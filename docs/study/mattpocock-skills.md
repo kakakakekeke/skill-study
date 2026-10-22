@@ -1,5 +1,7 @@
 # 스터디: mattpocock/skills
 
+> 이 문서는 **증거 자료**다. 5절·8절의 "가져올 것/다르게 할 것"은 후보 목록이며, 채택된 것은 `docs/principles.md`에 있다(근거 약어 `MP`). 규칙은 여기서 바꾸지 않는다.
+
 - 원본: https://github.com/mattpocock/skills (로컬: `.ref/mattpocock-skills`)
 - 읽은 시점: 2026-10-22, 커밋 `5beb35b`, 플러그인 버전 1.3.1
 - 한 줄 요약: "프로세스를 소유하지 않는, 작고 조합 가능한 스킬 27개". GSD/BMAD/Spec-Kit 류의 무거운 프레임워크에 대한 반대 포지션이라 우리 원칙과 방향이 같다.

@@ -1,5 +1,7 @@
 # 옵시디언 위키 검토: 스킬 관련 문서와 현재 원칙의 대조
 
+> 이 문서는 **증거 자료**다. R1~R8은 후보이며, 딥 리서치 독립 검증(`DR` 7절)을 거쳐 수정된 형태로 `docs/principles.md`에 반영됐다(근거 약어 `WK`). 규칙은 여기서 바꾸지 않는다.
+
 - 검토일: 2026-10-22
 - 대상: `llm-wiki` 볼트(skill-creator, 에이전트 자기개선 루프, 자기개선 루프 사례 research, 지침 파일 비대화, 에이전트 검증 루프, 에이전트 지침 파일, 컨텍스트 창 관리, 에이전트 토큰 최적화, Claude Code, LLM 코딩 가이드라인) + `Obsi/Clippings`(점진적 공개 vs 전체 인라인, 스킬 템플릿 컴파일, Superpowers 훅, gstack 3편)
 - 대조 기준: `docs/principles.md`(세 게이트, 원칙 4개), `CLAUDE.md`
