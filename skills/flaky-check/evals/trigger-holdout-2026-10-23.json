@@ -1,0 +1,54 @@
+[
+ {
+  "query": "what's the difference between a flaky test and a nondeterministic test? is there one?",
+  "should_trigger": false
+ },
+ {
+  "query": "how do big companies usually handle flaky tests in CI — quarantine, retries, or something else?",
+  "should_trigger": false
+ },
+ {
+  "query": "플레이키 테스트가 생기는 흔한 원인들을 정리해줘. 공유 상태, 시간, 네트워크 같은 거",
+  "should_trigger": false
+ },
+ {
+  "query": "I'm writing a blog post about test flakiness. can you give me a good definition and a couple of examples",
+  "should_trigger": false
+ },
+ {
+  "query": "is it a good idea to auto-retry failed tests 3 times in CI? what are the downsides",
+  "should_trigger": false
+ },
+ {
+  "query": "our team wants a policy for flaky tests: when to quarantine, when to delete. draft one",
+  "should_trigger": false
+ },
+ {
+  "query": "explain what a race condition in tests looks like and how to spot one in code review",
+  "should_trigger": false
+ },
+ {
+  "query": "that one login test keeps going red on and off in the nightly build. can you tell me how often it actually fails?",
+  "should_trigger": true
+ },
+ {
+  "query": "the smoke tests after deploy are hit or miss lately. run them a few times and see what's going on",
+  "should_trigger": true
+ },
+ {
+  "query": "결제 모듈 테스트가 가끔 깨져요. 몇 번 돌려서 재현되는지 확인해줘",
+  "should_trigger": true
+ },
+ {
+  "query": "our db migration test is intermittent. not sure if it's the test or the db. can you measure it before we touch anything",
+  "should_trigger": true
+ },
+ {
+  "query": "we keep retrying the build until it's green. figure out how often it would fail without the retries",
+  "should_trigger": true
+ },
+ {
+  "query": "the scheduler unit tests fail now and then with a timing assertion. before I rewrite them, is it even flaky or did someone break it?",
+  "should_trigger": true
+ }
+]

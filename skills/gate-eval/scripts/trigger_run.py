@@ -77,12 +77,15 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timeout", type=int, default=120)
     ap.add_argument("--skills-root", default=None, help="경쟁시킬 스킬들의 상위 디렉터리 (기본: 대상 스킬의 부모)")
+    ap.add_argument("--eval-set", default=None, help="문항 파일 (기본: <skill>/evals/trigger.json)")
+    ap.add_argument("--holdout", type=float, default=0.4, help="test 비율. description을 고친 뒤 새 문항만 돌릴 때는 1.0")
     a = ap.parse_args()
 
     skill_dir = Path(a.skill).resolve()
     name, desc, _ = parse_frontmatter(skill_dir / "SKILL.md")
-    eval_set = json.loads((skill_dir / "evals" / "trigger.json").read_text())
-    train, test = split_eval_set(eval_set, 0.4)
+    eval_path = Path(a.eval_set).resolve() if a.eval_set else skill_dir / "evals" / "trigger.json"
+    eval_set = json.loads(eval_path.read_text())
+    train, test = split_eval_set(eval_set, a.holdout)
     test_q = {q["query"] for q in test}
     out = Path(a.out).resolve() / "trigger"
     out.mkdir(parents=True, exist_ok=True)
@@ -100,7 +103,8 @@ def main() -> None:
             (sk / d.name).symlink_to(d.resolve(), target_is_directory=True)
             competitors.append(d.name)
     summary = {"skill": name, "description": desc, "method": "router-decision (all repo skills linked, empty project, Skill-only)",
-               "competitors": competitors, "runs_per_query": a.runs_per_query, "n_train": len(train), "n_test": len(test), "models": {}}
+               "competitors": competitors, "runs_per_query": a.runs_per_query, "eval_set": str(eval_path), "holdout": a.holdout,
+               "n_train": len(train), "n_test": len(test), "models": {}}
     try:
         for model in a.models.split(","):
             cached = out / f"{model}.json"
