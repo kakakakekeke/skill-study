@@ -244,8 +244,7 @@ diagnosing-bugs는 retro를 호출할 수 없다(user-invoked는 호출 불가).
 
 ## 9. 다음에 더 볼 것
 
-- `skills/engineering/diagnosing-bugs/` : "반복 오류 자가 보완" 목적과 가장 가까운 스킬. scripts/ 포함.
-- `skills/engineering/retro/` : 세션 후 환경 개선 제안. 자가 보완 루프의 출발점으로 참고.
+- ~~diagnosing-bugs, retro~~ : 6·7·8절에서 완료
 - `skills/engineering/code-review/` : 표준/스펙 두 축을 병렬 서브에이전트로 분리한 구조.
 - `skills/engineering/tdd/tests.md`, `mocking.md` : 참조 파일 작성 예시.
 - `.agents/writing-docs.md` : 사람용 문서 템플릿 (It's working if 섹션이 eval 힌트가 될 수 있음).
