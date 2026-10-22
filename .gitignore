@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# 에디터
+.vscode/
+.idea/
+
+# 로컬 설정 / 시크릿
+.env
+.env.*
+*.local.json
+.claude/settings.local.json
+
+# 빌드 산출물
+dist/
+*.plugin
+*.zip
+
+# 스킬 평가 결과 / 임시 파일
+**/evals/results/
+tmp/
