@@ -1,0 +1,65 @@
+{
+  "skill_name": "flaky-check",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pytest-two-signatures",
+      "prompt": "tests/test_cache.py::test_cache_hit fails sometimes in CI but passes when I run it locally. is it actually flaky? how often does it fail and what does the failure look like? don't fix it yet",
+      "fixture": "evals/fixtures/cache",
+      "expected_output": "Runs the test many times, reports a failure rate (~35-60%), and distinguishes two signatures: the hits assertion (TTL expiry) and TimeoutError from fetch_remote.",
+      "expectations": [
+        "The test was executed at least 10 times (a loop, repetition tool, or script), not just once or twice",
+        "The final answer reports a numeric failure count or rate out of the total number of runs",
+        "The final answer distinguishes two different failure modes: the 'expected cache hit' assertion (hits < 5, TTL expiry) and a TimeoutError from the backend fetch",
+        "No file under cachelib/ or tests/ was modified"
+      ],
+      "checks": [
+        {
+          "text": "Longest Bash tool output stayed under 60 lines",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_CHECKS/max_tool_result_lines.py 60"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "shell-step-intermittent",
+      "prompt": "the first step of our deploy job, `bash scripts/fetch.sh`, fails randomly in CI and we just hit retry. can you figure out how often it fails and what the errors are?",
+      "fixture": "evals/fixtures/deploy",
+      "expected_output": "Runs the script repeatedly (>=10), reports ~25% failure, names connection reset (exit 56) as dominant; if the rarer checksum mismatch (exit 3) was sampled, reports it separately.",
+      "expectations": [
+        "The script was executed at least 10 times",
+        "The final answer reports a numeric failure rate or count out of total runs",
+        "The final answer identifies 'Connection reset by peer' (curl exit 56) as the main failure",
+        "If more than one distinct error message appeared across the runs (e.g. a checksum mismatch besides the connection reset), the final answer reports them as separate failure modes with their counts rather than collapsing them into one",
+        "scripts/fetch.sh was not modified"
+      ],
+      "checks": [
+        {
+          "text": "Longest Bash tool output stayed under 60 lines",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_CHECKS/max_tool_result_lines.py 60"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "deterministic-not-flaky",
+      "prompt": "test_total_rounding in tests/test_total.py is flaky, it fails on and off in CI. can you check how flaky it is?",
+      "fixture": "evals/fixtures/totals",
+      "expected_output": "Runs it repeatedly and concludes it fails every time (deterministic float rounding bug), so it is not flaky.",
+      "expectations": [
+        "The test was executed more than once before concluding",
+        "The final answer concludes the failure is deterministic (fails on every run) rather than flaky, and says so explicitly",
+        "The final answer identifies float arithmetic (0.30000000000000004 != 0.3) as the cause"
+      ],
+      "checks": [
+        {
+          "text": "Longest Bash tool output stayed under 60 lines",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_CHECKS/max_tool_result_lines.py 60"
+        }
+      ]
+    }
+  ]
+}

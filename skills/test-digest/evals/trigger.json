@@ -1,0 +1,22 @@
+[
+  {"query": "run the full pytest suite for the api/ package and tell me which tests are failing, there were a bunch of failures after I merged the auth branch", "should_trigger": true},
+  {"query": "npm test is red on my branch, like 6 or 7 failures across different files. can you figure out what's going on", "should_trigger": true},
+  {"query": "our github actions job 'build-and-test' failed on main, run id 9918273. pull the log with gh and tell me what broke", "should_trigger": true},
+  {"query": "I dumped the jenkins console output into build_output.txt (it's like 4000 lines). somewhere in there the maven build fails, find the actual error", "should_trigger": true},
+  {"query": "tsc --noEmit is spitting out hundreds of errors after upgrading to typescript 5.6. summarize whats wrong by category", "should_trigger": true},
+  {"query": "go test ./... in the services repo, several packages fail. what are the failures?", "should_trigger": true},
+  {"query": "cargo test keeps failing in the parser crate, can u run it and tell me which tests and why", "should_trigger": true},
+  {"query": "run `make check` and give me a summary of failures — the output is super noisy because of all the deprecation warnings", "should_trigger": true},
+  {"query": "vitest run is failing in CI but I can't read the log, its got all the coverage table junk in it. the log is at ~/Downloads/ci-run-4421.log", "should_trigger": true},
+  {"query": "run the integration tests (docker compose up test) and tell me if anything fails, it prints a ton of container logs", "should_trigger": true},
+  {"query": "run pytest tests/test_auth.py::test_login_expired_token -x and show me the full traceback, I want to see every frame", "should_trigger": false},
+  {"query": "write a pytest test for the new parse_range function covering empty input and reversed bounds", "should_trigger": false},
+  {"query": "the CI workflow yaml is wrong, the test job doesn't run on pull requests. fix .github/workflows/ci.yml", "should_trigger": false},
+  {"query": "set up jest with ts-jest in this repo and add an npm test script", "should_trigger": false},
+  {"query": "tail -f the dev server log and tell me when the websocket reconnects", "should_trigger": false},
+  {"query": "test_cache_hit fails about one time in five, can you figure out if it's actually flaky and how often", "should_trigger": false},
+  {"query": "explain what this pytest fixture with scope='session' does and when it gets torn down", "should_trigger": false},
+  {"query": "add a --verbose flag to our cli tool that prints debug logs", "should_trigger": false},
+  {"query": "there's one failing test, test_format_money_none, I already know it's the None handling. just fix format_money so it returns $0.00 for None", "should_trigger": false},
+  {"query": "convert the log parsing in scripts/parse_logs.py from regex to structured json logging", "should_trigger": false}
+]

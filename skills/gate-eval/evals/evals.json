@@ -1,0 +1,24 @@
+{
+  "skill_name": "gate-eval",
+  "evals": [
+    {
+      "id": 1,
+      "name": "measure-toy-skill",
+      "prompt": "/gate-eval skills/toy-greeter --models haiku --reps 2",
+      "prompt_without": "Measure skills/toy-greeter against the three adoption gates described in docs/principles.md (trigger accuracy with should/should-not queries in skills/toy-greeter/evals/trigger.json, with-vs-without quality on skills/toy-greeter/evals/evals.json with a baseline-vs-baseline noise floor, and token cost). Use the haiku model only and 2 repetitions per configuration, run the actual measurements with claude -p, and write a report to skills/toy-greeter/evals/results/report.md recording the date, Claude Code version and model id.",
+      "fixture": "evals/fixtures/toyrepo",
+      "expected_output": "A report under skills/toy-greeter/evals/results/ with G1/G2/G3 sections, noise floor, gain/regression pairs, per-model stats, date, CLI and model versions, and a final verdict.",
+      "expectations": [
+        "A report file was actually written under skills/toy-greeter/evals/results/ (not just described in chat)",
+        "The report contains measured with-skill vs without-skill pass rates based on at least 2 repetitions per configuration, with the raw per-run results saved alongside",
+        "The report reports a baseline-vs-baseline noise floor (flip rate) and both gains and regressions, not only a net score",
+        "The report records the date, the Claude Code CLI version, and the canonical model id used",
+        "The report gives an explicit pass/fail verdict for each of the three gates"
+      ],
+      "checks": [
+        {"text": "A results report exists in outputs under skills/toy-greeter/evals/results/", "type": "script", "cmd": "ls outputs/skills/toy-greeter/evals/results/*/report.md outputs/skills/toy-greeter/evals/results/report.md 2>/dev/null | head -1 | grep ."},
+        {"text": "Trigger measurement ran (per-query trigger results saved)", "type": "script", "cmd": "grep -rl 'should_trigger' outputs/skills/toy-greeter/evals/results/ | grep -v trigger.json | head -1 | grep ."}
+      ]
+    }
+  ]
+}

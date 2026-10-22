@@ -1,0 +1,22 @@
+[
+  {"query": "users are reporting that the invoice total is off by one cent when there are more than 3 line items with tax. the code is in billing/totals.py. can you track this down and fix it", "should_trigger": true},
+  {"query": "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be 'hello-world'. fix pls", "should_trigger": true},
+  {"query": "getting this in prod:\n  File \"app/loader.py\", line 23, in load_config\n    timeout=int(merged[\"timeout\"])\nKeyError: 'timeout'\nconfigs without timeout should default to 30. please fix", "should_trigger": true},
+  {"query": "the date picker in the react app shows the wrong month when you open it on the 31st. src/components/DatePicker.tsx. there's a jest setup already", "should_trigger": true},
+  {"query": "our go service returns 500 instead of 404 when the user id doesn't exist, handler is in internal/http/users.go. fix it and make sure it doesn't regress", "should_trigger": true},
+  {"query": "parse_duration('1h30m') is returning 90 instead of 5400 seconds. something's wrong with the unit handling in utils/time.py", "should_trigger": true},
+  {"query": "bug: the CSV export drops the last row when the file doesn't end with a newline. exporter is in lib/export.rb, we use rspec", "should_trigger": true},
+  {"query": "QA says sorting the table by price puts $1,200 before $900. probably string sort somewhere in table.js. can u fix", "should_trigger": true},
+  {"query": "median([1,2,3,4]) returns 3 in statkit, should be 2.5", "should_trigger": true},
+  {"query": "the retry decorator in core/retry.py retries forever when max_attempts=0, it should raise immediately. fix and add a test", "should_trigger": true},
+  {"query": "add a --dry-run flag to the deploy script so it prints what it would do without doing it", "should_trigger": false},
+  {"query": "can you explain how the load_config function merges defaults? I don't get the setdefault loop", "should_trigger": false},
+  {"query": "there's a typo in the error message in loader.py line 40, 'recieved' should be 'received'. just fix that one word", "should_trigger": false},
+  {"query": "write unit tests for the slugify function, it has none right now. cover accents, punctuation, custom separators", "should_trigger": false},
+  {"query": "refactor billing/totals.py to use Decimal instead of float everywhere. the tests should keep passing", "should_trigger": false},
+  {"query": "test_cache_hit fails sometimes in CI, maybe 1 in 5 runs, passes locally. is it flaky? how often does it actually fail", "should_trigger": false},
+  {"query": "review this PR for the users handler and tell me if the error handling looks right", "should_trigger": false},
+  {"query": "the build is failing with a bunch of type errors after upgrading typescript, can you summarize what categories of errors we have", "should_trigger": false},
+  {"query": "make the DatePicker component also support selecting a date range, not just a single date", "should_trigger": false},
+  {"query": "update the README to document the new config keys timeout and retries", "should_trigger": false}
+]

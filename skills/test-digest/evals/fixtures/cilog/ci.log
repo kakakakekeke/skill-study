@@ -1,0 +1,500 @@
+2026-10-21T09:00:00.431Z ##[group]Run actions/checkout@v4
+2026-10-21T09:00:01.504Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +35e04d:refs/remotes/origin/main
+2026-10-21T09:00:02.174Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +1b9ebf:refs/remotes/origin/main
+2026-10-21T09:00:03.196Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +9871d0:refs/remotes/origin/main
+2026-10-21T09:00:04.696Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +6ce009:refs/remotes/origin/main
+2026-10-21T09:00:05.619Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +1e1b44:refs/remotes/origin/main
+2026-10-21T09:00:06.138Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +4638b5:refs/remotes/origin/main
+2026-10-21T09:00:07.544Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +2542e3:refs/remotes/origin/main
+2026-10-21T09:00:08.171Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +7a4f94:refs/remotes/origin/main
+2026-10-21T09:00:09.192Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +4cde57:refs/remotes/origin/main
+2026-10-21T09:00:10.160Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +7bef8a:refs/remotes/origin/main
+2026-10-21T09:00:11.328Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +2ef3bc:refs/remotes/origin/main
+2026-10-21T09:00:12.690Z [command]/usr/bin/git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +1f1870:refs/remotes/origin/main
+2026-10-21T09:00:13.699Z ##[endgroup]
+2026-10-21T09:00:14.506Z ##[group]Run actions/setup-node@v4
+2026-10-21T09:00:15.150Z Attempting to download 20.0.0... found in cache
+2026-10-21T09:00:16.326Z Attempting to download 20.1.0... found in cache
+2026-10-21T09:00:17.147Z Attempting to download 20.2.0... found in cache
+2026-10-21T09:00:18.670Z Attempting to download 20.3.0... found in cache
+2026-10-21T09:00:19.979Z Attempting to download 20.4.0... found in cache
+2026-10-21T09:00:20.236Z Attempting to download 20.5.0... found in cache
+2026-10-21T09:00:21.396Z Attempting to download 20.6.0... found in cache
+2026-10-21T09:00:22.529Z Attempting to download 20.7.0... found in cache
+2026-10-21T09:00:23.247Z Attempting to download 20.8.0... found in cache
+2026-10-21T09:00:24.653Z Attempting to download 20.9.0... found in cache
+2026-10-21T09:00:25.220Z Attempting to download 20.10.0... found in cache
+2026-10-21T09:00:26.684Z Attempting to download 20.11.0... found in cache
+2026-10-21T09:00:27.415Z Attempting to download 20.12.0... found in cache
+2026-10-21T09:00:28.673Z Attempting to download 20.13.0... found in cache
+2026-10-21T09:00:29.935Z Attempting to download 20.14.0... found in cache
+2026-10-21T09:00:30.798Z Attempting to download 20.15.0... found in cache
+2026-10-21T09:00:31.285Z Attempting to download 20.16.0... found in cache
+2026-10-21T09:00:32.205Z Attempting to download 20.17.0... found in cache
+2026-10-21T09:00:33.695Z Attempting to download 20.18.0... found in cache
+2026-10-21T09:00:34.684Z Attempting to download 20.19.0... found in cache
+2026-10-21T09:00:35.754Z Attempting to download 20.20.0... found in cache
+2026-10-21T09:00:36.292Z Attempting to download 20.21.0... found in cache
+2026-10-21T09:00:37.481Z Attempting to download 20.22.0... found in cache
+2026-10-21T09:00:38.199Z Attempting to download 20.23.0... found in cache
+2026-10-21T09:00:39.660Z Attempting to download 20.24.0... found in cache
+2026-10-21T09:00:40.829Z ##[endgroup]
+2026-10-21T09:00:41.164Z ##[group]Run npm ci
+2026-10-21T09:00:42.796Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-1.19.3.tgz 528ms (cache miss)
+2026-10-21T09:00:43.699Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-7.24.5.tgz 496ms (cache miss)
+2026-10-21T09:00:44.284Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-6.9.3.tgz 833ms (cache miss)
+2026-10-21T09:00:45.637Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-4.2.9.tgz 327ms (cache miss)
+2026-10-21T09:00:46.723Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-6.23.7.tgz 314ms (cache miss)
+2026-10-21T09:00:47.875Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-2.16.6.tgz 188ms (cache miss)
+2026-10-21T09:00:48.140Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-3.29.7.tgz 451ms (cache miss)
+2026-10-21T09:00:49.908Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-2.24.8.tgz 606ms (cache miss)
+2026-10-21T09:00:50.608Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-6.22.5.tgz 628ms (cache miss)
+2026-10-21T09:00:51.585Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-8.2.1.tgz 296ms (cache miss)
+2026-10-21T09:00:52.691Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-2.1.4.tgz 682ms (cache miss)
+2026-10-21T09:00:53.455Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-8.9.6.tgz 704ms (cache miss)
+2026-10-21T09:00:54.219Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-8.11.2.tgz 645ms (cache miss)
+2026-10-21T09:00:55.856Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-1.6.4.tgz 152ms (cache miss)
+2026-10-21T09:00:56.270Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-7.12.7.tgz 102ms (cache miss)
+2026-10-21T09:00:57.938Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-7.17.4.tgz 160ms (cache miss)
+2026-10-21T09:00:58.799Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-9.8.6.tgz 387ms (cache miss)
+2026-10-21T09:00:59.254Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-4.4.1.tgz 200ms (cache miss)
+2026-10-21T09:01:00.703Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-4.0.7.tgz 871ms (cache miss)
+2026-10-21T09:01:01.529Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-5.9.0.tgz 169ms (cache miss)
+2026-10-21T09:01:02.228Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-6.19.9.tgz 346ms (cache miss)
+2026-10-21T09:01:03.792Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-9.30.9.tgz 690ms (cache miss)
+2026-10-21T09:01:04.507Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.14.8.tgz 421ms (cache miss)
+2026-10-21T09:01:05.510Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-7.3.7.tgz 669ms (cache miss)
+2026-10-21T09:01:06.266Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-4.2.3.tgz 471ms (cache miss)
+2026-10-21T09:01:07.100Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-6.19.0.tgz 124ms (cache miss)
+2026-10-21T09:01:08.728Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-3.17.1.tgz 392ms (cache miss)
+2026-10-21T09:01:09.485Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-2.27.3.tgz 648ms (cache miss)
+2026-10-21T09:01:10.472Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-5.30.5.tgz 636ms (cache miss)
+2026-10-21T09:01:11.591Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-2.3.7.tgz 497ms (cache miss)
+2026-10-21T09:01:12.867Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-5.2.2.tgz 124ms (cache miss)
+2026-10-21T09:01:13.123Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-5.15.2.tgz 548ms (cache miss)
+2026-10-21T09:01:14.656Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-9.11.2.tgz 726ms (cache miss)
+2026-10-21T09:01:15.965Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-9.9.1.tgz 732ms (cache miss)
+2026-10-21T09:01:16.890Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-9.11.2.tgz 384ms (cache miss)
+2026-10-21T09:01:17.751Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-9.17.8.tgz 357ms (cache miss)
+2026-10-21T09:01:18.510Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-4.25.3.tgz 857ms (cache miss)
+2026-10-21T09:01:19.464Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-4.6.8.tgz 524ms (cache miss)
+2026-10-21T09:01:20.365Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.4.tgz 503ms (cache miss)
+2026-10-21T09:01:21.182Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-6.14.5.tgz 393ms (cache miss)
+2026-10-21T09:01:22.445Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-2.7.7.tgz 221ms (cache miss)
+2026-10-21T09:01:23.101Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-8.19.9.tgz 880ms (cache miss)
+2026-10-21T09:01:24.776Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-6.25.1.tgz 874ms (cache miss)
+2026-10-21T09:01:25.282Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-7.25.3.tgz 509ms (cache miss)
+2026-10-21T09:01:26.511Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-6.2.6.tgz 494ms (cache miss)
+2026-10-21T09:01:27.230Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-2.23.2.tgz 194ms (cache miss)
+2026-10-21T09:01:28.771Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-3.18.7.tgz 845ms (cache miss)
+2026-10-21T09:01:29.661Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-8.21.5.tgz 179ms (cache miss)
+2026-10-21T09:01:30.843Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-3.0.0.tgz 838ms (cache miss)
+2026-10-21T09:01:31.992Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-2.16.2.tgz 464ms (cache miss)
+2026-10-21T09:01:32.399Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-4.0.4.tgz 237ms (cache miss)
+2026-10-21T09:01:33.365Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-4.24.9.tgz 353ms (cache miss)
+2026-10-21T09:01:34.857Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-7.26.2.tgz 82ms (cache miss)
+2026-10-21T09:01:35.629Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-8.21.9.tgz 854ms (cache miss)
+2026-10-21T09:01:36.636Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-9.4.8.tgz 175ms (cache miss)
+2026-10-21T09:01:37.287Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.27.7.tgz 815ms (cache miss)
+2026-10-21T09:01:38.244Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-1.24.2.tgz 196ms (cache miss)
+2026-10-21T09:01:39.798Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-2.17.0.tgz 353ms (cache miss)
+2026-10-21T09:01:40.895Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-9.17.7.tgz 823ms (cache miss)
+2026-10-21T09:01:41.383Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-9.1.3.tgz 215ms (cache miss)
+2026-10-21T09:01:42.128Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-2.16.7.tgz 595ms (cache miss)
+2026-10-21T09:01:43.617Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-2.14.5.tgz 647ms (cache miss)
+2026-10-21T09:01:44.620Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-9.6.4.tgz 483ms (cache miss)
+2026-10-21T09:01:45.635Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-8.16.3.tgz 735ms (cache miss)
+2026-10-21T09:01:46.558Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-9.28.3.tgz 880ms (cache miss)
+2026-10-21T09:01:47.423Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-7.3.6.tgz 472ms (cache miss)
+2026-10-21T09:01:48.785Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-4.13.1.tgz 237ms (cache miss)
+2026-10-21T09:01:49.758Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-2.28.2.tgz 753ms (cache miss)
+2026-10-21T09:01:50.578Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-6.4.4.tgz 160ms (cache miss)
+2026-10-21T09:01:51.783Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-2.12.7.tgz 186ms (cache miss)
+2026-10-21T09:01:52.513Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-3.22.6.tgz 547ms (cache miss)
+2026-10-21T09:01:53.194Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-7.6.5.tgz 346ms (cache miss)
+2026-10-21T09:01:54.569Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-6.0.5.tgz 587ms (cache miss)
+2026-10-21T09:01:55.738Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-1.12.5.tgz 549ms (cache miss)
+2026-10-21T09:01:56.907Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-9.30.1.tgz 135ms (cache miss)
+2026-10-21T09:01:57.140Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-2.2.4.tgz 298ms (cache miss)
+2026-10-21T09:01:58.532Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-3.8.2.tgz 859ms (cache miss)
+2026-10-21T09:01:59.627Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-5.12.2.tgz 569ms (cache miss)
+2026-10-21T09:02:00.385Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-8.22.5.tgz 111ms (cache miss)
+2026-10-21T09:02:01.117Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-3.13.1.tgz 295ms (cache miss)
+2026-10-21T09:02:02.722Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-2.25.4.tgz 105ms (cache miss)
+2026-10-21T09:02:03.111Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-2.8.1.tgz 484ms (cache miss)
+2026-10-21T09:02:04.232Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-9.13.4.tgz 656ms (cache miss)
+2026-10-21T09:02:05.265Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-9.22.3.tgz 132ms (cache miss)
+2026-10-21T09:02:06.743Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.5.3.tgz 339ms (cache miss)
+2026-10-21T09:02:07.556Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-9.24.3.tgz 316ms (cache miss)
+2026-10-21T09:02:08.118Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-3.8.5.tgz 842ms (cache miss)
+2026-10-21T09:02:09.617Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.0.tgz 770ms (cache miss)
+2026-10-21T09:02:10.557Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-4.16.7.tgz 271ms (cache miss)
+2026-10-21T09:02:11.954Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-7.21.7.tgz 579ms (cache miss)
+2026-10-21T09:02:12.450Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-9.9.3.tgz 255ms (cache miss)
+2026-10-21T09:02:13.957Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-3.12.5.tgz 75ms (cache miss)
+2026-10-21T09:02:14.267Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-1.2.4.tgz 461ms (cache miss)
+2026-10-21T09:02:15.786Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-2.21.6.tgz 538ms (cache miss)
+2026-10-21T09:02:16.570Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-4.22.4.tgz 66ms (cache miss)
+2026-10-21T09:02:17.369Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-3.8.7.tgz 23ms (cache miss)
+2026-10-21T09:02:18.135Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-6.17.5.tgz 270ms (cache miss)
+2026-10-21T09:02:19.443Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-4.11.2.tgz 21ms (cache miss)
+2026-10-21T09:02:20.771Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-2.15.4.tgz 534ms (cache miss)
+2026-10-21T09:02:21.370Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-4.16.0.tgz 113ms (cache miss)
+2026-10-21T09:02:22.503Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-3.12.9.tgz 62ms (cache miss)
+2026-10-21T09:02:23.699Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-5.9.3.tgz 106ms (cache miss)
+2026-10-21T09:02:24.882Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-3.21.9.tgz 418ms (cache miss)
+2026-10-21T09:02:25.733Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-8.4.4.tgz 761ms (cache miss)
+2026-10-21T09:02:26.539Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.1.8.tgz 662ms (cache miss)
+2026-10-21T09:02:27.616Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-9.4.8.tgz 790ms (cache miss)
+2026-10-21T09:02:28.828Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-1.26.9.tgz 837ms (cache miss)
+2026-10-21T09:02:29.236Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.2.0.tgz 62ms (cache miss)
+2026-10-21T09:02:30.955Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-6.30.1.tgz 405ms (cache miss)
+2026-10-21T09:02:31.644Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-9.1.0.tgz 661ms (cache miss)
+2026-10-21T09:02:32.567Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.15.4.tgz 23ms (cache miss)
+2026-10-21T09:02:33.194Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-2.23.8.tgz 568ms (cache miss)
+2026-10-21T09:02:34.928Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-9.2.7.tgz 278ms (cache miss)
+2026-10-21T09:02:35.857Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-5.7.3.tgz 256ms (cache miss)
+2026-10-21T09:02:36.590Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-8.15.6.tgz 98ms (cache miss)
+2026-10-21T09:02:37.747Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-5.24.0.tgz 651ms (cache miss)
+2026-10-21T09:02:38.439Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.2.9.tgz 170ms (cache miss)
+2026-10-21T09:02:39.112Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-5.19.9.tgz 156ms (cache miss)
+2026-10-21T09:02:40.201Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-1.15.4.tgz 708ms (cache miss)
+2026-10-21T09:02:41.825Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-4.21.7.tgz 317ms (cache miss)
+2026-10-21T09:02:42.885Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-5.14.7.tgz 497ms (cache miss)
+2026-10-21T09:02:43.584Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-9.6.4.tgz 107ms (cache miss)
+2026-10-21T09:02:44.618Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-5.14.1.tgz 859ms (cache miss)
+2026-10-21T09:02:45.176Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-5.12.3.tgz 235ms (cache miss)
+2026-10-21T09:02:46.468Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-2.4.8.tgz 288ms (cache miss)
+2026-10-21T09:02:47.473Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-9.8.1.tgz 740ms (cache miss)
+2026-10-21T09:02:48.125Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-8.28.7.tgz 423ms (cache miss)
+2026-10-21T09:02:49.561Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-1.30.7.tgz 717ms (cache miss)
+2026-10-21T09:02:50.452Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-5.23.2.tgz 446ms (cache miss)
+2026-10-21T09:02:51.432Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-6.3.5.tgz 21ms (cache miss)
+2026-10-21T09:02:52.300Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-6.26.6.tgz 142ms (cache miss)
+2026-10-21T09:02:53.481Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.28.4.tgz 279ms (cache miss)
+2026-10-21T09:02:54.469Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-7.12.9.tgz 98ms (cache miss)
+2026-10-21T09:02:55.204Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-5.27.0.tgz 307ms (cache miss)
+2026-10-21T09:02:56.372Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-5.20.2.tgz 275ms (cache miss)
+2026-10-21T09:02:57.482Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-9.10.3.tgz 811ms (cache miss)
+2026-10-21T09:02:58.879Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-7.28.0.tgz 851ms (cache miss)
+2026-10-21T09:02:59.308Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-7.29.8.tgz 582ms (cache miss)
+2026-10-21T09:03:00.729Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-2.1.6.tgz 481ms (cache miss)
+2026-10-21T09:03:01.150Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-3.20.4.tgz 517ms (cache miss)
+2026-10-21T09:03:02.451Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-3.5.7.tgz 444ms (cache miss)
+2026-10-21T09:03:03.771Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-5.8.4.tgz 435ms (cache miss)
+2026-10-21T09:03:04.503Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-5.15.8.tgz 704ms (cache miss)
+2026-10-21T09:03:05.312Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-3.20.2.tgz 96ms (cache miss)
+2026-10-21T09:03:06.440Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-8.17.3.tgz 483ms (cache miss)
+2026-10-21T09:03:07.297Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-8.13.2.tgz 580ms (cache miss)
+2026-10-21T09:03:08.193Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-2.5.5.tgz 589ms (cache miss)
+2026-10-21T09:03:09.683Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-4.11.4.tgz 848ms (cache miss)
+2026-10-21T09:03:10.523Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.23.6.tgz 412ms (cache miss)
+2026-10-21T09:03:11.446Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-9.6.6.tgz 296ms (cache miss)
+2026-10-21T09:03:12.468Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.15.4.tgz 608ms (cache miss)
+2026-10-21T09:03:13.377Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-9.16.3.tgz 114ms (cache miss)
+2026-10-21T09:03:14.419Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-7.12.7.tgz 462ms (cache miss)
+2026-10-21T09:03:15.882Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-3.1.6.tgz 746ms (cache miss)
+2026-10-21T09:03:16.100Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-8.30.9.tgz 521ms (cache miss)
+2026-10-21T09:03:17.579Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-7.29.8.tgz 895ms (cache miss)
+2026-10-21T09:03:18.258Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-4.25.1.tgz 249ms (cache miss)
+2026-10-21T09:03:19.839Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-9.21.1.tgz 865ms (cache miss)
+2026-10-21T09:03:20.140Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-8.2.8.tgz 815ms (cache miss)
+2026-10-21T09:03:21.760Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-3.7.9.tgz 58ms (cache miss)
+2026-10-21T09:03:22.357Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-5.30.2.tgz 661ms (cache miss)
+2026-10-21T09:03:23.172Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-7.22.1.tgz 121ms (cache miss)
+2026-10-21T09:03:24.497Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-9.30.9.tgz 216ms (cache miss)
+2026-10-21T09:03:25.110Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-4.25.9.tgz 21ms (cache miss)
+2026-10-21T09:03:26.760Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-5.14.4.tgz 343ms (cache miss)
+2026-10-21T09:03:27.352Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-8.16.3.tgz 580ms (cache miss)
+2026-10-21T09:03:28.122Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-7.22.4.tgz 76ms (cache miss)
+2026-10-21T09:03:29.363Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-8.28.6.tgz 103ms (cache miss)
+2026-10-21T09:03:30.604Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-7.29.5.tgz 252ms (cache miss)
+2026-10-21T09:03:31.798Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-6.22.6.tgz 391ms (cache miss)
+2026-10-21T09:03:32.965Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-4.0.4.tgz 776ms (cache miss)
+2026-10-21T09:03:33.419Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-2.6.7.tgz 225ms (cache miss)
+2026-10-21T09:03:34.371Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-4.7.7.tgz 246ms (cache miss)
+2026-10-21T09:03:35.724Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-5.3.9.tgz 527ms (cache miss)
+2026-10-21T09:03:36.157Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-4.15.6.tgz 701ms (cache miss)
+2026-10-21T09:03:37.318Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-3.29.6.tgz 75ms (cache miss)
+2026-10-21T09:03:38.161Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-3.13.0.tgz 746ms (cache miss)
+2026-10-21T09:03:39.215Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-7.14.5.tgz 770ms (cache miss)
+2026-10-21T09:03:40.768Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-3.10.3.tgz 209ms (cache miss)
+2026-10-21T09:03:41.842Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-8.1.4.tgz 700ms (cache miss)
+2026-10-21T09:03:42.211Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-6.10.7.tgz 193ms (cache miss)
+2026-10-21T09:03:43.530Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-2.8.1.tgz 379ms (cache miss)
+2026-10-21T09:03:44.465Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-9.30.3.tgz 409ms (cache miss)
+2026-10-21T09:03:45.150Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-5.26.6.tgz 109ms (cache miss)
+2026-10-21T09:03:46.557Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-8.6.5.tgz 574ms (cache miss)
+2026-10-21T09:03:47.746Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-6.11.7.tgz 51ms (cache miss)
+2026-10-21T09:03:48.484Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-4.25.6.tgz 61ms (cache miss)
+2026-10-21T09:03:49.299Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-8.2.0.tgz 283ms (cache miss)
+2026-10-21T09:03:50.471Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-2.28.9.tgz 367ms (cache miss)
+2026-10-21T09:03:51.368Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-6.30.9.tgz 64ms (cache miss)
+2026-10-21T09:03:52.103Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-6.29.4.tgz 324ms (cache miss)
+2026-10-21T09:03:53.586Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-2.0.3.tgz 129ms (cache miss)
+2026-10-21T09:03:54.357Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-8.30.6.tgz 828ms (cache miss)
+2026-10-21T09:03:55.108Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-8.4.7.tgz 207ms (cache miss)
+2026-10-21T09:03:56.341Z npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-5.26.2.tgz 641ms (cache miss)
+2026-10-21T09:03:57.901Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-6.14.5.tgz 822ms (cache miss)
+2026-10-21T09:03:58.870Z npm http fetch GET 200 https://registry.npmjs.org/postcss/-/postcss-2.16.3.tgz 421ms (cache miss)
+2026-10-21T09:03:59.134Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-4.13.1.tgz 685ms (cache miss)
+2026-10-21T09:04:00.536Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-9.17.5.tgz 184ms (cache miss)
+2026-10-21T09:04:01.313Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-2.8.9.tgz 106ms (cache miss)
+2026-10-21T09:04:02.339Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-7.15.7.tgz 197ms (cache miss)
+2026-10-21T09:04:03.340Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-7.14.9.tgz 710ms (cache miss)
+2026-10-21T09:04:04.961Z npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-9.27.1.tgz 818ms (cache miss)
+2026-10-21T09:04:05.481Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-5.8.9.tgz 294ms (cache miss)
+2026-10-21T09:04:06.290Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-5.6.7.tgz 273ms (cache miss)
+2026-10-21T09:04:07.292Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-4.4.4.tgz 612ms (cache miss)
+2026-10-21T09:04:08.619Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-2.12.4.tgz 271ms (cache miss)
+2026-10-21T09:04:09.575Z npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-4.20.1.tgz 689ms (cache miss)
+2026-10-21T09:04:10.336Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-2.0.7.tgz 858ms (cache miss)
+2026-10-21T09:04:11.222Z npm http fetch GET 200 https://registry.npmjs.org/@types/node/-/node-6.1.4.tgz 258ms (cache miss)
+2026-10-21T09:04:12.176Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-4.19.9.tgz 218ms (cache miss)
+2026-10-21T09:04:13.717Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-9.27.2.tgz 479ms (cache miss)
+2026-10-21T09:04:14.734Z npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.3.9.tgz 746ms (cache miss)
+2026-10-21T09:04:15.244Z npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-4.1.5.tgz 368ms (cache miss)
+2026-10-21T09:04:16.849Z npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-4.8.0.tgz 633ms (cache miss)
+2026-10-21T09:04:17.435Z npm http fetch GET 200 https://registry.npmjs.org/tailwindcss/-/tailwindcss-4.26.0.tgz 858ms (cache miss)
+2026-10-21T09:04:18.179Z npm http fetch GET 200 https://registry.npmjs.org/ts-jest/-/ts-jest-6.5.9.tgz 339ms (cache miss)
+2026-10-21T09:04:19.595Z npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.25.7.tgz 581ms (cache miss)
+2026-10-21T09:04:20.663Z npm http fetch GET 200 https://registry.npmjs.org/react/-/react-7.3.6.tgz 699ms (cache miss)
+2026-10-21T09:04:21.812Z npm http fetch GET 200 https://registry.npmjs.org/@babel/core/-/core-9.2.2.tgz 427ms (cache miss)
+2026-10-21T09:04:22.519Z npm warn deprecated rimraf@3.0.2: This package is no longer supported.
+2026-10-21T09:04:23.783Z npm warn deprecated rimraf@3.0.2: This package is no longer supported.
+2026-10-21T09:04:24.527Z npm warn deprecated rimraf@3.0.2: This package is no longer supported.
+2026-10-21T09:04:25.419Z npm warn deprecated inflight@1.0.6: This package is no longer supported.
+2026-10-21T09:04:26.524Z npm warn deprecated rimraf@3.0.2: This package is no longer supported.
+2026-10-21T09:04:27.118Z npm warn deprecated @humanwhocodes/config-array@0.11.14: This package is no longer supported.
+2026-10-21T09:04:28.984Z added 1412 packages, and audited 1413 packages in 41s
+2026-10-21T09:04:29.885Z found 0 vulnerabilities
+2026-10-21T09:04:30.921Z ##[endgroup]
+2026-10-21T09:04:31.472Z ##[group]Run npm run lint
+2026-10-21T09:04:32.544Z   src/hooks/format.tsx  208:27  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:33.691Z   src/hooks/format.tsx  59:12  warning  'props' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:34.152Z   src/utils/format.tsx  84:17  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:35.854Z   src/hooks/format.tsx  46:74  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:36.633Z   src/hooks/Checkout.tsx  179:37  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:37.871Z   src/hooks/Cart.tsx  56:50  warning  'props' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:38.422Z   src/hooks/useFetch.tsx  65:6  warning  'props' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:39.755Z   src/components/Header.tsx  199:12  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:40.949Z   src/hooks/Header.tsx  208:79  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:41.509Z   src/pages/Checkout.tsx  290:28  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:42.352Z   src/hooks/format.tsx  184:16  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:43.220Z   src/hooks/Cart.tsx  288:5  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:44.764Z   src/pages/Header.tsx  234:71  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:45.498Z   src/pages/useFetch.tsx  299:32  warning  'props' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:46.123Z   src/utils/format.tsx  258:57  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:47.557Z   src/components/Header.tsx  251:60  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:48.168Z   src/pages/Checkout.tsx  243:52  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:49.921Z   src/hooks/useFetch.tsx  221:47  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:50.751Z   src/pages/Header.tsx  262:6  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:51.155Z   src/hooks/Cart.tsx  161:66  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:52.298Z   src/pages/Checkout.tsx  14:9  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:53.167Z   src/hooks/format.tsx  148:22  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:54.728Z   src/utils/Header.tsx  130:21  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:55.313Z   src/utils/format.tsx  74:33  warning  'props' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:56.481Z   src/utils/Header.tsx  260:31  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:57.751Z   src/components/Checkout.tsx  94:52  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:58.217Z   src/utils/useFetch.tsx  193:22  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:04:59.358Z   src/components/useFetch.tsx  232:72  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:05:00.691Z   src/pages/useFetch.tsx  136:49  warning  '_' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:05:01.335Z   src/hooks/useFetch.tsx  170:11  warning  'props' is defined but never used  @typescript-eslint/no-unused-vars
+2026-10-21T09:05:02.280Z ✖ 30 problems (0 errors, 30 warnings)
+2026-10-21T09:05:03.730Z ##[endgroup]
+2026-10-21T09:05:04.861Z ##[group]Run npm test -- --ci --coverage
+2026-10-21T09:05:05.149Z > shop-web@3.4.1 test
+2026-10-21T09:05:06.403Z > jest --ci --coverage
+2026-10-21T09:05:07.359Z PASS src/utils/format.test.ts (2.70 s)
+2026-10-21T09:05:08.699Z     ✓ rounds case 0 (57 ms)
+2026-10-21T09:05:09.420Z     ✓ rounds case 1 (59 ms)
+2026-10-21T09:05:10.865Z     ✓ rounds case 2 (2 ms)
+2026-10-21T09:05:11.252Z     ✓ renders case 3 (16 ms)
+2026-10-21T09:05:12.740Z     ✓ handles empty case 4 (41 ms)
+2026-10-21T09:05:13.624Z PASS src/hooks/useFetch.test.ts (1.61 s)
+2026-10-21T09:05:14.600Z     ✓ renders case 0 (10 ms)
+2026-10-21T09:05:15.768Z     ✓ formats case 1 (41 ms)
+2026-10-21T09:05:16.155Z     ✓ renders case 2 (3 ms)
+2026-10-21T09:05:17.463Z     ✓ renders case 3 (38 ms)
+2026-10-21T09:05:18.635Z     ✓ handles empty case 4 (8 ms)
+2026-10-21T09:05:19.329Z PASS src/components/Header.test.tsx (1.40 s)
+2026-10-21T09:05:20.703Z     ✓ parses case 0 (21 ms)
+2026-10-21T09:05:21.475Z     ✓ formats case 1 (15 ms)
+2026-10-21T09:05:22.586Z     ✓ parses case 2 (55 ms)
+2026-10-21T09:05:23.114Z     ✓ formats case 3 (10 ms)
+2026-10-21T09:05:24.252Z     ✓ formats case 4 (47 ms)
+2026-10-21T09:05:25.165Z     ✓ matches snapshot case 5 (8 ms)
+2026-10-21T09:05:26.753Z FAIL src/components/Cart.test.tsx (8.21 s)
+2026-10-21T09:05:27.248Z   Cart
+2026-10-21T09:05:28.992Z     ✓ renders empty state (23 ms)
+2026-10-21T09:05:29.781Z     ✓ adds an item (41 ms)
+2026-10-21T09:05:30.900Z     ✕ applies percentage coupon to subtotal (37 ms)
+2026-10-21T09:05:31.376Z     ✓ removes an item (19 ms)
+2026-10-21T09:05:32.511Z     ✕ shows free shipping above threshold (28 ms)
+2026-10-21T09:05:33.931Z   ● Cart › applies percentage coupon to subtotal
+2026-10-21T09:05:34.370Z 
+2026-10-21T09:05:35.111Z     expect(received).toBe(expected) // Object.is equality
+2026-10-21T09:05:36.157Z 
+2026-10-21T09:05:37.760Z     Expected: "$90.00"
+2026-10-21T09:05:38.940Z     Received: "$100.00"
+2026-10-21T09:05:39.675Z 
+2026-10-21T09:05:40.458Z       54 |     fireEvent.change(screen.getByLabelText('Coupon'), { target: { value: 'SAVE10' } });
+2026-10-21T09:05:41.708Z       55 |     fireEvent.click(screen.getByText('Apply'));
+2026-10-21T09:05:42.761Z     > 56 |     expect(screen.getByTestId('subtotal').textContent).toBe('$90.00');
+2026-10-21T09:05:43.692Z          |                                                        ^
+2026-10-21T09:05:44.554Z       57 |   });
+2026-10-21T09:05:45.716Z 
+2026-10-21T09:05:46.630Z       at Object.<anonymous> (src/components/Cart.test.tsx:56:57)
+2026-10-21T09:05:47.851Z 
+2026-10-21T09:05:48.604Z   ● Cart › shows free shipping above threshold
+2026-10-21T09:05:49.354Z 
+2026-10-21T09:05:50.269Z     TestingLibraryElementError: Unable to find an element with the text: Free shipping. This could be because the text is broken up by multiple elements.
+2026-10-21T09:05:51.100Z 
+2026-10-21T09:05:52.163Z     <div data-testid="line-0" class="row">item 0 — $10.00</div>
+2026-10-21T09:05:53.125Z     <div data-testid="line-1" class="row">item 1 — $73.00</div>
+2026-10-21T09:05:54.290Z     <div data-testid="line-2" class="row">item 2 — $56.00</div>
+2026-10-21T09:05:55.263Z     <div data-testid="line-3" class="row">item 3 — $35.00</div>
+2026-10-21T09:05:56.897Z     <div data-testid="line-4" class="row">item 4 — $12.00</div>
+2026-10-21T09:05:57.112Z     <div data-testid="line-5" class="row">item 5 — $18.00</div>
+2026-10-21T09:05:58.772Z     <div data-testid="line-6" class="row">item 6 — $75.00</div>
+2026-10-21T09:05:59.245Z     <div data-testid="line-7" class="row">item 7 — $30.00</div>
+2026-10-21T09:06:00.304Z     <div data-testid="line-8" class="row">item 8 — $57.00</div>
+2026-10-21T09:06:01.722Z     <div data-testid="line-9" class="row">item 9 — $71.00</div>
+2026-10-21T09:06:02.763Z     <div data-testid="line-10" class="row">item 10 — $69.00</div>
+2026-10-21T09:06:03.932Z     <div data-testid="line-11" class="row">item 11 — $58.00</div>
+2026-10-21T09:06:04.620Z     <div data-testid="line-12" class="row">item 12 — $27.00</div>
+2026-10-21T09:06:05.165Z     <div data-testid="line-13" class="row">item 13 — $44.00</div>
+2026-10-21T09:06:06.740Z     <div data-testid="line-14" class="row">item 14 — $43.00</div>
+2026-10-21T09:06:07.841Z     <div data-testid="line-15" class="row">item 15 — $11.00</div>
+2026-10-21T09:06:08.832Z     <div data-testid="line-16" class="row">item 16 — $66.00</div>
+2026-10-21T09:06:09.106Z     <div data-testid="line-17" class="row">item 17 — $73.00</div>
+2026-10-21T09:06:10.484Z       at Object.<anonymous> (src/components/Cart.test.tsx:71:19)
+2026-10-21T09:06:11.964Z 
+2026-10-21T09:06:12.576Z PASS src/components/Checkout.test.tsx (1.62 s)
+2026-10-21T09:06:13.563Z     ✓ rounds case 0 (43 ms)
+2026-10-21T09:06:14.207Z     ✓ formats case 1 (16 ms)
+2026-10-21T09:06:15.759Z     ✓ handles empty case 2 (16 ms)
+2026-10-21T09:06:16.443Z PASS src/pages/Home.test.tsx (0.51 s)
+2026-10-21T09:06:17.369Z     ✓ rounds case 0 (56 ms)
+2026-10-21T09:06:18.372Z     ✓ rounds case 1 (5 ms)
+2026-10-21T09:06:19.795Z     ✓ rounds case 2 (37 ms)
+2026-10-21T09:06:20.907Z     ✓ matches snapshot case 3 (45 ms)
+2026-10-21T09:06:21.402Z     ✓ parses case 4 (18 ms)
+2026-10-21T09:06:22.322Z     ✓ rounds case 5 (59 ms)
+2026-10-21T09:06:23.619Z     ✓ renders case 6 (58 ms)
+2026-10-21T09:06:24.366Z     ✓ renders case 7 (12 ms)
+2026-10-21T09:06:25.961Z PASS src/utils/price.test.ts (2.93 s)
+2026-10-21T09:06:26.864Z     ✓ formats case 0 (12 ms)
+2026-10-21T09:06:27.498Z     ✓ handles empty case 1 (14 ms)
+2026-10-21T09:06:28.344Z     ✓ handles empty case 2 (40 ms)
+2026-10-21T09:06:29.972Z     ✓ matches snapshot case 3 (60 ms)
+2026-10-21T09:06:30.809Z     ✓ rounds case 4 (60 ms)
+2026-10-21T09:06:31.649Z     ✓ rounds case 5 (55 ms)
+2026-10-21T09:06:32.959Z     ✓ matches snapshot case 6 (32 ms)
+2026-10-21T09:06:33.106Z     ✓ parses case 7 (46 ms)
+2026-10-21T09:06:34.547Z PASS src/utils/date.test.ts (2.80 s)
+2026-10-21T09:06:35.415Z     ✓ formats case 0 (38 ms)
+2026-10-21T09:06:36.737Z     ✓ formats case 1 (27 ms)
+2026-10-21T09:06:37.678Z     ✓ parses case 2 (6 ms)
+2026-10-21T09:06:38.133Z     ✓ formats case 3 (11 ms)
+2026-10-21T09:06:39.209Z     ✓ renders case 4 (9 ms)
+2026-10-21T09:06:40.453Z     ✓ parses case 5 (12 ms)
+2026-10-21T09:06:41.129Z     ✓ formats case 6 (46 ms)
+2026-10-21T09:06:42.241Z     ✓ renders case 7 (4 ms)
+2026-10-21T09:06:43.809Z -----------------------------|---------|----------|---------|---------|-------------------
+2026-10-21T09:06:44.758Z File                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+2026-10-21T09:06:45.988Z   components/Checkout.tsx        |   44.75 |    76.25 |   92.68 |   97.85 | 
+2026-10-21T09:06:46.200Z   pages/Checkout.tsx        |   53.26 |    44.04 |   42.96 |   80.11 | 333,157,254,61,77
+2026-10-21T09:06:47.832Z   hooks/Header.ts        |   61.54 |    63.02 |   62.32 |   99.36 | 
+2026-10-21T09:06:48.455Z   utils/price.ts        |   94.36 |    33.52 |   41.55 |   73.98 | 
+2026-10-21T09:06:49.155Z   pages/Cart.tsx        |   85.11 |    66.21 |   67.00 |   73.25 | 400,394
+2026-10-21T09:06:50.390Z   components/price.ts        |   46.62 |    53.63 |   77.44 |   93.65 | 305,91
+2026-10-21T09:06:51.863Z   hooks/format.ts        |   50.14 |    40.62 |   90.89 |   75.13 | 177,192,58,215,212
+2026-10-21T09:06:52.229Z   components/date.tsx        |   63.26 |    68.33 |   67.69 |   72.21 | 332,129,245
+2026-10-21T09:06:53.693Z   components/price.ts        |   73.19 |    87.84 |   75.94 |   60.21 | 234,362,141
+2026-10-21T09:06:54.840Z   hooks/useFetch.ts        |   69.82 |    60.64 |   52.34 |   59.96 | 326,89,380,89,136
+2026-10-21T09:06:55.300Z   utils/price.tsx        |   55.41 |    54.33 |   86.13 |   50.84 | 
+2026-10-21T09:06:56.387Z   pages/useFetch.tsx        |   90.38 |    68.55 |   57.25 |   46.81 | 
+2026-10-21T09:06:57.245Z   hooks/date.ts        |   42.01 |    81.55 |   84.28 |   72.80 | 247,21
+2026-10-21T09:06:58.768Z   utils/date.tsx        |   87.31 |    85.89 |   76.75 |   87.82 | 127,351,379
+2026-10-21T09:06:59.830Z   hooks/useFetch.tsx        |   69.55 |    70.33 |   80.89 |   46.53 | 214
+2026-10-21T09:07:00.951Z   hooks/Header.ts        |   70.58 |    32.79 |   94.52 |   73.86 | 103,345,177,15,209
+2026-10-21T09:07:01.967Z   pages/Checkout.tsx        |   56.69 |    57.20 |   85.25 |   73.44 | 
+2026-10-21T09:07:02.288Z   pages/format.ts        |   72.02 |    77.66 |   61.52 |   87.58 | 360
+2026-10-21T09:07:03.528Z   pages/Checkout.ts        |   80.07 |    62.35 |   64.51 |   43.01 | 
+2026-10-21T09:07:04.895Z   pages/price.ts        |   46.28 |    68.94 |   65.67 |   54.50 | 118,94,76
+2026-10-21T09:07:05.765Z   components/format.ts        |   81.71 |    58.18 |   62.85 |   80.52 | 160,399,290
+2026-10-21T09:07:06.466Z   hooks/Home.ts        |   90.29 |    64.90 |   64.87 |   56.54 | 105,256,11,379,153
+2026-10-21T09:07:07.974Z   hooks/Header.ts        |   70.62 |    84.79 |   80.10 |   82.46 | 165
+2026-10-21T09:07:08.773Z   pages/Cart.tsx        |   92.72 |    71.17 |   73.44 |   80.74 | 
+2026-10-21T09:07:09.454Z   components/format.tsx        |   81.37 |    62.77 |   46.74 |   49.29 | 241
+2026-10-21T09:07:10.809Z   hooks/format.ts        |   90.68 |    51.78 |   97.88 |   78.11 | 290,335,162,111,263
+2026-10-21T09:07:11.595Z   hooks/Checkout.ts        |   82.14 |    45.33 |   66.29 |   92.17 | 262,295,39
+2026-10-21T09:07:12.676Z   pages/useFetch.ts        |   55.63 |    51.69 |   78.94 |   40.20 | 249,366
+2026-10-21T09:07:13.798Z   pages/Header.ts        |   63.54 |    83.86 |   44.23 |   80.46 | 341,24,20,322,33
+2026-10-21T09:07:14.196Z   utils/Checkout.ts        |   71.96 |    48.04 |   53.91 |   66.80 | 183
+2026-10-21T09:07:15.667Z   utils/price.ts        |   89.67 |    100.98 |   98.26 |   58.55 | 226,138
+2026-10-21T09:07:16.604Z   components/Header.ts        |   62.63 |    81.42 |   72.34 |   95.64 | 114,345
+2026-10-21T09:07:17.658Z   components/price.tsx        |   60.91 |    68.16 |   77.81 |   45.05 | 380,293,217
+2026-10-21T09:07:18.731Z   components/date.ts        |   46.00 |    35.24 |   92.60 |   78.98 | 40,266,288,323,202
+2026-10-21T09:07:19.531Z   hooks/Checkout.tsx        |   42.85 |    88.80 |   88.22 |   46.84 | 28
+2026-10-21T09:07:20.135Z   components/Cart.ts        |   95.17 |    69.71 |   85.33 |   95.38 | 225
+2026-10-21T09:07:21.557Z   utils/Cart.ts        |   76.82 |    36.63 |   76.66 |   42.15 | 304,366,217
+2026-10-21T09:07:22.759Z   components/Cart.ts        |   78.75 |    49.60 |   89.52 |   75.13 | 
+2026-10-21T09:07:23.323Z   pages/format.tsx        |   80.01 |    84.00 |   40.87 |   82.15 | 
+2026-10-21T09:07:24.811Z   components/useFetch.ts        |   41.35 |    61.57 |   86.95 |   51.06 | 392,375
+2026-10-21T09:07:25.803Z   hooks/Checkout.ts        |   80.71 |    93.58 |   82.32 |   98.06 | 26,15,41,17,343
+2026-10-21T09:07:26.270Z   components/date.ts        |   59.93 |    51.62 |   78.07 |   60.47 | 382,234,250,356
+2026-10-21T09:07:27.441Z   hooks/Checkout.ts        |   81.20 |    83.61 |   64.99 |   90.57 | 396,300
+2026-10-21T09:07:28.485Z   utils/Header.tsx        |   79.83 |    72.77 |   86.01 |   93.19 | 168,309,229,136
+2026-10-21T09:07:29.901Z   pages/date.tsx        |   91.57 |    66.88 |   40.41 |   56.34 | 90,310,400
+2026-10-21T09:07:30.652Z   components/Header.tsx        |   91.73 |    48.35 |   94.70 |   83.99 | 187,283,53
+2026-10-21T09:07:31.700Z   pages/date.tsx        |   90.96 |    59.39 |   78.07 |   83.50 | 372,115,140
+2026-10-21T09:07:32.588Z   components/date.ts        |   74.11 |    98.45 |   89.08 |   54.50 | 276,142,277,174
+2026-10-21T09:07:33.977Z   hooks/format.tsx        |   52.11 |    53.89 |   58.46 |   76.72 | 216,274
+2026-10-21T09:07:34.711Z   hooks/format.tsx        |   99.63 |    77.13 |   63.80 |   69.10 | 171
+2026-10-21T09:07:35.367Z   components/price.ts        |   73.77 |    32.12 |   42.26 |   95.72 | 310,300,119
+2026-10-21T09:07:36.185Z   utils/date.tsx        |   100.57 |    46.32 |   93.04 |   61.25 | 203
+2026-10-21T09:07:37.426Z   components/Cart.tsx        |   75.47 |    88.62 |   100.08 |   95.76 | 213,71,371,56,141
+2026-10-21T09:07:38.362Z   hooks/Checkout.ts        |   51.57 |    50.47 |   55.92 |   54.22 | 
+2026-10-21T09:07:39.425Z   utils/Cart.tsx        |   93.06 |    63.65 |   85.94 |   81.97 | 38,61,84
+2026-10-21T09:07:40.227Z   components/format.ts        |   77.75 |    86.97 |   81.13 |   70.41 | 141,209
+2026-10-21T09:07:41.260Z   utils/Home.ts        |   50.56 |    60.18 |   98.86 |   97.01 | 377,109,28
+2026-10-21T09:07:42.743Z   hooks/Checkout.ts        |   96.95 |    47.99 |   68.12 |   99.49 | 
+2026-10-21T09:07:43.158Z   components/Home.ts        |   60.29 |    91.14 |   80.46 |   49.42 | 386
+2026-10-21T09:07:44.442Z   hooks/Home.tsx        |   68.19 |    64.53 |   66.31 |   49.03 | 302,161
+2026-10-21T09:07:45.222Z   hooks/Header.ts        |   46.40 |    88.61 |   47.19 |   72.07 | 352,118,296,254,156
+2026-10-21T09:07:46.952Z   utils/format.ts        |   67.33 |    60.30 |   46.49 |   58.53 | 39
+2026-10-21T09:07:47.545Z   utils/useFetch.tsx        |   68.64 |    73.65 |   48.56 |   40.67 | 105,194
+2026-10-21T09:07:48.279Z   components/date.tsx        |   57.73 |    53.17 |   93.23 |   73.98 | 374
+2026-10-21T09:07:49.696Z   hooks/Checkout.tsx        |   96.77 |    93.97 |   57.22 |   53.17 | 352,372,331,108
+2026-10-21T09:07:50.985Z   utils/format.tsx        |   44.88 |    96.52 |   93.92 |   98.07 | 187,181,154,337
+2026-10-21T09:07:51.951Z   pages/Checkout.tsx        |   66.97 |    91.17 |   95.85 |   57.31 | 298
+2026-10-21T09:07:52.465Z   utils/Cart.tsx        |   84.47 |    30.45 |   73.57 |   73.09 | 
+2026-10-21T09:07:53.923Z   hooks/price.ts        |   76.96 |    37.37 |   95.13 |   86.63 | 272,23,281
+2026-10-21T09:07:54.119Z   hooks/Cart.tsx        |   45.28 |    53.21 |   46.39 |   56.71 | 
+2026-10-21T09:07:55.198Z -----------------------------|---------|----------|---------|---------|-------------------
+2026-10-21T09:07:56.815Z Test Suites: 1 failed, 7 passed, 8 total
+2026-10-21T09:07:57.856Z Tests:       2 failed, 44 passed, 46 total
+2026-10-21T09:07:58.299Z Snapshots:   0 total
+2026-10-21T09:07:59.367Z Time:        19.482 s
+2026-10-21T09:08:00.118Z Ran all test suites.
+2026-10-21T09:08:01.957Z ##[error]Process completed with exit code 1.
+2026-10-21T09:08:02.713Z ##[endgroup]
+2026-10-21T09:08:03.752Z ##[group]Post Run actions/setup-node@v4
+2026-10-21T09:08:04.635Z Cache saved with key node-cache-Linux-npm-126617385adbed
+2026-10-21T09:08:05.554Z Cache saved with key node-cache-Linux-npm-1a0990e1cc24cb
+2026-10-21T09:08:06.990Z Cache saved with key node-cache-Linux-npm-ec66cbf1bd522
+2026-10-21T09:08:07.283Z Cache saved with key node-cache-Linux-npm-1a7ff5bcd0bde7
+2026-10-21T09:08:08.226Z Cache saved with key node-cache-Linux-npm-c4a03b056cd54
+2026-10-21T09:08:09.699Z Cache saved with key node-cache-Linux-npm-1359001bc69ae3
+2026-10-21T09:08:10.386Z Cache saved with key node-cache-Linux-npm-1bebcc24f803c3
+2026-10-21T09:08:11.224Z Cache saved with key node-cache-Linux-npm-77538c0f214eb
+2026-10-21T09:08:12.240Z Cache saved with key node-cache-Linux-npm-1fdacf0c9f364c
+2026-10-21T09:08:13.332Z Cache saved with key node-cache-Linux-npm-167d9e2f6ca560
+2026-10-21T09:08:14.250Z Cache saved with key node-cache-Linux-npm-ad15a8136e911
+2026-10-21T09:08:15.573Z Cache saved with key node-cache-Linux-npm-15e2364ffb60fd
+2026-10-21T09:08:16.268Z Cache saved with key node-cache-Linux-npm-103e8b63e64521
+2026-10-21T09:08:17.118Z Cache saved with key node-cache-Linux-npm-1dfc3397835e3d
+2026-10-21T09:08:18.498Z Cache saved with key node-cache-Linux-npm-17df5894cbce42
+2026-10-21T09:08:19.810Z ##[endgroup]
