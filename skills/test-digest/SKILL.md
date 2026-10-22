@@ -1,6 +1,6 @@
 ---
 name: test-digest
-description: Condenses long test, build, type-check, or CI log output (pytest, jest/vitest, go test, cargo, tsc, GitHub Actions logs) into a failure summary of a few dozen lines using a deterministic script. Use whenever running a test suite or build, or reading a saved CI log, when the output could run past ~80 lines and the question is "what failed and why". Not for a single targeted test whose output is already short.
+description: Condenses long test, build, type-check, or CI log output (pytest, jest/vitest, npm/yarn test, go test, cargo, tsc, GitHub Actions logs) into a failure summary of a few dozen lines using a deterministic script. Use whenever running a test suite, build, or type check, or reading a saved CI log, when the output could run past ~80 lines and the question is "what failed and why" — several failing tests, hundreds of compiler errors, a wall of warnings around one real error. Not for a single targeted test whose output is already short, and not for fixing a failure the user has already pinpointed.
 ---
 
 # test-digest

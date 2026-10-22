@@ -1,6 +1,6 @@
 ---
 name: flaky-check
-description: Measures whether a test or command fails intermittently by running it N times with a deterministic script that reports pass/fail counts, failure rate, distinct failure signatures, and timing in a few dozen lines. Use when the user says a test or step "fails sometimes", "is flaky", "passes locally but fails in CI", "fails randomly", or asks how often something fails or whether a failure is deterministic. Not for a test that fails every time (that's a plain bug) or for fixing the flake once the cause is known.
+description: Measures whether a test or command fails intermittently by running it N times with a deterministic script that reports pass/fail counts, failure rate, distinct failure signatures, and timing in a few dozen lines. Use when the user says a test or step "fails sometimes", "is flaky", "passes locally but fails in CI", "fails randomly", or asks how often something fails or whether a failure is deterministic. Any named test, suite, script, or CI step the user can run again qualifies, even if they describe it loosely. Not for a test that fails every time (that's a plain bug), not for fixing the flake once the cause is known, and not for general questions about why tests can be flaky when there is nothing specific to run.
 ---
 
 # flaky-check

@@ -42,3 +42,19 @@
 - 1차 grader 오류 1건(grader가 도구를 부르려다 구조화 출력 없음) → 재시도 3회 추가 후 재채점.
 - 2차에서 드러난 assertion 결함: "checksum mismatch도 언급" assertion은 픽스처의 5% 확률 사건이 20회 표본에 **잡히는지**에 의존 → 스킬과 무관한 뒤집힘. "둘 이상의 서로 다른 오류가 관찰됐으면 분리 보고"로 재작성(결과를 보고 assertion을 고친 것이므로 여기 기록).
 - 2차 결과: 두 모델 모두 회귀 0, 순Δ +0.4%(사실상 동률), haiku 토큰 규율 이득 1건. 시간은 haiku 21s vs 88s, opus 27s vs 68s, 출력 토큰 절반. 규칙상 통과지만 **품질 이득은 없다고 보는 게 정직하다**. G2 규칙(순Δ>0)으로는 통과 못 함. **규칙 질문**: 품질 동률이고 비용이 확연히 낮은 스킬을 G2 실패로 봐야 하는가. principles §2는 "확연한 품질 향상"이라고만 쓴다. 다음 원칙 검토 항목.
+
+## 2026-10-23 추가: 어려운 트리거 세트
+
+G1 100%가 문항이 쉬워서였는지 보려고, 스킬 셋 사이의 경계 문장·한국어·키워드는 겹치지만 다른 도구가 맞는 근접 사례를 넣어 스킬당 34~36문항(should 15~16)으로 늘렸다. 보고서 사본은 `gate-eval-round-1/*-trigger-hard-v*.md`.
+
+| 스킬 | v1 (원 description) haiku / opus | 조치 | 최종 haiku / opus (test 구간) |
+|---|---|---|---|
+| test-digest | 34/36 (train 미발동 2: "npm test 6~7 failures", "tsc hundreds of errors", 각 0.33) / 36/36 | description에 "npm/yarn test", "type check", "several failing tests, hundreds of compiler errors" 단서와 "이미 짚어낸 실패를 고치는 건 아님" 추가 | 36/36 / 36/36 (14/14) |
+| repro-first | 36/36 / 36/36 | 없음 | — |
+| flaky-check | 33/34 (test 과잉 1: "why would a test pass locally and fail in CI? usual reasons" 0.67) / 34/34 | v2: "구체적 명령이 있을 때만" 제한 추가 → haiku 미발동 2건으로 **역효과**(느슨하게 지칭한 "the cypress test", "the integration suite"에서 빠짐). v3: "느슨하게 지칭해도 이름 붙은 테스트·스위트·CI 단계면 됨, 돌릴 것이 없는 일반 질문만 제외"로 완화 | 33/34 / 34/34 (test 12/13, 미발동 1: "retry-until-pass… how bad is it actually" 0.33) |
+
+배운 것:
+- 어려운 세트에서도 세 스킬 모두 규칙상 통과. 그러나 100%는 깨졌고, haiku가 opus보다 설명문에 민감하다. 흔들린 문항은 모두 3회 중 1~2회만 켜진 **경계 문항**이라 반복 3회가 필요했다.
+- 부정 조건 한 줄은 재현율을 쉽게 깎는다(v2). 제외 조건은 "무엇이 없을 때"로 좁게 쓰고, 포함 범위를 먼저 넓게 적는 편이 안전했다.
+- flaky-check의 과잉 트리거 문항은 **test 구간**에 있었다. 그걸 보고 description을 고쳤으므로 v3의 test 점수는 완전한 held-out이 아니다. 다음 라운드에 같은 종류(개념 질문) 문항을 새로 넣어 다시 본다.
+- 남은 미발동 1건("retry-until-pass… how bad is it")은 더 손대지 않았다. 한 문항에 맞춰 고치면 과적합이다.
