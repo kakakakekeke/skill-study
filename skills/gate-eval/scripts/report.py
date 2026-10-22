@@ -5,8 +5,11 @@ G2 판정 규칙(조작적 정의, principles §2):
   노이즈 바닥 = without 반복들 사이에서 같은 assertion의 통과/실패가 뒤집히는 비율(쌍 단위, eval×model 평균).
   회귀 = without 다수결 통과 → with 다수결 실패인 assertion. 회귀율 = 회귀 수 / assertion 수.
   이득 = 반대 방향.
-  통과 = 모델마다 (회귀율 ≤ 노이즈 바닥) AND (평균 통과율 with − without > 0) AND (rep 짝 비교에서 with ≥ without인 짝이 과반).
-G3 (잠정): description ≈토큰, SKILL.md 줄 수(<200), 실행 토큰 비율 with/without. 공식 측정은 /skill-doctor. 비율 > 1.5이고 G2 이득이 없으면 실패.
+  필수 = 모델마다 회귀율 ≤ 노이즈 바닥.
+  품질형 통과 = 필수 AND 순Δ(평균 통과율 with − without) > 노이즈 바닥 AND rep 짝 비교에서 with ≥ without 과반.
+  비용형 통과 = 필수 AND |순Δ| ≤ 노이즈 바닥(동률) AND 출력 토큰 또는 소요 시간이 30% 이상 감소(COST_CUT).
+  둘 다 아니면 실패. 노이즈 바닥 안의 순Δ는 품질 이득이 아니다. 컨텍스트 토큰 비율은 턴 수에 비례하므로 참고치.
+G3 (잠정): description ≈토큰, SKILL.md 줄 수(<200), 실행 토큰 비율 with/without. 공식 측정은 /skill-doctor. 비율 > 1.5이고 G2 실패면 실패.
 """
 from __future__ import annotations
 
@@ -127,8 +130,25 @@ def main() -> None:
         lines += ["trigger 결과 없음 (`evals/trigger.json` 또는 실행 누락).", ""]
         summary["g1"] = {"verdict": "missing"}
 
+    # ---- 비용 지표 (G2 비용형 판정과 G3가 함께 쓴다)
+    COST_CUT = 0.30
+    cost = {}
+    for m in models:
+        tw = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, "with_skill"), [])]
+        two = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, "without_skill"), [])]
+        ow = [r.get("output_tokens") for e in evals for r in by.get((e, m, "with_skill"), [])]
+        owo = [r.get("output_tokens") for e in evals for r in by.get((e, m, "without_skill"), [])]
+        dw = [r.get("duration_ms") for e in evals for r in by.get((e, m, "with_skill"), [])]
+        dwo = [r.get("duration_ms") for e in evals for r in by.get((e, m, "without_skill"), [])]
+        out_cut = 1 - mean(ow) / mean(owo) if mean(ow) and mean(owo) else None
+        dur_cut = 1 - mean(dw) / mean(dwo) if mean(dw) and mean(dwo) else None
+        cost[m] = {"context_tokens_with": mean(tw), "context_tokens_without": mean(two),
+                   "ratio": (mean(tw) / mean(two)) if mean(tw) and mean(two) else None,
+                   "output_tokens_with": mean(ow), "output_tokens_without": mean(owo), "output_cut": out_cut,
+                   "duration_s_with": (mean(dw) or 0) / 1000, "duration_s_without": (mean(dwo) or 0) / 1000, "duration_cut": dur_cut}
+
     # ---- G2
-    lines += ["## G2 확연한 품질 향상", ""]
+    lines += ["## G2 확연한 이득 (품질 또는 비용)", ""]
     if not runs:
         lines += ["quality 결과 없음.", ""]
         summary["g2"] = {"verdict": "missing"}
@@ -172,19 +192,35 @@ def main() -> None:
             reg_rate = reg_all / n_items_all if n_items_all else 0.0
             net = mean(deltas) or 0.0
             consistent = pair_total and pair_wins * 2 > pair_total
-            ok = reg_rate <= noise + 1e-9 and net > 0 and consistent
+            reg_ok = reg_rate <= noise + 1e-9
+            c = cost.get(m, {})
+            cuts = [x for x in (c.get("output_cut"), c.get("duration_cut")) if x is not None]
+            best_cut = max(cuts) if cuts else 0.0
+            if reg_ok and net > noise + 1e-9 and consistent:
+                kind = "quality"
+            elif reg_ok and abs(net) <= noise + 1e-9 and best_cut >= COST_CUT:
+                kind = "cost"
+            else:
+                kind = None
+            ok = kind is not None
             g2[m] = {"noise_floor": noise, "regression_rate": reg_rate, "gains": gain_all, "regressions": reg_all, "net_delta": net,
-                     "pair_wins": f"{pair_wins}/{pair_total}", "verdict": "pass" if ok else "fail",
+                     "pair_wins": f"{pair_wins}/{pair_total}", "verdict": "pass" if ok else "fail", "kind": kind,
+                     "output_cut": c.get("output_cut"), "duration_cut": c.get("duration_cut"),
                      "with_not_invoked": len(osmosis)}
+            kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형)", None: "실패"}[kind]
             lines += ["", f"- 노이즈 바닥(without 뒤집힘률 평균): {fmt(noise, True)} · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 with≥without {pair_wins}/{pair_total}",
+                      f"- 비용: 출력 토큰 {fmt(c.get('output_cut'), True) if c.get('output_cut') is not None else '-'} 감소 · 시간 {fmt(c.get('duration_cut'), True) if c.get('duration_cut') is not None else '-'} 감소 (비용형 기준 {int(COST_CUT*100)}% 이상)",
                       f"- with 설정에서 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)",
-                      f"- **{m} 판정: {'통과' if ok else '실패'}**", ""]
+                      f"- **{m} 판정: {kind_txt}**", ""]
             if osmosis:
                 lines.append("  - 미호출 run 통과율: " + ", ".join(f"{r['eval_name']}/rep{r['rep']}={fmt(r['grading']['summary']['pass_rate'], True)}" for r in osmosis))
                 lines.append("")
         all_ok = all(v["verdict"] == "pass" for v in g2.values())
-        summary["g2"] = {"verdict": "pass" if all_ok else "fail", "models": g2}
-        lines += [f"**G2 판정: {'통과' if all_ok else '실패'}** (모든 모델에서 회귀율 ≤ 노이즈 바닥, 순Δ > 0, 짝 비교 과반)", ""]
+        kinds = {v["kind"] for v in g2.values()}
+        overall_kind = "quality" if kinds == {"quality"} else ("cost" if all_ok else None)
+        summary["g2"] = {"verdict": "pass" if all_ok else "fail", "kind": overall_kind, "models": g2}
+        kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형: 품질 동률, 비용 확연히 감소)", None: "실패"}[overall_kind]
+        lines += [f"**G2 판정: {kind_txt}** (필수: 모든 모델에서 회귀율 ≤ 노이즈 바닥. 품질형: 순Δ > 노이즈 바닥 그리고 짝 비교 과반. 비용형: 순Δ가 노이즈 바닥 안이고 출력 토큰 또는 시간 {int(COST_CUT*100)}% 이상 감소)", ""]
         lines += ["회귀 사례는 하나씩 정성 검토한다 — 각 run의 `grading.json` evidence와 `transcript.md`를 본다.", ""]
 
     # ---- G3
@@ -194,23 +230,15 @@ def main() -> None:
     g3 = {"description_tokens_approx": desc_tok, "body_lines": body_lines, "models": {}}
     ratio_bad = False
     for m in models:
-        tw = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, "with_skill"), [])]
-        two = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, "without_skill"), [])]
-        ow = [r.get("output_tokens") for e in evals for r in by.get((e, m, "with_skill"), [])]
-        owo = [r.get("output_tokens") for e in evals for r in by.get((e, m, "without_skill"), [])]
-        dw = [r.get("duration_ms") for e in evals for r in by.get((e, m, "with_skill"), [])]
-        dwo = [r.get("duration_ms") for e in evals for r in by.get((e, m, "without_skill"), [])]
-        ratio = (mean(tw) / mean(two)) if mean(tw) and mean(two) else None
-        g3["models"][m] = {"context_tokens_with": mean(tw), "context_tokens_without": mean(two), "ratio": ratio,
-                           "output_tokens_with": mean(ow), "output_tokens_without": mean(owo),
-                           "duration_s_with": (mean(dw) or 0) / 1000, "duration_s_without": (mean(dwo) or 0) / 1000}
-        lines.append(f"- {m}: 컨텍스트 토큰 with {fmt(mean(tw), d=0)} / without {fmt(mean(two), d=0)} (비율 {fmt(ratio)}) · 출력 토큰 {fmt(mean(ow), d=0)}/{fmt(mean(owo), d=0)} · 시간 {fmt((mean(dw) or 0)/1000, d=0)}s/{fmt((mean(dwo) or 0)/1000, d=0)}s")
-        if ratio and ratio > 1.5 and summary["g2"].get("models", {}).get(m, {}).get("net_delta", 0) <= 0:
+        c = cost[m]
+        g3["models"][m] = c
+        lines.append(f"- {m}: 컨텍스트 토큰 with {fmt(c['context_tokens_with'], d=0)} / without {fmt(c['context_tokens_without'], d=0)} (비율 {fmt(c['ratio'])}; 턴 수에 비례하는 참고치) · 출력 토큰 {fmt(c['output_tokens_with'], d=0)}/{fmt(c['output_tokens_without'], d=0)} · 시간 {fmt(c['duration_s_with'], d=0)}s/{fmt(c['duration_s_without'], d=0)}s")
+        if c["ratio"] and c["ratio"] > 1.5 and summary["g2"].get("models", {}).get(m, {}).get("verdict") != "pass":
             ratio_bad = True
     g3_ok = body_lines < 200 and not ratio_bad
     g3["verdict"] = "pass" if g3_ok else "fail"
     summary["g3"] = g3
-    lines += ["", f"**G3 판정(잠정): {'통과' if g3_ok else '실패'}** — 공식 측정은 세션에서 `/skill-doctor`. 규칙: 본문 < 200줄, 토큰 비율 > 1.5인데 G2 이득 없음이면 실패.", ""]
+    lines += ["", f"**G3 판정(잠정): {'통과' if g3_ok else '실패'}** — 공식 측정은 세션에서 `/skill-doctor`. 규칙: 본문 < 200줄, 토큰 비율 > 1.5인데 G2 실패면 실패.", ""]
 
     verdicts = [summary["g1"].get("verdict"), summary["g2"].get("verdict"), summary["g3"].get("verdict")]
     final = "채택 가능" if all(v in ("pass", "n/a") for v in verdicts) else "백로그 (미입증 게이트 있음)"

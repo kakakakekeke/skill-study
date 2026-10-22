@@ -37,8 +37,8 @@ python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --skip-trigger --
 | 게이트 | 판정 규칙 (report.py에 고정) | 실패 시 |
 |---|---|---|
 | G1 | 모델마다 held-out test에서 과잉·미발동 각 1건 이하 | description을 고치고 **train만 보고** 다시. test를 보며 고치면 과적합 |
-| G2 | 회귀율 ≤ 노이즈 바닥 **그리고** 순Δ > 0 **그리고** rep 짝 비교에서 with ≥ without 과반 | 회귀 사례를 하나씩 `grading.json` evidence·`transcript.md`로 정성 검토. assertion을 통과하게 고치는 것은 금지 |
-| G3 | 본문 < 200줄, 토큰 비율 > 1.5인데 G2 이득 없음이면 실패(잠정) | 공식 측정은 세션에서 `/skill-doctor`. 비싸면 라우팅(user-invoked + references/) |
+| G2 | 필수: 회귀율 ≤ 노이즈 바닥. **품질형** = 순Δ > 노이즈 바닥 **그리고** rep 짝 비교 과반. **비용형** = 순Δ가 노이즈 바닥 안(동률) **그리고** 출력 토큰 또는 시간 30% 이상 감소. 보고서에 유형을 적는다 | 회귀 사례를 하나씩 `grading.json` evidence·`transcript.md`로 정성 검토. assertion을 통과하게 고치는 것은 금지. 노이즈 바닥 안의 순Δ는 품질 이득으로 쓰지 않는다 |
+| G3 | 본문 < 200줄, 컨텍스트 토큰 비율 > 1.5인데 G2 실패면 실패(잠정). 비율은 턴 수에 비례하는 참고치 | 공식 측정은 세션에서 `/skill-doctor`. 비싸면 라우팅(user-invoked + references/) |
 
 G2 표의 "with 미호출"은 삼투 조건이다. 스킬이 있는데 호출되지 않은 run이 통과율을 올렸다면 description 자체가 행동을 바꾼 것이니 따로 적는다.
 
