@@ -69,6 +69,7 @@
 evals/results/<날짜>/
 ├── trigger/<model>.json, summary.json     # 수행 중 G1이 있으면 그것
 ├── trigger-router/                          # 수행 중 G1일 때 시작 시점 참고치
+├── trigger-intask-diag/                     # trigger-intask-diag.json이 있을 때 수행 중 호출률(보고용)
 ├── quality/configs.json                      # 조건 이름 → 구성요소 (기준선 = [])
 ├── quality/<eval>/<model>/<조건>/rep-<k>/     # 조건: with_skill, without_skill, 또는 --configs의 이름(hook, both …)
 │   ├── run.json        # 토큰·시간·호출 여부·최종 응답

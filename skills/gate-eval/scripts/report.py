@@ -300,6 +300,28 @@ def main() -> None:
         lines += [f"**G2 판정 (스킬 게이트 = 처리 `{primary}`): {({'quality': '통과 (품질형)', 'cost': '통과 (비용형)', None: '실패'})[g2_all[primary]['kind']]}** (필수: 모든 모델에서 회귀율 ≤ 노이즈 바닥. 품질형: 순Δ > 노이즈 바닥 그리고 짝 비교 과반. 비용형: 순Δ가 노이즈 바닥 안이고 출력 토큰 또는 시간 {int(COST_CUT*100)}% 이상 감소)", ""]
         lines += ["회귀 사례는 하나씩 정성 검토한다 — 각 run의 `grading.json` evidence와 `transcript.md`를 본다.", ""]
 
+    # ---- 수행 중 호출률 (보고용, 원칙 §2 "수행 중 호출률과 보완")
+    dsum = out / "trigger-intask-diag" / "summary.json"
+    if dsum.exists():
+        d = json.loads(dsum.read_text())
+        INTASK_MIN = 0.5
+        lines += ["## 수행 중 호출률 (보고용, 판정 아님)", "",
+                  f"fixture에서 형제 스킬({', '.join(d.get('competitors', []))})을 연결하고 과제를 실제로 수행시켰을 때의 호출률이다. "
+                  f"실효 이득 = G2 순Δ × 수행 중 재현율. 재현율이 {int(INTASK_MIN*100)}% 미만이면 보완(① 명시적 호출 → ② 행동 검사 훅 → ③ 트리거 주입 훅)을 붙인다.", "",
+                  "| 모델 | 수행 중 재현율 | 과잉 | G2 순Δ | 실효 이득 | 보완 |", "|---|---|---|---|---|---|"]
+        prim = (summary.get("g2") or {}).get("models") or {}
+        summary["intask"] = {}
+        for m, v in d["models"].items():
+            a = v["all"]
+            rec = a["should_fire_recall"]
+            net = (prim.get(m) or {}).get("net_delta")
+            eff = net * rec if (net is not None and rec is not None) else None
+            need = rec is not None and rec < INTASK_MIN
+            lines.append(f"| {m} | {fmt(rec, True)} | {len(a['over_trigger'])} | {f'{net*100:+.1f}%' if net is not None else '-'} | "
+                         f"{f'{eff*100:+.1f}%' if eff is not None else '-'} | {'**필요**' if need else '-'} |")
+            summary["intask"][m] = {"recall": rec, "over": len(a["over_trigger"]), "net_delta": net, "effective_gain": eff, "needs_compensation": need}
+        lines.append("")
+
     # ---- G3
     lines += ["## G3 과하지 않은 토큰", ""]
     desc_tok, body_lines = approx_tokens(desc), len(body.strip().splitlines())

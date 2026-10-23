@@ -54,6 +54,11 @@ def main() -> None:
                 "--out-name", "trigger-router"])
     elif not a.skip_trigger and not user_invoked and (skill / "evals" / "trigger.json").exists():
         sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models])
+    diag = skill / "evals" / "trigger-intask-diag.json"
+    if not a.skip_trigger and not user_invoked and diag.exists() and not intask.exists():
+        # 원칙 §2 "수행 중 호출률과 보완": 판정이 아니라 보고용
+        sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
+            "--eval-set", str(diag), "--workers", str(a.workers), "--out-name", "trigger-intask-diag"])
     if not a.skip_quality and (skill / "evals" / "evals.json").exists():
         cmd = [py, str(HERE / "quality_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
                "--reps", str(a.reps), "--workers", str(a.workers), "--timeout", str(a.timeout), "--max-turns", str(a.max_turns)]

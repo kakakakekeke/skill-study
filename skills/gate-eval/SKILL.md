@@ -37,6 +37,8 @@ python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \
 
 이 측정은 발동 조건이 요청 문장에 있는 스킬에만 유효하다. 과제 진행 상태에 따라 켜지는 스킬은 원칙 §2 "G1 측정 시점"대로 **수행 중 G1**로 잰다: `evals/trigger-intask.json`(형식은 `references/evals-format.md`)이 있으면 문항마다 fixture에서 과제를 실제로 수행시키고(경쟁 스킬 동일, 라우터 프롬프트 없음) 대상 스킬이 호출되는 즉시 끝낸다. 이때는 이것이 판정이고, `trigger.json`의 시작 시점 결과는 `trigger-router/`에 참고치로 남는다. 파일의 `reason`은 측정 전에 적고 커밋한다.
 
+발동 조건이 요청 문장에 있는 스킬도 `evals/trigger-intask-diag.json`(같은 형식, 진단용)이 있으면 수행 중 호출률을 함께 재서 보고서의 "수행 중 호출률" 절에 적는다. 판정에는 쓰지 않고, 실효 이득(G2 순Δ × 수행 중 재현율)과 보완 필요 여부(재현율 50% 미만)를 보여 준다. 보완 순서는 원칙 §2 "수행 중 호출률과 보완".
+
 ## 보고서 읽는 법
 
 | 게이트 | 판정 규칙 (report.py에 고정) | 실패 시 |
