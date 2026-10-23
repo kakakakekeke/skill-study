@@ -1,0 +1,101 @@
+{
+ "skill": "repro-first",
+ "description": "Fixes a reported bug by first turning the report into one command that fails (a red reproduction), then making the smallest change that turns it green, then stating how the regression is prevented. Use when the user reports a bug, a wrong result, a crash, a traceback, or \"X returns Y but should return Z\" in code that has a test runner or can be run directly. Not for feature requests, questions about how code works, or one-character typo fixes the user has already pinpointed.",
+ "method": "in-task (fixture per query, all repo skills linked, full tools, max-turns 30, stop on invoke)",
+ "in_task": true,
+ "reason": "진단(판정 아님): 시작 시점 라우팅이 이 스킬의 실제 수행 중 호출을 과대평가하는지 확인한다. 발동 조건은 요청 문장에 있으므로 원칙 §2상 판정은 시작 시점 G1이다. 2026-10-23, 측정 전 작성.",
+ "competitors": [
+  "flaky-check",
+  "repro-first",
+  "test-integrity-check"
+ ],
+ "runs_per_query": 3,
+ "eval_set": "/Users/kakakakekeke/workspace/skill-study/.claude/worktrees/next-tasks-cb464b/skills/repro-first/evals/trigger-intask-diag.json",
+ "holdout": 0.4,
+ "n_train": 12,
+ "n_test": 6,
+ "models": {
+  "haiku": {
+   "all": {
+    "n": 18,
+    "pass": 10,
+    "should_fire_recall": 0.1111111111111111,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be ' → 0.00 ['NONE']",
+     "slugs for titles that end in punctuation come out with a dash at the end, e.g. ' → 0.00 ['NONE']",
+     "슬러그 끝에 하이픈이 붙어서 나와요. 'Hello World!' 넣으면 'hello-world-'예요. 고쳐줘 → 0.00 ['NONE']",
+     "getting KeyError: 'timeout' from load_config when the config file has no timeout → 0.00 ['NONE']",
+     "the app crashes on startup:\n  File \"appcfg/loader.py\", line 24, in load_config\n  → 0.00 ['NONE']",
+     "ticket #412 says load_config crashes on configs without a timeout key. check it  → 0.00 ['NONE']",
+     "the median of an even-length list is wrong, it returns the upper middle element  → 0.00 ['NONE']",
+     "QA: median([10, 20]) gives 20. that's a bug right? fix it → 0.00 ['NONE']"
+    ]
+   },
+   "train": {
+    "n": 12,
+    "pass": 6,
+    "should_fire_recall": 0.0,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be ' → 0.00 ['NONE']",
+     "slugs for titles that end in punctuation come out with a dash at the end, e.g. ' → 0.00 ['NONE']",
+     "슬러그 끝에 하이픈이 붙어서 나와요. 'Hello World!' 넣으면 'hello-world-'예요. 고쳐줘 → 0.00 ['NONE']",
+     "the app crashes on startup:\n  File \"appcfg/loader.py\", line 24, in load_config\n  → 0.00 ['NONE']",
+     "ticket #412 says load_config crashes on configs without a timeout key. check it  → 0.00 ['NONE']",
+     "QA: median([10, 20]) gives 20. that's a bug right? fix it → 0.00 ['NONE']"
+    ]
+   },
+   "test": {
+    "n": 6,
+    "pass": 4,
+    "should_fire_recall": 0.3333333333333333,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "getting KeyError: 'timeout' from load_config when the config file has no timeout → 0.00 ['NONE']",
+     "the median of an even-length list is wrong, it returns the upper middle element  → 0.00 ['NONE']"
+    ]
+   }
+  },
+  "sonnet": {
+   "all": {
+    "n": 18,
+    "pass": 14,
+    "should_fire_recall": 0.5555555555555556,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be ' → 0.00 ['NONE']",
+     "slugs for titles that end in punctuation come out with a dash at the end, e.g. ' → 0.00 ['NONE']",
+     "슬러그 끝에 하이픈이 붙어서 나와요. 'Hello World!' 넣으면 'hello-world-'예요. 고쳐줘 → 0.00 ['NONE']",
+     "getting KeyError: 'timeout' from load_config when the config file has no timeout → 0.00 ['NONE']"
+    ]
+   },
+   "train": {
+    "n": 12,
+    "pass": 9,
+    "should_fire_recall": 0.5,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be ' → 0.00 ['NONE']",
+     "slugs for titles that end in punctuation come out with a dash at the end, e.g. ' → 0.00 ['NONE']",
+     "슬러그 끝에 하이픈이 붙어서 나와요. 'Hello World!' 넣으면 'hello-world-'예요. 고쳐줘 → 0.00 ['NONE']"
+    ]
+   },
+   "test": {
+    "n": 6,
+    "pass": 5,
+    "should_fire_recall": 0.6666666666666666,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "getting KeyError: 'timeout' from load_config when the config file has no timeout → 0.00 ['NONE']"
+    ]
+   }
+  }
+ }
+}

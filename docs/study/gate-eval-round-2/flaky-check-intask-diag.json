@@ -1,0 +1,77 @@
+{
+ "skill": "flaky-check",
+ "description": "Measures whether a test or command fails intermittently by running it N times with a deterministic script that reports pass/fail counts, failure rate, distinct failure signatures, and timing in a few dozen lines. Use when the user says a test or step \"fails sometimes\", \"is flaky\", \"passes locally but fails in CI\", \"fails randomly\", or asks how often something fails or whether a failure is deterministic. Any named test, suite, script, or CI step the user can run again qualifies, even if they describe it loosely. Not for a test that fails every time (that's a plain bug), not for fixing the flake once the cause is known, and not for general questions about why tests can be flaky when there is nothing specific to run.",
+ "method": "in-task (fixture per query, all repo skills linked, full tools, max-turns 30, stop on invoke)",
+ "in_task": true,
+ "reason": "진단(판정 아님): 시작 시점 라우팅이 이 스킬의 실제 수행 중 호출을 과대평가하는지 확인한다. 발동 조건은 요청 문장에 있으므로 원칙 §2상 판정은 시작 시점 G1이다. 2026-10-23, 측정 전 작성.",
+ "competitors": [
+  "flaky-check",
+  "repro-first",
+  "test-integrity-check"
+ ],
+ "runs_per_query": 3,
+ "eval_set": "/Users/kakakakekeke/workspace/skill-study/.claude/worktrees/next-tasks-cb464b/skills/flaky-check/evals/trigger-intask-diag.json",
+ "holdout": 0.4,
+ "n_train": 12,
+ "n_test": 7,
+ "models": {
+  "haiku": {
+   "all": {
+    "n": 19,
+    "pass": 17,
+    "should_fire_recall": 0.8,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "is scripts/fetch.sh stable? QA says it fails intermittently but I've never seen  → 0.00 ['NONE']",
+     "fetch.sh sometimes exits 56 and sometimes 3, no idea why. quantify it → 0.33 ['NONE', 'flaky-check']"
+    ]
+   },
+   "train": {
+    "n": 12,
+    "pass": 10,
+    "should_fire_recall": 0.6666666666666666,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": [
+     "is scripts/fetch.sh stable? QA says it fails intermittently but I've never seen  → 0.00 ['NONE']",
+     "fetch.sh sometimes exits 56 and sometimes 3, no idea why. quantify it → 0.33 ['NONE', 'flaky-check']"
+    ]
+   },
+   "test": {
+    "n": 7,
+    "pass": 7,
+    "should_fire_recall": 1.0,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": []
+   }
+  },
+  "sonnet": {
+   "all": {
+    "n": 19,
+    "pass": 19,
+    "should_fire_recall": 1.0,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": []
+   },
+   "train": {
+    "n": 12,
+    "pass": 12,
+    "should_fire_recall": 1.0,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": []
+   },
+   "test": {
+    "n": 7,
+    "pass": 7,
+    "should_fire_recall": 1.0,
+    "should_not_fire_precision": 1.0,
+    "over_trigger": [],
+    "under_trigger": []
+   }
+  }
+ }
+}

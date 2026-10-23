@@ -305,3 +305,33 @@ G2에서 실제로 변별된 assertion (with / without, 15 run 기준):
 - **verify-on-stop: 게이트 통과 → 배포**(마켓플레이스 `source: ./plugins/verify-on-stop`, 1.0.0). `ideas.md` 29번. verify-before-done(13번)은 부활시키지 않고 이 플러그인으로 대체한다.
 - 하지 않은 것: JS/TS 프로젝트(preflight가 Python 전용이라 다른 언어 프로젝트에서는 pytest 0개 → "검증 못 함"만 표시하고 막지 않음), git 저장소 fixture의 eval(git diff 경로는 합성 transcript + `sed -i` 편집으로 1회 확인: 연관 테스트 실패와 mypy 오류를 잡아 막음), sonnet.
 
+## ⑤ 배포 스킬 재검증: sonnet 측정 + 수행 중 G1 진단 (2026-10-23, eval 모델을 haiku·sonnet으로 바꾼 뒤)
+
+- 조건: CLI 2.1.295, 측정 모델 `claude-sonnet-5-5`, grader **opus**(이번부터). 5회. haiku 결과는 라운드 1·2 측정을 그대로 쓴다. repro-first는 배포 버전(v1)이 게이트를 통과한 원래 사례 3개(`--only 1,2,3`)로 쟀다. 나머지 12개(이미 수정됨·부분 수정·ledger)는 기준선이 이미 만점이라 넣으면 Δ만 희석된다. verify-on-stop은 `without,hook=hook`이다. 보고서 사본은 `gate-eval-round-2/<name>-sonnet.md`.
+
+### sonnet 판정 (전부 통과)
+
+| 항목 | G1 (시작 시점, test) | G2 | 비용 (출력/시간) | 비고 |
+|---|---|---|---|---|
+| flaky-check | 13/13 (train 과잉 1: perf 벤치 15회 → 0.67) | **비용형** 통과: 순Δ +2.9% ≤ 바닥 13%, 회귀 0/15 | −19% / **−49%** | |
+| repro-first | 18/18 | **품질형** 통과: 순Δ +44.4% > 바닥 4%, 회귀 0/18, 짝 15/15 | +58% / +63% | haiku·opus보다 Δ가 크다 |
+| test-integrity-check | 14/14 | **품질형** 통과: 순Δ +16.0% > 바닥 7%, 회귀 0/19, 짝 20/20 | −5% / +7% | 미호출 5/20(정상형 B 제외 설계대로) |
+| verify-on-stop | n/a (훅) | **품질형** 통과: 순Δ +14.3% > 바닥 13%, 회귀 0/23, 짝 34/35 | +11% / +14% | 바닥과의 차이가 작다(아래) |
+
+- verify-on-stop의 노이즈 바닥 13%는 fp-contradictory-tests가 만들었다. sonnet은 이 사례에서 기준선·훅 모두 5회 중 2회는 멈추고 3회는 테스트를 고쳐(40%±55%) 뒤집힘이 컸다. 훅은 이 결과를 바꾸지 않았다(두 조건이 같음). 이득의 대부분은 "사용자가 검증 결과를 봄"(구조적)이다. sonnet은 기준선에서도 typecheck-only의 mypy를 4/5 고쳐, ①의 sonnet 관찰("스킬 없이도 mypy를 돌린다")과 맞는다. sonnet에서 이 훅의 이득은 **검사 누락 방지보다 보고**(목적 3)다.
+- 검사 결함 1건: `claim_matches_reality.py`가 실제로는 다 통과한 run 2개(훅 조건)를 거짓 완료로 셌다. 최종 메시지의 "would have failed on import", "I haven't run the tests"를 실패 주장으로 읽었다. 실제 상태는 과소 주장이다. 결과를 보고 검사를 고치면 안 되므로 판정은 그대로 두고 다음 측정 전에 고친다.
+
+### 수행 중 G1 진단 (판정 아님; 문항은 측정 전 커밋 `6851001`, 사본 `gate-eval-round-2/<name>-intask-diag.json`)
+
+배포 스킬 3개 모두 발동 조건이 요청 문장에 있으므로, §2상 판정은 시작 시점 G1이다. ①에서 시작 시점 측정이 과대평가했으므로, 이 스킬들도 그런지 수행 중으로 진단했다. fixture는 각 스킬의 G2 fixture이고, 형제 스킬 3개를 연결했다(문항 18~19개, 3회).
+
+| 스킬 | haiku 재현율 (수행 중 / 시작 시점) | sonnet 재현율 (수행 중 / 시작 시점) | 과잉 |
+|---|---|---|---|
+| flaky-check | 80% / 100% (미발동 2: fetch.sh 안정성 질문 0/3, exit 56/3 정량화 1/3) | 100% / 100% | 0 |
+| test-integrity-check | 90% / 100% (미발동 1) | 100% / 100% | 0 |
+| **repro-first** | **11%** / 100% (9문항 중 8개 0/3) | **56%** / 100% (슬러그 3문항·KeyError 1문항 0/3) | 0 |
+
+- **repro-first는 경쟁 스킬이 있으면 호출이 크게 준다.** 확인: sonnet, 같은 문항("slugify('Hello World!') returns …"), 같은 fixture에서 repro-first만 연결하면 바로 Skill 호출, 형제 3개를 연결하면 0/3(세 스킬 모두 init에 로드된 것을 확인)으로 직접 작업했다. G2 with 조건(대상 스킬만 연결)의 호출 15/15는 이 경쟁을 재지 않는다. 시작 시점 라우터는 "쓸 스킬이 있으면 호출하라"고 명시적으로 묻기 때문에 100%가 나온다. ①의 verify-before-done은 경쟁과 무관했다(혼자 연결해도 haiku 0/12). 그래서 과대평가의 원인은 스킬마다 다르다(측정 시점 / 경쟁).
+- 진단 중 착오 1건: 처음 셸(zsh)에서 `for s in $2`로 링크를 만들었다가, 단어 분리가 안 돼 링크가 하나만 생겼다. 그래서 "스킬이 2개 이상이면 아무것도 로드되지 않는다"는 잘못된 관찰을 냈다. 목록을 풀어 쓴 재실험으로 정정했다. 하네스(Python)는 영향 없음.
+- 함의: 시작 시점 G1은 요청 문장으로 판정되는 스킬에서도 과대평가할 수 있다(n=1, repro-first). 이것을 판정 규칙으로 바꿀지(모든 model-invoked 스킬에 수행 중 G1)는 사용자 결정 사항이다. 바꾸면 repro-first는 두 모델 모두 G1 실패(haiku 1/9, sonnet 5/9)이고, flaky-check은 haiku held-out 결과에 따라 갈린다.
+
