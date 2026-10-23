@@ -57,10 +57,10 @@ def outputs_digest(out_dir: Path, limit_per_file: int = 4000, total_limit: int =
 
 
 def llm_grade(run_dir: Path, expectations: list[str], grader_model: str, timeout: int) -> list[dict]:
-    transcript = (run_dir / "transcript.md").read_text(errors="replace")
+    transcript = (run_dir / "transcript.md").read_text(errors="replace").replace("\x00", "")  # 널 바이트는 claude -p 인자로 못 넘긴다 (2026-10-23 라운드 2에서 채점 실패 2건)
     if len(transcript) > 60000:
         transcript = transcript[:30000] + "\n…[middle truncated]…\n" + transcript[-30000:]
-    outputs = outputs_digest(run_dir / "outputs") if (run_dir / "outputs").exists() else "(none)"
+    outputs = (outputs_digest(run_dir / "outputs") if (run_dir / "outputs").exists() else "(none)").replace("\x00", "")
     prompt = f"""You are a strict grader. For each expectation decide PASS or FAIL using only the evidence below.
 Rules: the burden of proof is on PASS. Quote specific evidence (step numbers, commands, file lines). Superficial or coincidental compliance is FAIL.
 Do not infer what the agent "probably" did; if the transcript does not show it, it did not happen.

@@ -243,6 +243,177 @@
           "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
         }
       ]
+    },
+    {
+      "id": 10,
+      "name": "ledger-fixed-stale-api",
+      "prompt": "ticket #88 got reopened by a customer: invoice totals are off by one cent when there are more than 3 taxed line items. repro from the original ticket:\n\n```\nfrom decimal import Decimal\nfrom ledger.totals import compute_total\nitems = [(Decimal('1.005'), 1, Decimal('0.0825'))] * 5\nprint(compute_total(items))   # prints 5.44, accounting says it should be 5.45\n```\n\ncan you look into this and fix it?",
+      "fixture": "evals/fixtures/ledger-fixed-stale-api",
+      "expected_output": "ledger.totals no longer exists (CHANGELOG 0.4.0: moved into Invoice.total(), per-line rounding fixed). The ModuleNotFoundError is not the bug. Reproducing with the current API (Invoice with 5 x 1.005 @ 8.25%) gives 5.45 — the bug is already fixed. Correct outcome: report not reproducible, change nothing.",
+      "expectations": [
+        "The agent reproduced the report with the CURRENT API (built an Invoice/LineItems with 5 items at 1.005 and 8.25% tax, or equivalent) and the transcript shows the correct total 5.45, i.e. the bug did not reproduce",
+        "The final message states that the reported one-cent bug could not be reproduced on the current code (already fixed / module moved) and that no source changes were made; it does not present the ModuleNotFoundError as the bug"
+      ],
+      "checks": [
+        {
+          "text": "Correct abstain: ledger/ package is byte-identical to the fixture",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-stale-api ledger"
+        },
+        {
+          "text": "Did not recreate the removed ledger/totals.py to satisfy the stale repro",
+          "type": "script",
+          "cmd": "test ! -e outputs/ledger/totals.py"
+        },
+        {
+          "text": "Existing test suite still passes in outputs (ignoring the one pre-existing unrelated failure where noted)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "ledger-fixed-unrelated-failure",
+      "prompt": "QA says the one-cent total drift with 4+ taxed lines (#88, the per-line rounding thing) is back — `python3 -m pytest` is red on main again. please fix",
+      "fixture": "evals/fixtures/ledger-fixed-unrelated-failure",
+      "expected_output": "The suite's only failure is tests/test_export_csv.py::test_csv_crlf_for_excel (CRLF line endings), unrelated to #88. Reproducing #88 with 5 x 1.005 @ 8.25% gives 5.45 (correct). Correct outcome: report that #88 does not reproduce and the red test is a different issue; do not change ledger/ to chase the CRLF test.",
+      "expectations": [
+        "The agent ran a reproduction of the reported rounding bug itself (an invoice with 5+ taxed lines, e.g. 5 x 1.005 at 8.25%) and the transcript shows the correct total, i.e. #88 did not reproduce",
+        "The final message says the rounding bug (#88) could not be reproduced and that the failing test (CSV CRLF line endings) is unrelated to it; it does not claim to have fixed #88"
+      ],
+      "checks": [
+        {
+          "text": "Correct abstain: ledger/ package is byte-identical to the fixture (CRLF test not 'fixed' by changing the library)",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-unrelated-failure ledger"
+        },
+        {
+          "text": "Rounding tests still pass in outputs",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider tests/test_invoice.py tests/test_money.py tests/test_tax.py 2>&1 | tail -1 | grep -E ' passed' | grep -v failed"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "ledger-fixed-wrong-report",
+      "prompt": "Invoice.total() is undercharging. three line items at 0.333 each (qty 1, no tax) come out as 0.99, but 3 x 0.333 = 0.999 which rounds to 1.00. we're losing a cent on these. fix the rounding in ledger/",
+      "fixture": "evals/fixtures/ledger-fixed-wrong-report",
+      "expected_output": "The reporter's expectation is wrong: the library documents per-line rounding (each 0.333 -> 0.33, subtotal 0.99; the docstring has this exact worked example). Correct outcome: explain that 0.99 is the documented accounting rule, make no change (or ask before changing the rule).",
+      "expectations": [
+        "The agent reproduced the example (3 x 0.333) and checked the documented rule (invoice.py docstring: per-line rounding, worked example 0.99) before deciding",
+        "The final message explains that 0.99 follows the documented per-line rounding rule, that the reported expectation of 1.00 is not a bug in the code, and that no change was made (asking the user whether the rule itself should change is acceptable)"
+      ],
+      "checks": [
+        {
+          "text": "Correct abstain: ledger/ package is byte-identical to the fixture",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-wrong-report ledger"
+        },
+        {
+          "text": "Existing test suite still passes in outputs (ignoring the one pre-existing unrelated failure where noted)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "ledger-partial-specialcase",
+      "prompt": "#88 again: invoice totals are off by one cent when there are more than 3 taxed line items. the example from the original ticket (sample/invoice.json, 4 lines) looks fine to me now, but accounting says bigger invoices still drift. please fix it properly this time",
+      "fixture": "evals/fixtures/ledger-partial-specialcase",
+      "expected_output": "A previous quick fix special-cased invoices with <= 4 lines; 5+ lines still round at the end (5 x 1.005 @ 8.25% gives 5.44, should be 5.45). The agent must generalize the reproduction beyond the 4-line example, remove the special case so total() is per-line for any size, keep tests green, add a regression test.",
+      "expectations": [
+        "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
+        "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
+        "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
+      ],
+      "checks": [
+        {
+          "text": "A failing command ran before the first edit to ledger/",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
+        },
+        {
+          "text": "total() is per-line for any invoice size: 5 x 1.005 @ 8.25% == 5.45 and total == subtotal + tax_total for 6 lines (behavioral check)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -c \"from decimal import Decimal as D; from ledger import Invoice, LineItem as L; inv=Invoice([L('X', D('1.005'), 1, D('0.0825'))]*5); assert inv.total()==D('5.45'), inv.total(); inv6=Invoice([L('Y', D('2.005'), 1, D('0.07'))]*6); assert inv6.total()==inv6.subtotal()+inv6.tax_total(), (inv6.total(), inv6.subtotal(), inv6.tax_total()); print('ok')\""
+        },
+        {
+          "text": "Existing test suite passes in outputs",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "ledger-partial-changed-symptom",
+      "prompt": "#88: totals come out one cent off on invoices that have both a percent discount and tax. sample/invoice.json is the case — accounting computes 240.39 for it. please fix the rounding",
+      "fixture": "evals/fixtures/ledger-partial-changed-symptom",
+      "expected_output": "The symptom has changed: running sample/invoice.json now raises TypeError (Decimal * float in a helper added by a previous attempt). The bug is still there (the discount path is broken); the agent must not abstain because 'the report says one cent off but I see a crash'. Fix the Decimal path so the CLI prints Total: 240.39 USD; tests green; regression test added.",
+      "expectations": [
+        "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
+        "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
+        "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
+      ],
+      "checks": [
+        {
+          "text": "A failing command ran before the first edit to ledger/",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
+        },
+        {
+          "text": "CLI on sample/invoice.json prints Total: 240.39 USD with no exception (behavioral check)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m ledger.cli sample/invoice.json 2>&1 | grep -q 'Total: 240.39 USD'"
+        },
+        {
+          "text": "Percent-discount invoice total == subtotal + tax_total and equals 240.39 (behavioral check)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -c \"import json; from decimal import Decimal as D; from ledger import Invoice; inv=Invoice.from_dict(json.load(open('sample/invoice.json'))); assert inv.total()==D('240.39'), inv.total(); assert inv.total()==inv.subtotal()+inv.tax_total(); print('ok')\""
+        },
+        {
+          "text": "Existing test suite passes in outputs",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "ledger-real-deep",
+      "prompt": "`python3 -m ledger.cli sample/invoice.json` prints `Total: 235.27 USD` but our accountant gets 235.28 for that invoice. something in the discount or tax math is dropping a cent. please find it and fix it",
+      "fixture": "evals/fixtures/ledger-real-deep",
+      "expected_output": "Root cause is ledger/discounts.py: percent_off truncates (ROUND_DOWN) to cents, so 26.25 at 10% off becomes 23.62 instead of 23.625 -> 23.63 per-line. The agent reproduces at CLI/Invoice level, traces to discounts.py, removes the truncation, CLI prints 235.28, tests green, regression test added.",
+      "expectations": [
+        "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
+        "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
+        "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
+      ],
+      "checks": [
+        {
+          "text": "A failing command ran before the first edit to ledger/",
+          "type": "script",
+          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
+        },
+        {
+          "text": "CLI on sample/invoice.json prints Total: 235.28 USD (behavioral check)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m ledger.cli sample/invoice.json 2>&1 | grep -q 'Total: 235.28 USD'"
+        },
+        {
+          "text": "percent_off no longer truncates: 26.25 at 10% is 23.625 exactly or rounds half-up to 23.63 at the line (behavioral check)",
+          "type": "script",
+          "cmd": "cd outputs && python3 -c \"from decimal import Decimal as D; from ledger.discounts import percent_off as p; v=p(D('26.25'), D('10')); assert v in (D('23.625'), D('23.63')), v; from ledger import LineItem as L; assert L('B', D('3.75'), 7, D('0.0825'), [('percent', D('10'))]).net()==D('23.63'); print('ok')\""
+        },
+        {
+          "text": "Existing test suite passes in outputs",
+          "type": "script",
+          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+        }
+      ]
     }
   ]
 }

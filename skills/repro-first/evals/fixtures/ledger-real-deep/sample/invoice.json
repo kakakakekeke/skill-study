@@ -1,0 +1,9 @@
+{
+  "currency": "USD",
+  "items": [
+    {"sku": "WIDGET-A", "unit_price": "19.99", "qty": 3, "tax_rate": "0.0825"},
+    {"sku": "WIDGET-B", "unit_price": "3.75", "qty": 7, "tax_rate": "0.0825", "discounts": [["percent", "10"]]},
+    {"sku": "GADGET-C", "unit_price": "129.00", "qty": 1, "tax_rate": "0.0825"},
+    {"sku": "CABLE-D", "unit_price": "2.375", "qty": 2, "tax_rate": "0.0825"}
+  ]
+}
