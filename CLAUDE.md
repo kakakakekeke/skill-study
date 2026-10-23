@@ -12,6 +12,7 @@ Claude Code 스킬·플러그인을 만드는 프로젝트. 경량, eval 검증,
 
 - 새 스킬은 `skill-creator`, 플러그인은 `plugin-authoring` 스킬로 시작한다.
 - 디렉터리 이름 = `name` 필드, kebab-case.
+- 스킬 상태(제작중·배포·폐기)와 마켓플레이스 등록은 `docs/principles.md` §6.4. 측정 PR에서 등록하거나 `deprecated/`로 옮기고 `python3 scripts/check_marketplace.py`를 돌린다.
 - `.ref/`는 외부 저장소 클론. 읽기 전용, 수정하지 않는다.
 - 커밋 메시지는 한국어.
 - 규칙을 바꿀 땐 `docs/principles.md`만 고친다. 스터디 노트에 결론을 쓰지 않는다.

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "skill-study",
+  "description": "세 게이트(트리거·품질·토큰)를 eval로 통과한 경량 개발 스킬 모음",
+  "owner": {
+    "name": "kakakakekeke"
+  },
+  "plugins": [
+    {
+      "name": "flaky-check",
+      "description": "명령을 N회 반복 실행해 실패율·실패 시그니처·시간을 수십 줄로 보고한다 (가끔 실패하는 테스트 판정)",
+      "version": "1.0.0",
+      "category": "development",
+      "source": "./skills",
+      "strict": false,
+      "skills": ["./flaky-check"]
+    },
+    {
+      "name": "repro-first",
+      "description": "버그 수정 전 실패하는 재현 명령을 먼저 만들고, 최소 수정으로 green을 확인한 뒤 재발 방지 위치를 적는다",
+      "version": "1.0.0",
+      "category": "development",
+      "source": "./skills",
+      "strict": false,
+      "skills": ["./repro-first"]
+    },
+    {
+      "name": "test-integrity-check",
+      "description": "실패 테스트를 애플리케이션 코드로만 통과시키고, 테스트가 스펙과 충돌하면 테스트를 고치지 않고 근거와 함께 보고한다",
+      "version": "1.0.0",
+      "category": "development",
+      "source": "./skills",
+      "strict": false,
+      "skills": ["./test-integrity-check"]
+    }
+  ]
+}

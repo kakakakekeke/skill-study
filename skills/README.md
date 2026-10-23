@@ -14,3 +14,13 @@ skills/
 - 디렉터리 이름 = `SKILL.md`의 `name` (kebab-case)
 - `description`은 "무엇을 하는가 + 언제 트리거되는가"를 3인칭으로 작성
 - 새 스킬은 `skill-creator` 스킬로 시작한다
+- 여기 있는 스킬은 제작중이거나 배포 중이다. 배포 = `.claude-plugin/marketplace.json` 등록(세 게이트 통과), 미통과는 `deprecated/`로 옮긴다. 규칙은 `docs/principles.md` §6.4
+- `gate-eval`은 이 저장소 전용 내부 도구라 등록하지 않는다
+
+설치 (배포 중인 스킬):
+
+```
+/plugin install flaky-check --marketplace kakakakekeke/skill-study
+/plugin install repro-first --marketplace kakakakekeke/skill-study
+/plugin install test-integrity-check --marketplace kakakakekeke/skill-study
+```

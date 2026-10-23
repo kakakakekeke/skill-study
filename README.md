@@ -6,8 +6,11 @@ Claude Code용 스킬과 플러그인을 만들고 실험하는 작업장.
 
 ```
 skill-study/
-├── skills/     # 독립 스킬 (SKILL.md 단위)
+├── .claude-plugin/marketplace.json  # 배포 목록 (게이트 통과 스킬만)
+├── skills/     # 독립 스킬 (SKILL.md 단위): 제작중 + 배포
+├── deprecated/ # 게이트 미통과로 폐기한 스킬 (보존, 미배포)
 ├── plugins/    # 플러그인 (plugin.json 단위, 스킬·커맨드·훅 번들)
+├── scripts/    # 저장소 검사 (check_marketplace.py, CI에서 실행)
 ├── docs/       # 규칙 원본(principles.md), 백로그, 스터디 노트
 ├── .ref/       # 참고용 외부 저장소 클론 (git 추적 안 함)
 ├── CLAUDE.md   # Claude용 포인터와 저장소 규약 (규칙 본문은 docs/principles.md)
@@ -27,7 +30,19 @@ skill-study/
 5. 로컬에서 테스트한다.
    - 스킬: `~/.claude/skills/`에 심볼릭 링크 후 호출
    - 플러그인: `claude --plugin-dir ./plugins/<name>`
-6. 안정화되면 별도 저장소나 마켓플레이스로 옮긴다.
+6. 측정 PR에서 상태를 정한다(`docs/principles.md` §6.4): 통과 → `.claude-plugin/marketplace.json`에 등록, 미통과 → `deprecated/`로 이동.
+
+## 설치 (마켓플레이스)
+
+```bash
+claude plugin marketplace add kakakakekeke/skill-study
+```
+
+```bash
+claude plugin install repro-first@skill-study
+```
+
+배포 중인 스킬: `flaky-check`, `repro-first`, `test-integrity-check`. 플러그인 하나에 스킬 하나라 필요한 것만 설치한다.
 
 ## 로컬 테스트용 스킬 링크
 

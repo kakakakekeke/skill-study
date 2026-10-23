@@ -1,13 +1,13 @@
 # 아이디어 백로그
 
-채택 여부는 `principles.md` §2 세 게이트와 §6.3 체크리스트로 결정한다. 상태: 아이디어 / 선정 / 제작중 / 게이트 통과 / 보류(사유).
+채택 여부는 `principles.md` §2 세 게이트와 §6.3 체크리스트로 결정한다. 상태: 아이디어 / 선정 / 제작중 / 게이트 통과 / 보류(사유, 아직 만들지 않은 후보) / 폐기(만들었으나 미통과, `deprecated/`). 만든 스킬의 상태 처리는 §6.4.
 
 ## 2026-10-22 자율 제작 라운드 후보 (효용 예상 순)
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
 | 1 | `gate-eval` | skill (user-invoked 라우터+scripts) | 이 저장소 스킬을 세 게이트 프로토콜(§5)로 측정: 노이즈 바닥, 모델 2종×3회, 이득·회귀 쌍, 토큰, 버전 기록 → 고정 형식 report.md | 3 (일정한 산출물), 전체 게이트의 도구 | skill-creator는 단일 모델·반복 없음·노이즈 바닥 없음, `claude plugin eval`은 형식 비호환 → 빈칸 | **게이트 통과 (비용형)** (10-23 5회: 두 모델 Δ가 노이즈 바닥 안, 출력 토큰 −89%/−81%·시간 −75%/−59%. haiku는 스킬 없으면 노이즈 바닥을 거의 안 넣음(1/5 vs 4/5); `study/gate-eval-round-1.md`) |
-| 2 | `test-digest` | skill + script | 테스트·빌드·CI 로그의 긴 출력을 결정적 스크립트로 실패 요약 수십 줄로 압축 | 2 (토큰), 1 | 없음 | **보류** (10-23 5회 재측정: 노이즈 바닥 3%, haiku +5.3% 품질형이나 opus +2.7%는 동률·비용 절감 없음 → G2 실패. 변별 assertion은 "Bash 출력 80줄 이하" 1개뿐. 작은 모델 전용 등 다른 쓸모가 보이면 재검토. G1은 36/36) |
+| 2 | `test-digest` | skill + script | 테스트·빌드·CI 로그의 긴 출력을 결정적 스크립트로 실패 요약 수십 줄로 압축 | 2 (토큰), 1 | 없음 | **폐기** (`deprecated/`, 10-23 §6.4) (10-23 5회 재측정: 노이즈 바닥 3%, haiku +5.3% 품질형이나 opus +2.7%는 동률·비용 절감 없음 → G2 실패. 변별 assertion은 "Bash 출력 80줄 이하" 1개뿐. 작은 모델 전용 등 다른 쓸모가 보이면 재검토. G1은 36/36) |
 | 3 | `repro-first` | skill | 버그 수정 전 red가 되는 재현 명령을 먼저 만들고, 수정 후 green 확인, 끝에 "재발을 막을 검사 위치" 한 줄 | 4.6 (루프 우선), 1 | diagnosing-bugs(외부)는 과잉 트리거·무거움. 내장 없음 | **게이트 통과** (G2 +26%/+20%, 회귀 0) |
 | 4 | `flaky-check` | skill + script | 명령을 N회 반복 실행해 실패율·실패 시그니처·시간을 수십 줄로 보고 (노이즈 바닥 측정기) | 1, 2 | 없음 | **게이트 통과 (비용형)** (2차: 회귀 0, 품질 동률, 시간 −76%/−60%·출력 토큰 −51%/−23%. 10-23 G2 비용형 신설로 판정. description v3는 새 held-out 13문항에서 13/13·13/13, 경계 문항 0) |
 | 5 | 관찰 로그 Stop 훅 | plugin (hook) | 세션 종료 시 반복 오류를 관찰 로그에 기록, 2~3회 시 승격 후보 제안 | 4 | 없음 | 보류: §4.5 "해로움 판정자" 미정, 훅은 반복 위반 관찰 후(§3.2) |
@@ -23,7 +23,7 @@
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
-| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **보류 (G1 haiku만 미발동)** (10-23 5회: G2 품질형 통과 haiku +12.6%/opus +13.3%/sonnet +23.0%·회귀 0, G3 통과. G1은 description v3로 opus·sonnet held-out 14/14 통과, haiku 11/14 — 검증을 언급 안 한 평범한 변경 요청에 라우터가 NONE. 실제 수행 중 호출은 haiku 11/15·opus 15/15로 G1 프록시와 갈림. 20번 ci-preflight 흡수(`scripts/preflight.py`). `study/gate-eval-round-2.md`) |
+| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **폐기 (G1 haiku만 미발동)** (`deprecated/`, 10-23 §6.4) (10-23 5회: G2 품질형 통과 haiku +12.6%/opus +13.3%/sonnet +23.0%·회귀 0, G3 통과. G1은 description v3로 opus·sonnet held-out 14/14 통과, haiku 11/14 — 검증을 언급 안 한 평범한 변경 요청에 라우터가 NONE. 실제 수행 중 호출은 haiku 11/15·opus 15/15로 G1 프록시와 갈림. 20번 ci-preflight 흡수(`scripts/preflight.py`). `study/gate-eval-round-2.md`) |
 | 14 | `repro-first` v2 (abstain-or-fix) | 기존 스킬 확장 + scripts/repro_check.py | 재현이 올바른 이유로 실패하는지 확인, 재현 불가면 변경 없이 보고. fixture에 진짜 버그/이미 수정/부분 수정 3군 | 1, 4.6 | 없음 | **보류 (기준선이 이미 중단함)** (10-23 5회, fixture 3군 9개: without/v1/v2 모두 정답 중단 15/15·잘못된 중단 0·해결 15/15. v2−v1 Δ는 노이즈 안(+1.3/−3.0pp), v2 opus는 without 대비 동률로 G2 실패. v1 유지, v2 본문·repro_check.py는 evals/에 보관. 모듈 7개짜리 ledger 세트(옛 API·무관한 실패·틀린 신고·특수 처리·증상 변화·깊은 버그 6개)에서도 세 조건 모두 결과 assertion 60/60으로 동일 → 현 모델엔 빈칸 없음. `study/gate-eval-round-2.md`) |
 | 15 | `plan-first` | skill | 첫 Edit 전 ≤8단계 계획 | 1 | **Claude Code plan mode와 중복 가능성 — §3.1 확인 전엔 착수 금지** | 보류: 소형 모델만 검증(+5.4pp), opus 소멸 위험 |
 | 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 보류: 23번 impact-map과 같은 것. 13번 verify-before-done의 연관 테스트 선택으로 흡수 |
