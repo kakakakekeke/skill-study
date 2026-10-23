@@ -46,7 +46,9 @@ def parse_configs(spec: str) -> list[tuple[str, set[str]]]:
 
 
 def prepare_project(skill_dir: Path, ev: dict, comps: set[str], name: str, hook_settings: Path | None) -> Path:
-    proj = Path(tempfile.mkdtemp(prefix=f"ge-{slug(name)}-"))
+    # 폴더 이름은 중립으로: 모델은 작업 폴더 경로를 보므로 스킬 이름이 들어가면 호출이 유도된다
+    # (repro-first: ge-repro-first-* 6/6 vs ge-intask-* haiku 0/6·sonnet 1/6, 2026-10-24)
+    proj = Path(tempfile.mkdtemp(prefix="ge-run-"))
     fixture = ev.get("fixture")
     if fixture:
         src = (skill_dir / fixture).resolve()
