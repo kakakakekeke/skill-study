@@ -48,11 +48,27 @@
 - 10개/10개 안팎. should-not은 명백히 무관한 것이 아니라 **근접 사례**로.
 - 60/40 train/test 분할은 skill-creator의 `split_eval_set(seed=42)`를 그대로 쓴다.
 
+## evals/trigger-intask.json (수행 중 G1, 선택)
+
+```json
+{
+  "reason": "요청 문장에 발동 조건이 없다는 근거. 측정 전에 적는다",
+  "items": [
+    {"query": "fixture 저장소에서 실제로 수행할 과제", "should_trigger": true, "fixture": "evals/fixtures/<이름>"}
+  ]
+}
+```
+
+- 있으면 판정은 이것으로 한다(원칙 §2 "G1 측정 시점"). 문항 수·분할·판정 기준은 `trigger.json`과 같다.
+- should-not도 같은 fixture에서 수행하는 근접 과제로(설명, 테스트 작성, 설정 변경, 형제 스킬의 일).
+- run별 턴 수·시간·결과 종류가 `trigger/<model>.json`의 `detail`에 남는다. 발동하면 그 자리에서 끝나므로 발동 run은 턴 수가 작다.
+
 ## 결과 디렉터리
 
 ```
 evals/results/<날짜>/
-├── trigger/<model>.json, summary.json
+├── trigger/<model>.json, summary.json     # 수행 중 G1이 있으면 그것
+├── trigger-router/                          # 수행 중 G1일 때 시작 시점 참고치
 ├── quality/configs.json                      # 조건 이름 → 구성요소 (기준선 = [])
 ├── quality/<eval>/<model>/<조건>/rep-<k>/     # 조건: with_skill, without_skill, 또는 --configs의 이름(hook, both …)
 │   ├── run.json        # 토큰·시간·호출 여부·최종 응답
