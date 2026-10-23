@@ -105,10 +105,14 @@ def main() -> None:
     evals = sorted({k[0] for k in by})
     models = sorted({k[1] for k in by})
 
+    grader_errors = [f"{r['eval_name']}/{r['model_alias']}/{r['config']}/rep{r['rep']}" for r in runs
+                     if any("GRADER ERROR" in str(e.get("evidence", "")) for e in (r.get("grading") or {}).get("expectations", []))]
     lines = [f"# gate-eval 보고서: `{name}`", "",
              f"- 날짜: {date.today().isoformat()}", f"- Claude Code: {claude_version()}",
              f"- 모델(canonical): {sorted({m for r in runs for m in (r.get('models') or [])})}",
              f"- 호출 방식: {'user-invoked (description 상시 미로드)' if user_invoked else 'model-invoked'}", ""]
+    if grader_errors:  # 채점기 형식 오류는 실패로 집계된다. grade.py를 다시 돌리면 이 run만 재채점한다
+        lines += [f"> **경고: 채점기 오류 {len(grader_errors)} run** — 판정 전에 `grade.py`를 다시 실행할 것: " + ", ".join(grader_errors[:6]), ""]
     summary = {"skill": name, "date": date.today().isoformat(), "claude_code": claude_version(), "user_invoked": user_invoked, "g1": {}, "g2": {}, "g3": {}}
 
     # ---- G1

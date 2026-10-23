@@ -1,6 +1,6 @@
 # gate-eval 보고서: `verify-on-stop`
 
-- 날짜: 2026-10-23
+- 날짜: 2026-10-24
 - Claude Code: 2.1.295 (Claude Code)
 - 모델(canonical): ['claude-sonnet-5-5']
 - 호출 방식: model-invoked

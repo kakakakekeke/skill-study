@@ -1,6 +1,6 @@
 # gate-eval 보고서: `flaky-check`
 
-- 날짜: 2026-10-23
+- 날짜: 2026-10-24
 - Claude Code: 2.1.295 (Claude Code)
 - 모델(canonical): ['claude-sonnet-5-5']
 - 호출 방식: model-invoked
@@ -30,10 +30,10 @@
 | eval | with_skill 통과율 (mean±sd) | without_skill 통과율 (mean±sd) | Δ | 노이즈 바닥(without_skill) | 뒤집힘(with_skill) | 이득 | 회귀 | 스킬 미호출 |
 |---|---|---|---|---|---|---|---|---|
 | deterministic-not-flaky | 100%±0% | 100%±0% | 0% | 0% | 0% | 0 | 0 | 0/5 |
-| pytest-two-signatures | 92%±11% | 80%±35% | 12% | 40% | 16% | 0 | 0 | 0/5 |
+| pytest-two-signatures | 92%±11% | 96%±9% | -4% | 8% | 16% | 0 | 0 | 0/5 |
 | shell-step-intermittent | 97%±7% | 100%±0% | -3% | 0% | 7% | 0 | 0 | 0/5 |
 
-- 노이즈 바닥: **13%** = max(관측 13% [뒤집힘 20/150회 비교], 3/N 2%) · 회귀율: 0% (0/15) · 이득 0건 · 순Δ +2.9% · rep 짝 with_skill≥without_skill 13/15
+- 노이즈 바닥: **3%** = max(관측 3% [뒤집힘 4/150회 비교], 3/N 2%) · 회귀율: 0% (0/15) · 이득 0건 · 순Δ -2.4% · rep 짝 with_skill≥without_skill 12/15
 - 비용: 출력 토큰 19% 감소 · 시간 49% 감소 (비용형 기준 30% 이상 감소)
 - 스킬 미호출 run: 0 (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)
 - **sonnet 판정: 통과 (비용형)**

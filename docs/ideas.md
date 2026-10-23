@@ -9,7 +9,7 @@
 | 1 | `gate-eval` | skill (user-invoked 라우터+scripts) | 이 저장소 스킬을 세 게이트 프로토콜(§5)로 측정: 노이즈 바닥, 모델 2종×3회, 이득·회귀 쌍, 토큰, 버전 기록 → 고정 형식 report.md | 3 (일정한 산출물), 전체 게이트의 도구 | skill-creator는 단일 모델·반복 없음·노이즈 바닥 없음, `claude plugin eval`은 형식 비호환 → 빈칸 | **게이트 통과 (비용형)** (10-23 5회: 두 모델 Δ가 노이즈 바닥 안, 출력 토큰 −89%/−81%·시간 −75%/−59%. haiku는 스킬 없으면 노이즈 바닥을 거의 안 넣음(1/5 vs 4/5); `study/gate-eval-round-1.md`) |
 | 2 | `test-digest` | skill + script | 테스트·빌드·CI 로그의 긴 출력을 결정적 스크립트로 실패 요약 수십 줄로 압축 | 2 (토큰), 1 | 없음 | **폐기** (`deprecated/`, 10-23 §6.4) (10-23 5회 재측정: 노이즈 바닥 3%, haiku +5.3% 품질형이나 opus +2.7%는 동률·비용 절감 없음 → G2 실패. 변별 assertion은 "Bash 출력 80줄 이하" 1개뿐. 작은 모델 전용 등 다른 쓸모가 보이면 재검토. G1은 36/36) |
 | 3 | `repro-first` | skill | 버그 수정 전 red가 되는 재현 명령을 먼저 만들고, 수정 후 green 확인, 끝에 "재발을 막을 검사 위치" 한 줄 | 4.6 (루프 우선), 1 | diagnosing-bugs(외부)는 과잉 트리거·무거움. 내장 없음 | **게이트 통과** (G2 +26%/+20%, 회귀 0). 10-23 sonnet: G1 18/18, G2 품질형 +44.4%·회귀 0. 수행 중 진단 재현율 haiku 11%·sonnet 56%(경쟁 스킬 있으면 호출 감소, `study/gate-eval-round-2.md` ⑤). 10-24 1.1.0: 트리거 주입 훅(보완 ③) 추가 — 중립 폴더 증분 G2 haiku +16.7%·sonnet +15.6%, 회귀 0, 수행 중 호출 11%/44%→100% (⑥) |
-| 4 | `flaky-check` | skill + script | 명령을 N회 반복 실행해 실패율·실패 시그니처·시간을 수십 줄로 보고 (노이즈 바닥 측정기) | 1, 2 | 없음 | **게이트 통과 (비용형)** (2차: 회귀 0, 품질 동률, 시간 −76%/−60%·출력 토큰 −51%/−23%. 10-23 G2 비용형 신설로 판정. description v3는 새 held-out 13문항에서 13/13·13/13, 경계 문항 0). 10-23 sonnet: G1 13/13, G2 비용형(시간 −49%)·회귀 0. 수행 중 진단 haiku 80%·sonnet 100% |
+| 4 | `flaky-check` | skill + script | 명령을 N회 반복 실행해 실패율·실패 시그니처·시간을 수십 줄로 보고 (노이즈 바닥 측정기) | 1, 2 | 없음 | **게이트 통과 (비용형)** (2차: 회귀 0, 품질 동률, 시간 −76%/−60%·출력 토큰 −51%/−23%. 10-23 G2 비용형 신설로 판정. description v3는 새 held-out 13문항에서 13/13·13/13, 경계 문항 0). 10-23 sonnet: G1 13/13, G2 비용형(시간 −49%)·회귀 0. 수행 중 진단 haiku 80%·sonnet 100%. 10-24 중립 폴더: 두 모델 비용형 통과(⑦) |
 | 5 | 관찰 로그 Stop 훅 | plugin (hook) | 세션 종료 시 반복 오류를 관찰 로그에 기록, 2~3회 시 승격 후보 제안 | 4 | 없음 | 보류: §4.5 "해로움 판정자" 미정, 훅은 반복 위반 관찰 후(§3.2) |
 | 6 | `ci-triage` | skill | 실패한 GitHub Actions 런의 로그를 가져와 원인 요약 | 1, 2 | `test-digest`가 `gh run view --log-failed` 입력도 처리하면 중복 | 보류: 2에 흡수 가능 여부 확인 후 |
 | 7 | `hook-authoring` | skill | 훅 작성 + 거짓양성률 측정 절차 | 3 | `update-config`, `plugin-authoring`과 겹침 | 보류 |
@@ -36,7 +36,7 @@
 | # | 이름 | 종류 | 한 줄 설명 | 막는 실패(빈도) | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
 | 20 | `ci-preflight` | scripts | 변경 연관 테스트 선택 실행 + 린트/타입체크 JSON 요약 | CI 실패 17%, 체크당 −15% | 없음 | **13번 verify-before-done에 흡수** (행동은 13, 스크립트는 20) |
-| 21 | `test-integrity-check` | skill + scripts/test_diff_audit (+ 옵트인 hook) | 테스트는 스펙: 코드로 못 통과시키면 테스트를 고치지 않고 충돌 보고. AST diff 감사 스크립트 | Validation Retreat, 해킹 54~76%(불가능 과제) | 없음 | **게이트 통과** (10-23: G1 36문항 test 14/14·14/14, G2 품질형 haiku +41%/opus +20% 회귀 0, G3 본문 31줄. 기준선은 충돌형에서 두 모델 5/5 테스트 기대값 변경(공개적으로). 훅은 **보류(오탐)**: Edit|Write 매처는 opus의 `sed -i`에 안 걸리고, Bash까지 막으면 정당한 테스트 갱신 과제가 0/5 완료. `study/gate-eval-round-2.md` ③). 10-23 sonnet: G1 14/14, G2 품질형 +16.0%·회귀 0. 수행 중 진단 haiku 90%·sonnet 100% |
+| 21 | `test-integrity-check` | skill + scripts/test_diff_audit (+ 옵트인 hook) | 테스트는 스펙: 코드로 못 통과시키면 테스트를 고치지 않고 충돌 보고. AST diff 감사 스크립트 | Validation Retreat, 해킹 54~76%(불가능 과제) | 없음 | **게이트 통과** (10-23: G1 36문항 test 14/14·14/14, G2 품질형 haiku +41%/opus +20% 회귀 0, G3 본문 31줄. 기준선은 충돌형에서 두 모델 5/5 테스트 기대값 변경(공개적으로). 훅은 **보류(오탐)**: Edit|Write 매처는 opus의 `sed -i`에 안 걸리고, Bash까지 막으면 정당한 테스트 갱신 과제가 0/5 완료. `study/gate-eval-round-2.md` ③). 10-23 sonnet: G1 14/14, G2 품질형 +16.0%·회귀 0. 수행 중 진단 haiku 90%·sonnet 100%. 10-24 중립 폴더: haiku 품질형 통과, **sonnet G2 실패(+13.0% < 바닥 19%, 기준선 변동)** — 처리 미결(⑦) |
 | 22 | `scope-guard` | skill + scripts | 이슈 경로·심볼 vs diff 파일 집합, LOC 예산 | 크기 δ0.17, 부작용 22.3% | simplify와 다름 | 4순위 (오탐 측정 설계 필요) |
 | 23 | `impact-map` | scripts | 변경 심볼 참조처 열거 JSON | 부작용 22.3% | 없음 | 보류: 13번의 연관 테스트 선택에 흡수. 16번 regression-guard와 통합 |
 | 24 | `dep-add-gate` | scripts | 매니페스트 diff 시 audit·라이선스·크기 | 의존성 리버트 12.5% | security-review 부분 | 아이디어 |
@@ -49,7 +49,7 @@
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
-| 29 | `verify-on-stop` | plugin (Stop hook + scripts/preflight.py) | 이번 요청에서 소스를 고쳤는데 그 뒤로 preflight가 안 돌았으면 끝내기 전에 훅이 직접 돌림. 실패면 한 번만 막고, 통과면 systemMessage로 결과를 사용자에게 보임 | 1, 3 | 없음 | **게이트 통과 → 배포** (10-23 5회, 7 fixture: 이득 3·오탐 4. 두 모델 품질형 +16.7%, 회귀 0/23, 노이즈 바닥 1%. typecheck-only mypy clean 0/10→10/10. 오탐 fixture는 모순 테스트·TDD red에서 20/20 막았지만 결과 회귀 0, 문서만·무관한 기존 실패에서는 0/20 막음. 비용 출력 +36%/+25%, 시간 +36%/+37%. 13번 verify-before-done의 후속. `study/gate-eval-round-2.md` ④). 10-23 sonnet: G2 품질형 +14.3%(바닥 13%)·회귀 0, 이득은 주로 보고 |
+| 29 | `verify-on-stop` | plugin (Stop hook + scripts/preflight.py) | 이번 요청에서 소스를 고쳤는데 그 뒤로 preflight가 안 돌았으면 끝내기 전에 훅이 직접 돌림. 실패면 한 번만 막고, 통과면 systemMessage로 결과를 사용자에게 보임 | 1, 3 | 없음 | **게이트 통과 → 배포** (10-23 5회, 7 fixture: 이득 3·오탐 4. 두 모델 품질형 +16.7%, 회귀 0/23, 노이즈 바닥 1%. typecheck-only mypy clean 0/10→10/10. 오탐 fixture는 모순 테스트·TDD red에서 20/20 막았지만 결과 회귀 0, 문서만·무관한 기존 실패에서는 0/20 막음. 비용 출력 +36%/+25%, 시간 +36%/+37%. 13번 verify-before-done의 후속. `study/gate-eval-round-2.md` ④). 10-23 sonnet: G2 품질형 +14.3%(바닥 13%)·회귀 0, 이득은 주로 보고. 10-24 중립 폴더: 두 모델 품질형 통과(⑦) |
 
 ### 통합 우선순위 (리서치 1+2, 2026-10-23)
 
