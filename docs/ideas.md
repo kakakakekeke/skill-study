@@ -26,9 +26,27 @@
 | 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **선정 후보 1** (예측 높음: 외부 근거 생성형. SWT-Bench +2.6pp는 미검정·GPT-4 2023 — 우리 eval이 첫 유의성 검정. 1차 출처 검증 완료 10-23) |
 | 14 | `repro-first` v2 (abstain-or-fix) | 기존 스킬 확장 + scripts/repro_check.py | 재현이 올바른 이유로 실패하는지 확인, 재현 불가면 변경 없이 보고. fixture에 진짜 버그/이미 수정/부분 수정 3군 | 1, 4.6 | 없음 | **선정 후보 2 — 근거 가장 강함** (SWE-Doctor Pro +8.9pp 10/10 조합, FixedBench 65→80.5% Sonnet 4.6 p<0.01, 편집 전 재현률 42.5→81.5. 과잉 중단을 같은 eval에서 측정. 1차 출처 검증 완료 10-23) |
 | 15 | `plan-first` | skill | 첫 Edit 전 ≤8단계 계획 | 1 | **Claude Code plan mode와 중복 가능성 — §3.1 확인 전엔 착수 금지** | 보류: 소형 모델만 검증(+5.4pp), opus 소멸 위험 |
-| 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 아이디어 (비용형 통과 가능성 높음, 품질형은 중간. 13번과 합칠 수 있는지 검토) |
+| 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 보류: 23번 impact-map과 같은 것. 13번 verify-before-done의 연관 테스트 선택으로 흡수 |
 | 17 | `runtime-diagnose` | skill | 재현 후 수정 전 디버거·로그로 런타임 관찰 | 1 | 없음 | 보류 (원문의 Stage 2는 PDB 디버거 에이전트 — SKILL.md로 재현 어려움. FF 케이스에만 효과. 라운드 3 이후) |
 | 18 | `tdd-enforce` | skill | 실패 테스트 없이 프로덕션 코드 금지 | 1 | 없음 | **기각 후보** (TDAD 동률 + 회귀 +42%, superpowers 저준수. 새 기능 과제 한정 재검토 여지) |
 | 19 | `self-review`, CoT 가이드라인 | — | — | — | code-review 중복 / §3.5 | **기각** (self-repair ≤1.08배, CoT는 추론 모델에서 ±3pp·지연 증가) |
+
+## 2026-10-23 딥 리서치 2 후보 — 실패 빈도·결정적 도구 (근거: `study/deep-research-failure-driven.md`)
+
+| # | 이름 | 종류 | 한 줄 설명 | 막는 실패(빈도) | 내장 중복 | 상태 |
+|---|---|---|---|---|---|---|
+| 20 | `ci-preflight` | scripts | 변경 연관 테스트 선택 실행 + 린트/타입체크 JSON 요약 | CI 실패 17%, 체크당 −15% | 없음 | **13번 verify-before-done에 흡수** (행동은 13, 스크립트는 20) |
+| 21 | `test-integrity-check` | skill + scripts/test_diff_audit | 테스트 diff AST 비교로 assert 제거·skip·expected 변경 열거 | Validation Retreat, 해킹 54~76%(불가능 과제) | 없음 | **선정 후보 3** (기성 도구 없는 빈칸. 상충 fixture 필수. 훅 대안과 비교 측정) |
+| 22 | `scope-guard` | skill + scripts | 이슈 경로·심볼 vs diff 파일 집합, LOC 예산 | 크기 δ0.17, 부작용 22.3% | simplify와 다름 | 4순위 (오탐 측정 설계 필요) |
+| 23 | `impact-map` | scripts | 변경 심볼 참조처 열거 JSON | 부작용 22.3% | 없음 | 보류: 13번의 연관 테스트 선택에 흡수. 16번 regression-guard와 통합 |
+| 24 | `dep-add-gate` | scripts | 매니페스트 diff 시 audit·라이선스·크기 | 의존성 리버트 12.5% | security-review 부분 | 아이디어 |
+| 25 | `pr-dedupe-check` | scripts | PR 전 gh로 중복 PR 조회 | 중복 23%+ | 없음 | 보류: 로컬 작업 중심인 우리 워크플로에 효용 낮음 |
+| 26 | `loop-breaker` | skill + scripts | 실패 시그니처 반복 감지 시 전환 요구 | 비진전 반복 | abstain-or-fix 인접 | 아이디어 |
+| 27 | `coverage-delta` / `dead-code-sweep` / `migration-reversibility` | scripts | 비용형 후보 풀 | 낮음 | simplify 부분 | 아이디어 |
+| 28 | secret-scan, force-push 차단 | **hook** | 스킬 아님 | — | security-review | §3.2에 따라 반복 위반 관찰 후 훅으로 |
+
+### 통합 우선순위 (리서치 1+2, 2026-10-23)
+
+라운드 2 착수 순서: **① verify-before-done(13⊕20) → ② repro-first v2(14) → ③ test-integrity-check(21)**. 근거: ①은 효과 근거(R1)와 최다 빈도 실패(R2)가 만나는 유일한 지점, ②는 효과 근거 최강·기준선 보유, ③은 결정적 도구의 진짜 빈칸. 상세는 `study/deep-research-failure-driven.md` 6~7절. 채택 전 §6.1 1차 출처 검증: 2601.15195, 2510.20270, 2509.13941.
 
 선정 기준: (a) 내장과 안 겹치는 빈칸, (b) 결정적 부분을 scripts/로 빼서 경량 가능, (c) G2를 **측정 가능한 assertion**으로 조작화할 수 있음, (d) 목적 1~4 중 하나에 직접 기여. 1번은 나머지 셋의 측정 도구이므로 먼저 만든다.
