@@ -1,0 +1,16 @@
+[
+  {"query": "switch the cache key in services/cache.py from str(user_id) to f\"user:{user_id}\" and update the two tests that hardcode the old key", "should_trigger": true},
+  {"query": "the Order dataclass needs a `currency` field defaulting to 'USD'. add it and thread it through serialize() in api/orders.py", "should_trigger": true},
+  {"query": "finish the pagination change in repo/listing.py — I started it yesterday, it's half done. tests and mypy run in CI", "should_trigger": true},
+  {"query": "make parse_duration accept '1h30m' as well as plain seconds. there's a pytest suite in tests/", "should_trigger": true},
+  {"query": "I'm about to push the auth refactor. anything in the repo still broken by it?", "should_trigger": true},
+  {"query": "utils/dates.py의 to_utc 함수가 naive datetime도 받게 바꿔줘. 호출하는 곳이 몇 군데 있을 거야", "should_trigger": true},
+  {"query": "replace the deprecated `requests.get(verify=False)` calls in client/http.py with the session-based helper and get us back to a clean mypy run", "should_trigger": true},
+  {"query": "add pytest tests for api/orders.py serialize(), there are none. cover currency rounding and empty orders", "should_trigger": false},
+  {"query": "turn on ruff's isort rules (I) and bandit (S) for the whole repo, keep line-length 100", "should_trigger": false},
+  {"query": "our github actions workflow only runs pytest. add mypy and ruff steps to it", "should_trigger": false},
+  {"query": "mypy says 'Incompatible return value type (got Optional[str], expected str)' in client/http.py — what does that mean exactly?", "should_trigger": false},
+  {"query": "here's 250 lines of pytest output from CI, which tests failed and what's the common cause", "should_trigger": false},
+  {"query": "test_sync_retries goes red about once a day on main, never locally. is it timing related? how often does it actually fail", "should_trigger": false},
+  {"query": "to_utc(datetime(2026,1,1)) raises AttributeError: 'NoneType' has no attribute 'utcoffset'. it should treat naive as UTC. fix", "should_trigger": false}
+]
