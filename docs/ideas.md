@@ -23,11 +23,11 @@
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
-| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **선정 후보 1** (예측 높음: SWT-Bench +2.6pp p<0.1%, 외부 근거 생성형. 1차 출처 검증 필요) |
-| 14 | `repro-first` v2 (abstain-or-fix) | 기존 스킬 확장 + scripts/repro_check.py | 재현이 올바른 이유로 실패하는지 확인, 재현 불가면 변경 없이 보고. fixture에 진짜 버그/이미 수정/부분 수정 3군 | 1, 4.6 | 없음 | **선정 후보 2** (예측 높음: SWE-Doctor Pro +8.9pp, FixedBench 65→80.5% Sonnet 4.6. 과잉 중단을 같은 eval에서 측정) |
+| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **선정 후보 1** (예측 높음: 외부 근거 생성형. SWT-Bench +2.6pp는 미검정·GPT-4 2023 — 우리 eval이 첫 유의성 검정. 1차 출처 검증 완료 10-23) |
+| 14 | `repro-first` v2 (abstain-or-fix) | 기존 스킬 확장 + scripts/repro_check.py | 재현이 올바른 이유로 실패하는지 확인, 재현 불가면 변경 없이 보고. fixture에 진짜 버그/이미 수정/부분 수정 3군 | 1, 4.6 | 없음 | **선정 후보 2 — 근거 가장 강함** (SWE-Doctor Pro +8.9pp 10/10 조합, FixedBench 65→80.5% Sonnet 4.6 p<0.01, 편집 전 재현률 42.5→81.5. 과잉 중단을 같은 eval에서 측정. 1차 출처 검증 완료 10-23) |
 | 15 | `plan-first` | skill | 첫 Edit 전 ≤8단계 계획 | 1 | **Claude Code plan mode와 중복 가능성 — §3.1 확인 전엔 착수 금지** | 보류: 소형 모델만 검증(+5.4pp), opus 소멸 위험 |
 | 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 아이디어 (비용형 통과 가능성 높음, 품질형은 중간. 13번과 합칠 수 있는지 검토) |
-| 17 | `runtime-diagnose` | skill | 재현 후 수정 전 디버거·로그로 런타임 관찰 | 1 | 없음 | 아이디어 (SWE-Doctor 어블레이션 F→F +12.5pp, 비용 1.9배. 14번 결과 보고 결정) |
+| 17 | `runtime-diagnose` | skill | 재현 후 수정 전 디버거·로그로 런타임 관찰 | 1 | 없음 | 보류 (원문의 Stage 2는 PDB 디버거 에이전트 — SKILL.md로 재현 어려움. FF 케이스에만 효과. 라운드 3 이후) |
 | 18 | `tdd-enforce` | skill | 실패 테스트 없이 프로덕션 코드 금지 | 1 | 없음 | **기각 후보** (TDAD 동률 + 회귀 +42%, superpowers 저준수. 새 기능 과제 한정 재검토 여지) |
 | 19 | `self-review`, CoT 가이드라인 | — | — | — | code-review 중복 / §3.5 | **기각** (self-repair ≤1.08배, CoT는 추론 모델에서 ±3pp·지연 증가) |
 
