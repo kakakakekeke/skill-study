@@ -102,7 +102,7 @@ code-review, simplify, security-review, skill-creator 등 내장과 역할이 �
 ## 5. eval 실행 규칙 [확정]
 
 - 형식: skill-creator의 `evals/evals.json`. `claude plugin eval`과 비호환이므로 하나만 쓴다.
-- 모델: **haiku·sonnet** 두 종으로 각각 판정한다 [확정, 2026-10-23 사용자 결정]. 그 전 측정(라운드 1·2)은 haiku·opus였고 그 판정은 유지한다. grader도 sonnet이므로 sonnet run은 같은 모델이 채점한다. 판정은 결정적 검사(`checks`) 위주로 짜서 grader 편향의 영향을 줄인다.
+- 모델: **haiku·sonnet** 두 종으로 각각 판정한다 [확정, 2026-10-23 사용자 결정]. 그 전 측정(라운드 1·2)은 haiku·opus였고 그 판정은 유지한다. grader는 **opus**로, 측정 대상 모델과 겹치지 않게 한다(자기 채점 방지; 그 전 측정의 grader는 sonnet). 판정은 결정적 검사(`checks`) 위주로 짜고, LLM grader는 결정적으로 못 보는 것에만 쓴다.
 - 반복: 케이스당 **3회 이상**. 단일 실행 비교 금지. mean±stddev.
 - 노이즈 바닥: 기준선 vs 기준선 반복으로 뒤집힘률을 먼저 잰다 (G2 전제). 값은 max(관측, 3/N). 3회 반복(쌍 3개)에서 0%는 과소추정이었다(test-digest: 3회 0% → 5회 3%). Δ가 3/N 근처면 5회로 늘린다.
 - 트리거: should/should-not 약 20개, 60/40 train/test. 과적합 방지. 시작 시점과 수행 중 중 어느 쪽으로 잴지는 §2 "G1 측정 시점"을 따른다.

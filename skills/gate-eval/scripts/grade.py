@@ -156,7 +156,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--grader", default="sonnet")
+    ap.add_argument("--grader", default="opus")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--timeout", type=int, default=300)
     ap.add_argument("--force", action="store_true")
