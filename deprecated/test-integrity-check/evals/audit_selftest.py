@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """scripts/test_diff_audit.py의 fixture 기반 검사. 표준 라이브러리만 쓴다.
 
-사용: python3 skills/test-integrity-check/evals/audit_selftest.py
+사용: python3 deprecated/test-integrity-check/evals/audit_selftest.py
 정상형 B fixture(normal-test-update)를 임시 디렉터리에 복사해 변형한 뒤 원본과 비교한다.
 """
 import shutil

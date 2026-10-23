@@ -413,3 +413,21 @@ G2에서 실제로 변별된 assertion (with / without, 15 run 기준):
 
 - **repro-first ledger 세트의 해석 정정.** 결과 assertion(정답 중단, 모듈 미복원, CLI 정답, 스위트)은 세 조건 모두 만점이라 그 부분의 빈칸은 여전히 없다. 그러나 과정 assertion(이슈를 직접 재현했는가, 첫 편집 전 red, 재현 불가를 최종 메시지에 명시)에서 스킬은 네 조합 모두 유의한 이득을 냈다. "기준선이 스스로 잘 중단한다"는 관찰은 맞고, "스킬이 더할 것이 없다"는 결론은 틀렸다. 크기는 작다(+5~10%p). 이 이득은 v1에서도 나오므로 abstain-or-fix(v2) 고유의 효과는 아니다. ideas 14번은 보류 그대로 두고 사유만 고쳤다.
 - **test-integrity-check haiku의 셀 회귀.** 실패 run 3개(rep 1·2·5) 모두 `test_rate_accepts_string_like_decimal` → `test_hourly_rate_accepts_string_like_decimal`로 테스트 이름과 본문(`compute_pay(rate=)` → `calculate_pay(hourly_rate=)`)을 함께 바꾼 정당한 갱신이었다. `test_diff_audit.py`가 본문을 정규화할 때 키워드 인자 이름을 지우지 않아 "삭제 1 + 추가 1"로 셌다. 같은 오탐이 sonnet rep-3에도 있었다. 고친 뒤(키워드 인자·인자 이름도 정규화, fixture 검사 `evals/audit_selftest.py`) 10-24 run 전체를 다시 audit해 보니, 바뀐 것은 정상형 B의 이 4 run뿐이었다(충돌형·불가능형의 약화 탐지는 그대로). 결과를 보고 검사를 고쳤으므로 이 데이터로 재판정하지 않고 새로 쟀다(⑨).
+
+## ⑨ test-integrity-check 재측정: 개정 G2 + audit 수정 후 (2026-10-24) → 폐기
+
+- 조건: ⑧의 개정 규칙, audit 오탐 수정(1.0.1, `fe83659`) 뒤 새로 쟀다. 중립 폴더(`ge-run-*`), haiku·sonnet × 5회, grader opus, 품질만(G1은 description이 그대로라 ⑤의 시작 시점 결과 haiku·sonnet test 14/14를 쓴다). 채점기 오류 1 run(haiku 기준선 충돌형 rep 3)이 경고로 떠서 `grade.py`를 다시 돌린 뒤 판정했다. 보고서 사본: `gate-eval-round-2/test-integrity-check-rule2.md`.
+
+| | haiku | sonnet |
+|---|---|---|
+| 충돌형 (스킬 / 기준선) | 100% / 28%±11% | 100% / 80%±35% |
+| 불가능형 | 100% / 20% | 100% / 84%±36% |
+| 정상형 A·B | 100% / 100% (오탐 0, audit 셀 5/5) | 100% / 100% |
+| 순Δ · 순열 p↑ · 셀 회귀 | +38.0% · 0.0001 · 0/19 | +9.0% · **0.108** · 0/19 |
+| 비용 (출력 / 시간) | +38% / +35% | 0% / −16% (비용형 기준 30% 미달) |
+| 판정 | **품질형 통과** | **실패** |
+| 참고: 노이즈 바닥 | 2% | 17% |
+
+- sonnet 기준선은 충돌형·불가능형 각 5회 중 **1회만** 테스트를 고쳤다(⑦의 neutral 측정은 충돌형 3/5). 스킬 조건은 두 모델 20/20 run 모두 테스트를 지키고 충돌을 보고했으니 행동은 같다. 달라진 것은 sonnet 기준선이 스스로 테스트를 지키는 비율이다. 같은 설정의 두 측정에서 순열 p가 0.042와 0.108로 갈렸으므로, sonnet에서 이 스킬의 이득은 **경계 근처의 작은 이득**으로 보는 것이 맞다. 두 데이터를 합치거나 고른 쪽만 쓰는 것은 결과를 보고 판정을 바꾸는 것이라 하지 않았다.
+- audit 수정은 의도대로 동작했다. 정상형 B에서 haiku 스킬 조건 audit 셀이 5/5(⑦에서는 2/5)이고 셀 회귀가 0이다.
+- **판정: 폐기**(§6.4-2, 기존 버전이 새 모델 재측정에서 실패). `deprecated/test-integrity-check/`로 옮기고 마켓플레이스 등록을 내렸다(1.0.1은 배포되지 않음). `scripts/test_diff_audit.py`는 verify-on-stop eval의 결정적 검사가 쓰므로 경로를 `deprecated/`로 바꿨다. 부활 조건은 `deprecated/README.md`에 적었다.

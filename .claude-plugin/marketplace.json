@@ -30,17 +30,6 @@
       "hooks": "./repro-first/hooks/hooks.json"
     },
     {
-      "name": "test-integrity-check",
-      "description": "실패 테스트를 애플리케이션 코드로만 통과시키고, 테스트가 스펙과 충돌하면 테스트를 고치지 않고 근거와 함께 보고한다",
-      "version": "1.0.1",
-      "category": "development",
-      "source": "./skills",
-      "strict": false,
-      "skills": [
-        "./test-integrity-check"
-      ]
-    },
-    {
       "name": "verify-on-stop",
       "description": "Stop 훅: 코드를 고친 뒤 CI 검사(연관 테스트·ruff·mypy)가 돌지 않았으면 끝내기 전에 직접 돌리고, 실패면 한 번만 되돌려 보내고 통과면 결과를 사용자에게 보여 준다",
       "version": "1.0.0",

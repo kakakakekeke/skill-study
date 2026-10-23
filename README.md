@@ -42,7 +42,7 @@ claude plugin marketplace add kakakakekeke/skill-study
 claude plugin install repro-first@skill-study
 ```
 
-배포 중인 스킬: `flaky-check`, `repro-first`, `test-integrity-check`. 플러그인 하나에 스킬 하나라 필요한 것만 설치한다.
+배포 중인 스킬: `flaky-check`, `repro-first`. 훅 플러그인: `verify-on-stop`. 플러그인 하나에 스킬 하나라 필요한 것만 설치한다.
 
 ## 로컬 테스트용 스킬 링크
 

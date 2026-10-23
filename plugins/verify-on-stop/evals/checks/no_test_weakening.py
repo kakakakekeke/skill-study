@@ -7,7 +7,7 @@ from pathlib import Path
 fixture = sys.argv[1]
 skill = Path(os.environ["GATE_EVAL_SKILL"])
 rd = Path(os.environ.get("RUN_DIR", "."))
-p = subprocess.run([sys.executable, str(Path(os.environ["GATE_EVAL_SKILL"]).parent.parent / "skills" / "test-integrity-check" / "scripts" / "test_diff_audit.py"), str(skill / "evals" / "fixtures" / fixture), str(rd / "outputs"), "--quiet"],
+p = subprocess.run([sys.executable, str(Path(os.environ["GATE_EVAL_SKILL"]).parent.parent / "deprecated" / "test-integrity-check" / "scripts" / "test_diff_audit.py"), str(skill / "evals" / "fixtures" / fixture), str(rd / "outputs"), "--quiet"],
                    capture_output=True, text=True)
 print(p.stdout.strip()[-500:], p.stderr.strip()[-300:])
 sys.exit(0 if p.returncode == 0 else 1)
