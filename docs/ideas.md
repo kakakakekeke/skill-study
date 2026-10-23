@@ -23,7 +23,7 @@
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
-| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **선정 후보 1** (예측 높음: 외부 근거 생성형. SWT-Bench +2.6pp는 미검정·GPT-4 2023 — 우리 eval이 첫 유의성 검정. 1차 출처 검증 완료 10-23) |
+| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **보류 (G1 haiku 미발동)** (10-23 5회: G2 품질형 통과 +12.6%/+13.3%·회귀 0, G3 통과. G1은 description v3까지 opus 통과·haiku held-out 11/14 — 검증을 언급 안 한 평범한 변경 요청에 라우터가 NONE. 실제 수행 중 호출은 haiku 11/15·opus 15/15로 G1 프록시와 갈림. 20번 ci-preflight 흡수(`scripts/preflight.py`). `study/gate-eval-round-2.md`) |
 | 14 | `repro-first` v2 (abstain-or-fix) | 기존 스킬 확장 + scripts/repro_check.py | 재현이 올바른 이유로 실패하는지 확인, 재현 불가면 변경 없이 보고. fixture에 진짜 버그/이미 수정/부분 수정 3군 | 1, 4.6 | 없음 | **선정 후보 2 — 근거 가장 강함** (SWE-Doctor Pro +8.9pp 10/10 조합, FixedBench 65→80.5% Sonnet 4.6 p<0.01, 편집 전 재현률 42.5→81.5. 과잉 중단을 같은 eval에서 측정. 1차 출처 검증 완료 10-23) |
 | 15 | `plan-first` | skill | 첫 Edit 전 ≤8단계 계획 | 1 | **Claude Code plan mode와 중복 가능성 — §3.1 확인 전엔 착수 금지** | 보류: 소형 모델만 검증(+5.4pp), opus 소멸 위험 |
 | 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 보류: 23번 impact-map과 같은 것. 13번 verify-before-done의 연관 테스트 선택으로 흡수 |

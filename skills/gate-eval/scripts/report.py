@@ -73,6 +73,12 @@ def sd(xs):
     return st.stdev(xs) if len(xs) > 1 else 0.0
 
 
+def cut_txt(x):
+    if x is None:
+        return "—"
+    return f"{abs(x)*100:.0f}% {'감소' if x >= 0 else '증가'}"
+
+
 def fmt(x, pct=False, d=2):
     if x is None:
         return "—"
@@ -220,7 +226,7 @@ def main() -> None:
                      "with_not_invoked": len(osmosis)}
             kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형)", None: "실패"}[kind]
             lines += ["", f"- 노이즈 바닥: **{fmt(floor, True)}** = max(관측 {fmt(noise, True)} [뒤집힘 {cmp_flips}/{cmp_total}회 비교], 3/N {fmt(noise_ub, True) if noise_ub is not None else '-'}) · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 with≥without {pair_wins}/{pair_total}",
-                      f"- 비용: 출력 토큰 {fmt(c.get('output_cut'), True) if c.get('output_cut') is not None else '-'} 감소 · 시간 {fmt(c.get('duration_cut'), True) if c.get('duration_cut') is not None else '-'} 감소 (비용형 기준 {int(COST_CUT*100)}% 이상)",
+                      f"- 비용: 출력 토큰 {cut_txt(c.get('output_cut'))} · 시간 {cut_txt(c.get('duration_cut'))} (비용형 기준 {int(COST_CUT*100)}% 이상 감소)",
                       f"- with 설정에서 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)",
                       f"- **{m} 판정: {kind_txt}**", ""]
             if osmosis:
