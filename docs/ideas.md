@@ -36,7 +36,7 @@
 | # | 이름 | 종류 | 한 줄 설명 | 막는 실패(빈도) | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
 | 20 | `ci-preflight` | scripts | 변경 연관 테스트 선택 실행 + 린트/타입체크 JSON 요약 | CI 실패 17%, 체크당 −15% | 없음 | **13번 verify-before-done에 흡수** (행동은 13, 스크립트는 20) |
-| 21 | `test-integrity-check` | skill + scripts/test_diff_audit | 테스트 diff AST 비교로 assert 제거·skip·expected 변경 열거 | Validation Retreat, 해킹 54~76%(불가능 과제) | 없음 | **선정 후보 3** (기성 도구 없는 빈칸. 상충 fixture 필수. 훅 대안과 비교 측정) |
+| 21 | `test-integrity-check` | skill + scripts/test_diff_audit | 테스트 diff AST 비교로 assert 제거·skip·expected 변경 열거 | Validation Retreat, 해킹 54~76%(불가능 과제) | 없음 | **선정 후보 3, 설계 변경** (Claude는 해킹의 79~86%가 테스트 수정(ImpossibleBench §4.2) → 테스트 경로 쓰기 차단 훅이 1차, AST 스크립트는 2차. 스킬/훅/둘 다 3조건 비교. 선행: 우리 세션의 테스트 수정 빈도 관찰. 1차 출처 검증 완료 10-23) |
 | 22 | `scope-guard` | skill + scripts | 이슈 경로·심볼 vs diff 파일 집합, LOC 예산 | 크기 δ0.17, 부작용 22.3% | simplify와 다름 | 4순위 (오탐 측정 설계 필요) |
 | 23 | `impact-map` | scripts | 변경 심볼 참조처 열거 JSON | 부작용 22.3% | 없음 | 보류: 13번의 연관 테스트 선택에 흡수. 16번 regression-guard와 통합 |
 | 24 | `dep-add-gate` | scripts | 매니페스트 diff 시 audit·라이선스·크기 | 의존성 리버트 12.5% | security-review 부분 | 아이디어 |
