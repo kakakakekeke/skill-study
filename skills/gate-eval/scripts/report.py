@@ -5,6 +5,7 @@ G2 판정 규칙(조작적 정의, principles §2):
   노이즈 바닥 = without 반복들 사이에서 같은 assertion의 통과/실패가 뒤집히는 비율(쌍 단위, eval×model 평균).
   회귀 = without 다수결 통과 → with 다수결 실패인 assertion. 회귀율 = 회귀 수 / assertion 수.
   이득 = 반대 방향.
+  노이즈 바닥 = max(관측 뒤집힘률, 3/N). N = without 반복 쌍 비교 횟수. 0건 관측은 과소추정이므로 rule-of-three 상한을 하한으로.
   필수 = 모델마다 회귀율 ≤ 노이즈 바닥.
   품질형 통과 = 필수 AND 순Δ(평균 통과율 with − without) > 노이즈 바닥 AND rep 짝 비교에서 with ≥ without 과반.
   비용형 통과 = 필수 AND |순Δ| ≤ 노이즈 바닥(동률) AND 출력 토큰 또는 소요 시간이 30% 이상 감소(COST_CUT).
@@ -43,18 +44,22 @@ def majority(vals: list[bool]) -> bool:
     return sum(vals) * 2 > len(vals)
 
 
-def flip_rate(reps: list[dict]) -> float | None:
-    """같은 설정의 반복들 사이에서 assertion별 pass가 뒤집히는 쌍의 비율."""
+def flip_counts(reps: list[dict]) -> tuple[int, int]:
+    """같은 설정의 반복들 사이에서 assertion별 pass가 뒤집힌 쌍 수와 비교한 쌍 수."""
     if len(reps) < 2:
-        return None
+        return 0, 0
     n_items = len(reps[0]["grading"]["expectations"])
-    pairs = list(itertools.combinations(reps, 2))
     flips = total = 0
-    for a, b in pairs:
+    for a, b in itertools.combinations(reps, 2):
         for i in range(n_items):
             total += 1
             if a["grading"]["expectations"][i]["passed"] != b["grading"]["expectations"][i]["passed"]:
                 flips += 1
+    return flips, total
+
+
+def flip_rate(reps: list[dict]) -> float | None:
+    flips, total = flip_counts(reps)
     return flips / total if total else None
 
 
@@ -158,6 +163,7 @@ def main() -> None:
             lines += [f"### 모델 {m}", "", "| eval | with 통과율 (mean±sd) | without 통과율 (mean±sd) | Δ | 노이즈 바닥(without) | 뒤집힘(with) | 이득 | 회귀 | with 미호출 |", "|---|---|---|---|---|---|---|---|---|"]
             nf_all, reg_all, gain_all, n_items_all, pair_wins, pair_total, deltas = [], 0, 0, 0, 0, 0, []
             osmosis = []
+            cmp_total = cmp_flips = 0  # without 반복 쌍 비교 횟수·뒤집힘 수 (노이즈 바닥의 표본 크기)
             for e in evals:
                 w, wo = by.get((e, m, "with_skill"), []), by.get((e, m, "without_skill"), [])
                 if not w or not wo:
@@ -166,6 +172,8 @@ def main() -> None:
                 pwo = [r["grading"]["summary"]["pass_rate"] for r in wo]
                 nf = flip_rate(wo)
                 nfw = flip_rate(w)
+                f_, t_ = flip_counts(wo)
+                cmp_flips += f_; cmp_total += t_
                 n_items = len(w[0]["grading"]["expectations"])
                 gains, regs = [], []
                 for i in range(n_items):
@@ -189,26 +197,29 @@ def main() -> None:
                 for r_ in regs:
                     lines.append(f"|  | ↓ 회귀: {r_[:90]} | | | | | | | |")
             noise = mean(nf_all) or 0.0
+            noise_ub = 3 / cmp_total if cmp_total else None  # 뒤집힘 0건일 때의 95% 상한(rule of three)
+            floor = max(noise, noise_ub or 0.0)  # principles §2: 노이즈 바닥 = max(관측, 3/N)
             reg_rate = reg_all / n_items_all if n_items_all else 0.0
             net = mean(deltas) or 0.0
             consistent = pair_total and pair_wins * 2 > pair_total
-            reg_ok = reg_rate <= noise + 1e-9
+            reg_ok = reg_rate <= floor + 1e-9
             c = cost.get(m, {})
             cuts = [x for x in (c.get("output_cut"), c.get("duration_cut")) if x is not None]
             best_cut = max(cuts) if cuts else 0.0
-            if reg_ok and net > noise + 1e-9 and consistent:
+            if reg_ok and net > floor + 1e-9 and consistent:
                 kind = "quality"
-            elif reg_ok and abs(net) <= noise + 1e-9 and best_cut >= COST_CUT:
+            elif reg_ok and abs(net) <= floor + 1e-9 and best_cut >= COST_CUT:
                 kind = "cost"
             else:
                 kind = None
             ok = kind is not None
-            g2[m] = {"noise_floor": noise, "regression_rate": reg_rate, "gains": gain_all, "regressions": reg_all, "net_delta": net,
+            g2[m] = {"noise_floor_observed": noise, "noise_comparisons": cmp_total, "noise_flips": cmp_flips, "noise_floor_rule_of_three": noise_ub, "noise_floor": floor,
+                     "regression_rate": reg_rate, "gains": gain_all, "regressions": reg_all, "net_delta": net,
                      "pair_wins": f"{pair_wins}/{pair_total}", "verdict": "pass" if ok else "fail", "kind": kind,
                      "output_cut": c.get("output_cut"), "duration_cut": c.get("duration_cut"),
                      "with_not_invoked": len(osmosis)}
             kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형)", None: "실패"}[kind]
-            lines += ["", f"- 노이즈 바닥(without 뒤집힘률 평균): {fmt(noise, True)} · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 with≥without {pair_wins}/{pair_total}",
+            lines += ["", f"- 노이즈 바닥: **{fmt(floor, True)}** = max(관측 {fmt(noise, True)} [뒤집힘 {cmp_flips}/{cmp_total}회 비교], 3/N {fmt(noise_ub, True) if noise_ub is not None else '-'}) · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 with≥without {pair_wins}/{pair_total}",
                       f"- 비용: 출력 토큰 {fmt(c.get('output_cut'), True) if c.get('output_cut') is not None else '-'} 감소 · 시간 {fmt(c.get('duration_cut'), True) if c.get('duration_cut') is not None else '-'} 감소 (비용형 기준 {int(COST_CUT*100)}% 이상)",
                       f"- with 설정에서 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)",
                       f"- **{m} 판정: {kind_txt}**", ""]
