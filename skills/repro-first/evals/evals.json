@@ -1,0 +1,56 @@
+{
+  "skill_name": "repro-first",
+  "evals": [
+    {
+      "id": 1,
+      "name": "slugify-trailing-sep",
+      "prompt": "bug report from the content team: slugify('Hello World!') returns 'hello-world-' with a trailing dash, it should be 'hello-world'. same thing with 'Title: Part 2?' -> 'title-part-2-'. can you fix this?",
+      "fixture": "evals/fixtures/slug",
+      "expected_output": "A failing test/command is run before editing slugger/slug.py; slugify strips trailing separator; existing tests pass; a regression test is added; final message states repro command, cause, prevention.",
+      "expectations": [
+        "A new test that reproduces the trailing-separator bug was added to tests/ and it passes after the fix",
+        "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
+        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+      ],
+      "checks": [
+        {"text": "A failing command ran before the first edit to slugger/", "type": "script", "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'slugger/'"},
+        {"text": "slugify no longer returns trailing separator (behavioral check on outputs)", "type": "script", "cmd": "cd outputs && python3 -c \"from slugger import slugify as s; assert s('Hello World!')=='hello-world', s('Hello World!'); assert s('Title: Part 2?')=='title-part-2'; assert s('a b', sep='_')=='a_b'; assert s('Crème Brûlée')=='creme-brulee'; print('ok')\""},
+        {"text": "Existing test suite passes in outputs", "type": "script", "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "config-missing-timeout",
+      "prompt": "load_config blows up when the config file doesn't have a timeout key:\n\n  File \"appcfg/loader.py\", line 23, in load_config\n    timeout=int(merged[\"timeout\"]),\nKeyError: 'timeout'\n\nconfig.example.json in the repo is exactly that kind of file. timeout is supposed to default to 30 like the other optional keys. please fix",
+      "fixture": "evals/fixtures/cfg",
+      "expected_output": "Red repro (loading config.example.json or a test without timeout) before editing; timeout defaults to 30; tests pass; regression test added; three-line report.",
+      "expectations": [
+        "A new test covering a config without the timeout key was added to tests/ and passes after the fix",
+        "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
+        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+      ],
+      "checks": [
+        {"text": "A failing command ran before the first edit to appcfg/", "type": "script", "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'appcfg/'"},
+        {"text": "load_config on config.example.json gives timeout 30 (behavioral check)", "type": "script", "cmd": "cd outputs && python3 -c \"from appcfg import load_config as l; c=l('config.example.json'); assert c.timeout==30 and c.retries==3 and c.verbose is False and c.port==8080, c; print('ok')\""},
+        {"text": "Existing test suite passes in outputs", "type": "script", "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "median-even-length",
+      "prompt": "statkit.median gives wrong answers for even-length input. median([1,2,3,4]) returns 3, should be 2.5. fix it pls",
+      "fixture": "evals/fixtures/stats",
+      "expected_output": "Red repro before editing statkit/core.py; median averages the two middle values; tests pass; regression test added; three-line report.",
+      "expectations": [
+        "A new test covering even-length median was added to tests/ and passes after the fix",
+        "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
+        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+      ],
+      "checks": [
+        {"text": "A failing command ran before the first edit to statkit/", "type": "script", "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'statkit/'"},
+        {"text": "median handles even and odd lengths (behavioral check)", "type": "script", "cmd": "cd outputs && python3 -c \"from statkit import median as m; assert m([1,2,3,4])==2.5; assert m([4,1,3,2])==2.5; assert m([3,1,2])==2; assert m([5])==5; assert m([1,2])==1.5; print('ok')\""},
+        {"text": "Existing test suite passes in outputs", "type": "script", "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+[
+  {"query": "can you add a friendly hello line at the top of README.md? the project feels cold", "should_trigger": true},
+  {"query": "make our README more welcoming for first-time contributors, maybe a greeting up top", "should_trigger": true},
+  {"query": "rewrite the installation section of the README, it's out of date since we moved to uv", "should_trigger": false},
+  {"query": "add a greeting message to the CLI's --help output", "should_trigger": false}
+]

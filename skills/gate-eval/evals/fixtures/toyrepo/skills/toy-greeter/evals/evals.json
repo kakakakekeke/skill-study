@@ -1,0 +1,14 @@
+{
+  "skill_name": "toy-greeter",
+  "evals": [
+    {
+      "id": 1,
+      "name": "readme-greeting",
+      "prompt": "make the README a bit more welcoming, add a greeting line at the top",
+      "fixture": "evals/fixtures/repo",
+      "expected_output": "README.md starts with 'Hello, and welcome!' and nothing else changed",
+      "expectations": ["Nothing other than the first line of README.md was changed"],
+      "checks": [{"text": "README.md starts with the exact greeting", "type": "regex_outputs", "pattern": "--- README.md ---\\nHello, and welcome!"}]
+    }
+  ]
+}

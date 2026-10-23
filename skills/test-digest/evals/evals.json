@@ -1,0 +1,51 @@
+{
+  "skill_name": "test-digest",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pytest-noisy-failures",
+      "prompt": "run the test suite in this repo and tell me what's failing and why. don't fix anything yet, I just want to understand the failures",
+      "fixture": "evals/fixtures/pyproj",
+      "expected_output": "Names the 3 failing tests, explains the two root causes (parse_range excludes the end value; format_money crashes on None), with raw test output kept short.",
+      "expectations": [
+        "The final answer identifies that parse_range drops the end of the range (range end is exclusive / off-by-one), causing test_parse_range_inclusive and test_parse_range_same_bounds to fail",
+        "The final answer identifies that format_money(None) raises TypeError because Decimal cannot convert None (test_format_money_none)",
+        "No source or test file under calc/ or tests/ was modified"
+      ],
+      "checks": [
+        {"text": "Final answer names all three failing tests", "type": "regex_final", "pattern": "(?=.*test_parse_range_inclusive)(?=.*test_parse_range_same_bounds)(?=.*test_format_money_none)"},
+        {"text": "Longest Bash tool output stayed under 80 lines", "type": "script", "cmd": "python3 $GATE_EVAL_CHECKS/max_tool_result_lines.py 80"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ci-log-file",
+      "prompt": "CI failed on main again. I saved the raw log of the job as ci.log in this folder (source isn't checked out here). what broke?",
+      "fixture": "evals/fixtures/cilog",
+      "expected_output": "Reports 2 failed tests in src/components/Cart.test.tsx: coupon not applied ($100.00 instead of $90.00) and 'Free shipping' text missing; notes lint warnings are not the cause.",
+      "expectations": [
+        "The final answer says the failing file is src/components/Cart.test.tsx with exactly 2 failing tests (coupon subtotal and free shipping)",
+        "The final answer states the coupon test expected $90.00 but received $100.00",
+        "The final answer does not blame the npm deprecation warnings or eslint warnings for the failure"
+      ],
+      "checks": [
+        {"text": "Final answer mentions 'Free shipping' failure", "type": "regex_final", "pattern": "free shipping"},
+        {"text": "Longest Bash tool output stayed under 80 lines", "type": "script", "cmd": "python3 $GATE_EVAL_CHECKS/max_tool_result_lines.py 80"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "all-passing-verbose",
+      "prompt": "can you run the tests verbosely and confirm everything passes? tell me how many tests ran",
+      "fixture": "evals/fixtures/passing",
+      "expected_output": "Reports 11 passed, 0 failed.",
+      "expectations": [
+        "The final answer states that all tests passed and gives the count 11"
+      ],
+      "checks": [
+        {"text": "Final answer contains the number 11", "type": "regex_final", "pattern": "\\b11\\b"},
+        {"text": "Longest Bash tool output stayed under 80 lines", "type": "script", "cmd": "python3 $GATE_EVAL_CHECKS/max_tool_result_lines.py 80"}
+      ]
+    }
+  ]
+}

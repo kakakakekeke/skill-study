@@ -1,0 +1,138 @@
+[
+  {
+    "query": "test_cache_hit in tests/test_cache.py fails sometimes in CI but passes locally every time I try. is it actually flaky? how often",
+    "should_trigger": true
+  },
+  {
+    "query": "our deploy job's first step `bash scripts/fetch.sh` fails randomly and we just hit retry until it works. can you measure how often it fails and what the errors are",
+    "should_trigger": true
+  },
+  {
+    "query": "the e2e suite has one test, checkout.spec.ts 'applies coupon', that's red maybe 1 in 10 runs. can u run it a bunch of times and tell me the failure rate",
+    "should_trigger": true
+  },
+  {
+    "query": "I think TestOrderSync in sync_test.go is nondeterministic, it passed 3 times then failed. figure out if it's flaky before I waste time debugging",
+    "should_trigger": true
+  },
+  {
+    "query": "is `make integration` stable? QA says it fails intermittently with a timeout but I've never seen it",
+    "should_trigger": true
+  },
+  {
+    "query": "a colleague marked test_total_rounding as flaky and added a retry. I'm not sure it's actually flaky. can you check",
+    "should_trigger": true
+  },
+  {
+    "query": "the android unit test suite fails on and off in github actions with some gradle daemon error. run ./gradlew test repeatedly and tell me how often it breaks",
+    "should_trigger": true
+  },
+  {
+    "query": "before I turn on the new parallel test runner I want to know the baseline: how often does `pytest -q` fail if I just run it 20 times unchanged",
+    "should_trigger": true
+  },
+  {
+    "query": "test_fetch_remote_timeout passes 100% on my mac but like 70% in docker. can you quantify it in docker and get the failure messages",
+    "should_trigger": true
+  },
+  {
+    "query": "this cypress test keeps getting marked flaky by the dashboard. how often does it really fail when run alone vs with the whole suite",
+    "should_trigger": true
+  },
+  {
+    "query": "test_cache_hit fails every single time since yesterday's merge. here's the assertion error, please fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "add pytest-rerunfailures to the project and mark the slow network tests with @pytest.mark.flaky(reruns=3)",
+    "should_trigger": false
+  },
+  {
+    "query": "run the full test suite and summarize what's failing, the output is huge",
+    "should_trigger": false
+  },
+  {
+    "query": "the fetch.sh script needs exponential backoff when curl gets a connection reset. implement that",
+    "should_trigger": false
+  },
+  {
+    "query": "why does time.time() based TTL cause flaky tests? explain the general problem and how people usually fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "write a load test that hits /api/orders 500 times and reports p95 latency",
+    "should_trigger": false
+  },
+  {
+    "query": "our CI takes 40 minutes, can you profile which tests are slowest and suggest what to parallelize",
+    "should_trigger": false
+  },
+  {
+    "query": "run pytest tests/test_cache.py -x one time and show me the full output, I want to see the warnings",
+    "should_trigger": false
+  },
+  {
+    "query": "mock out fetch_remote in test_cache_hit so the test doesn't depend on timing",
+    "should_trigger": false
+  },
+  {
+    "query": "set up a github actions matrix to run the tests on python 3.10, 3.11 and 3.12",
+    "should_trigger": false
+  },
+  {
+    "query": "CI에서 가끔 빨간불인데 로컬에선 한 번도 안 나요. tests/test_sync.py 몇 번 돌려서 얼마나 자주 실패하는지 봐줘",
+    "should_trigger": true
+  },
+  {
+    "query": "scripts/migrate.sh is nondeterministic, sometimes exit 1 sometimes 0, no idea why. can you quantify it and get the error",
+    "should_trigger": true
+  },
+  {
+    "query": "we have retry-until-pass on the integration suite in CI and I think it's hiding something. how bad is it actually?",
+    "should_trigger": true
+  },
+  {
+    "query": "I suspect test ordering matters. run the suite a bunch of times with random order and see if it ever fails",
+    "should_trigger": true
+  },
+  {
+    "query": "the playwright login test is red on maybe every fourth run of the pipeline. run it repeatedly and tell me the failure messages",
+    "should_trigger": true
+  },
+  {
+    "query": "test_cache_hit is flaky because of the time.time() based TTL. rewrite the test to use a fake clock",
+    "should_trigger": false
+  },
+  {
+    "query": "add @pytest.mark.flaky(reruns=3) to the network tests so CI stops blocking us",
+    "should_trigger": false
+  },
+  {
+    "query": "why would a test pass locally and fail in CI? give me the usual reasons",
+    "should_trigger": false
+  },
+  {
+    "query": "run the suite once and summarize what's failing, the output is huge",
+    "should_trigger": false
+  },
+  {
+    "query": "set up a flaky-test dashboard in buildkite test analytics",
+    "should_trigger": false
+  },
+  {
+    "query": "quarantine all tests tagged @flaky into a separate non-blocking CI job",
+    "should_trigger": false
+  },
+  {
+    "query": "the slugify bug only shows up with unicode input, reproduce it and fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "run the perf benchmark 15 times and report the p50/p95 latency spread",
+    "should_trigger": false
+  },
+  {
+    "query": "tests/test_sync.py가 느려. 왜 3분이나 걸리는지 프로파일링해줘",
+    "should_trigger": false
+  }
+]
