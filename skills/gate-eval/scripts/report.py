@@ -117,6 +117,9 @@ def main() -> None:
         summary["g1"] = {"verdict": "n/a"}
     elif tsum.exists():
         t = json.loads(tsum.read_text())
+        if t.get("in_task"):
+            lines += ["**수행 중 G1** (원칙 §2 \"G1 측정 시점\"): fixture에서 과제를 실제로 수행시키고 대상 스킬이 언제든 호출되면 발동.",
+                      f"- 측정 전 근거: {t.get('reason')}", f"- 경쟁 스킬: {', '.join(t.get('competitors', []))}", ""]
         lines += [f"쿼리 {t['n_train']+t['n_test']}개(train {t['n_train']}/test {t['n_test']}), 쿼리당 {t['runs_per_query']}회, 임계 0.5.", "",
                   "| 모델 | 구간 | 통과 | should-fire 재현율 | should-not-fire 정밀도 |", "|---|---|---|---|---|"]
         g1_ok = True
@@ -135,8 +138,18 @@ def main() -> None:
                     if items:
                         lines.append(f"- {m} {lab}: " + " / ".join(f"`{q}`" for q in items))
                 lines.append("")
-        summary["g1"] = {"verdict": "pass" if g1_ok else "fail", "models": t["models"]}
+        summary["g1"] = {"verdict": "pass" if g1_ok else "fail", "in_task": bool(t.get("in_task")), "models": t["models"]}
         lines += ["", f"**판정: {'통과' if g1_ok else '실패'}** (규칙: 모델마다 held-out test에서 과잉·미발동 각각 1건 이하)", ""]
+        rsum = out / "trigger-router" / "summary.json"
+        if t.get("in_task") and rsum.exists():
+            r = json.loads(rsum.read_text())
+            lines += ["참고치: 시작 시점 라우팅 (판정에 쓰지 않음)", "", "| 모델 | 구간 | 통과 | should-fire 재현율 | should-not-fire 정밀도 |", "|---|---|---|---|---|"]
+            for m, d in r["models"].items():
+                for part in ("train", "test"):
+                    s_ = d[part]
+                    lines.append(f"| {m} | {part} | {s_['pass']}/{s_['n']} | {fmt(s_['should_fire_recall'], True)} | {fmt(s_['should_not_fire_precision'], True)} |")
+            summary["g1"]["router_reference"] = r["models"]
+            lines.append("")
     else:
         lines += ["trigger 결과 없음 (`evals/trigger.json` 또는 실행 누락).", ""]
         summary["g1"] = {"verdict": "missing"}

@@ -43,7 +43,15 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     py = sys.executable
     user_invoked = "disable-model-invocation: true" in (skill / "SKILL.md").read_text().split("---")[1]
-    if not a.skip_trigger and not user_invoked and (skill / "evals" / "trigger.json").exists():
+    intask = skill / "evals" / "trigger-intask.json"
+    if not a.skip_trigger and not user_invoked and intask.exists():
+        # 원칙 §2 "G1 측정 시점": 수행 중 G1이 판정, 시작 시점 라우팅은 참고치(trigger-router/)
+        sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
+            "--eval-set", str(intask), "--workers", str(a.workers)])
+        if (skill / "evals" / "trigger.json").exists():
+            sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
+                "--out-name", "trigger-router"])
+    elif not a.skip_trigger and not user_invoked and (skill / "evals" / "trigger.json").exists():
         sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models])
     if not a.skip_quality and (skill / "evals" / "evals.json").exists():
         cmd = [py, str(HERE / "quality_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
