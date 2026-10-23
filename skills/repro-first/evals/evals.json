@@ -1,419 +1,506 @@
 {
-  "skill_name": "repro-first",
-  "evals": [
+ "skill_name": "repro-first",
+ "evals": [
+  {
+   "id": 1,
+   "name": "slugify-trailing-sep",
+   "prompt": "bug report from the content team: slugify('Hello World!') returns 'hello-world-' with a trailing dash, it should be 'hello-world'. same thing with 'Title: Part 2?' -> 'title-part-2-'. can you fix this?",
+   "fixture": "evals/fixtures/slug",
+   "expected_output": "A failing test/command is run before editing slugger/slug.py; slugify strips trailing separator; existing tests pass; a regression test is added; final message states repro command, cause, prevention.",
+   "expectations": [
+    "A new test that reproduces the trailing-separator bug was added to tests/ and it passes after the fix",
+    "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+   ],
+   "checks": [
     {
-      "id": 1,
-      "name": "slugify-trailing-sep",
-      "prompt": "bug report from the content team: slugify('Hello World!') returns 'hello-world-' with a trailing dash, it should be 'hello-world'. same thing with 'Title: Part 2?' -> 'title-part-2-'. can you fix this?",
-      "fixture": "evals/fixtures/slug",
-      "expected_output": "A failing test/command is run before editing slugger/slug.py; slugify strips trailing separator; existing tests pass; a regression test is added; final message states repro command, cause, prevention.",
-      "expectations": [
-        "A new test that reproduces the trailing-separator bug was added to tests/ and it passes after the fix",
-        "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to slugger/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'slugger/'"
-        },
-        {
-          "text": "slugify no longer returns trailing separator (behavioral check on outputs)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from slugger import slugify as s; assert s('Hello World!')=='hello-world', s('Hello World!'); assert s('Title: Part 2?')=='title-part-2'; assert s('a b', sep='_')=='a_b'; assert s('Crème Brûlée')=='creme-brulee'; print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
+     "text": "A failing command ran before the first edit to slugger/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'slugger/'"
     },
     {
-      "id": 2,
-      "name": "config-missing-timeout",
-      "prompt": "load_config blows up when the config file doesn't have a timeout key:\n\n  File \"appcfg/loader.py\", line 23, in load_config\n    timeout=int(merged[\"timeout\"]),\nKeyError: 'timeout'\n\nconfig.example.json in the repo is exactly that kind of file. timeout is supposed to default to 30 like the other optional keys. please fix",
-      "fixture": "evals/fixtures/cfg",
-      "expected_output": "Red repro (loading config.example.json or a test without timeout) before editing; timeout defaults to 30; tests pass; regression test added; three-line report.",
-      "expectations": [
-        "A new test covering a config without the timeout key was added to tests/ and passes after the fix",
-        "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
-        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to appcfg/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'appcfg/'"
-        },
-        {
-          "text": "load_config on config.example.json gives timeout 30 (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from appcfg import load_config as l; c=l('config.example.json'); assert c.timeout==30 and c.retries==3 and c.verbose is False and c.port==8080, c; print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
+     "text": "slugify no longer returns trailing separator (behavioral check on outputs)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from slugger import slugify as s; assert s('Hello World!')=='hello-world', s('Hello World!'); assert s('Title: Part 2?')=='title-part-2'; assert s('a b', sep='_')=='a_b'; assert s('Crème Brûlée')=='creme-brulee'; print('ok')\""
     },
     {
-      "id": 3,
-      "name": "median-even-length",
-      "prompt": "statkit.median gives wrong answers for even-length input. median([1,2,3,4]) returns 3, should be 2.5. fix it pls",
-      "fixture": "evals/fixtures/stats",
-      "expected_output": "Red repro before editing statkit/core.py; median averages the two middle values; tests pass; regression test added; three-line report.",
-      "expectations": [
-        "A new test covering even-length median was added to tests/ and passes after the fix",
-        "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
-        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to statkit/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'statkit/'"
-        },
-        {
-          "text": "median handles even and odd lengths (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from statkit import median as m; assert m([1,2,3,4])==2.5; assert m([4,1,3,2])==2.5; assert m([3,1,2])==2; assert m([5])==5; assert m([1,2])==1.5; print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "name": "slug-already-fixed",
-      "prompt": "bug report from the content team: slugify('Hello World!') returns 'hello-world-' with a trailing dash, it should be 'hello-world'. same thing with 'Title: Part 2?' -> 'title-part-2-'. can you fix this?",
-      "fixture": "evals/fixtures/slug-fixed",
-      "expected_output": "The reported behavior does not reproduce (slugify already strips the trailing separator). The agent runs a reproduction, sees it pass, reports that it is not reproducible / already fixed, and makes no change to slugger/.",
-      "expectations": [
-        "The agent ran a command or test that exercises the reported examples before deciding anything, and the transcript shows it passing (the bug did not reproduce)",
-        "The final message states clearly that the reported behavior could not be reproduced on the current code (or is already fixed) and that no source changes were made"
-      ],
-      "checks": [
-        {
-          "text": "Correct abstain: slugger/ is byte-identical to the fixture (no source change)",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py slug-fixed slugger"
-        },
-        {
-          "text": "Existing test suite still passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "name": "cfg-already-fixed",
-      "prompt": "load_config blows up when the config file doesn't have a timeout key:\n\n  File \"appcfg/loader.py\", line 23, in load_config\n    timeout=int(merged[\"timeout\"]),\nKeyError: 'timeout'\n\nconfig.example.json in the repo is exactly that kind of file. timeout is supposed to default to 30 like the other optional keys. please fix",
-      "fixture": "evals/fixtures/cfg-fixed",
-      "expected_output": "load_config already defaults timeout to 30; the agent reproduces, sees no KeyError and timeout == 30, reports not reproducible, no change to appcfg/.",
-      "expectations": [
-        "The agent ran a command or test that exercises the reported examples before deciding anything, and the transcript shows it passing (the bug did not reproduce)",
-        "The final message states clearly that the reported behavior could not be reproduced on the current code (or is already fixed) and that no source changes were made"
-      ],
-      "checks": [
-        {
-          "text": "Correct abstain: appcfg/ is byte-identical to the fixture (no source change)",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py cfg-fixed appcfg"
-        },
-        {
-          "text": "Existing test suite still passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "name": "stats-already-fixed",
-      "prompt": "statkit.median gives wrong answers for even-length input. median([1,2,3,4]) returns 3, should be 2.5. fix it pls",
-      "fixture": "evals/fixtures/stats-fixed",
-      "expected_output": "median already averages the middle two; the agent reproduces, sees 2.5, reports not reproducible, no change to statkit/.",
-      "expectations": [
-        "The agent ran a command or test that exercises the reported examples before deciding anything, and the transcript shows it passing (the bug did not reproduce)",
-        "The final message states clearly that the reported behavior could not be reproduced on the current code (or is already fixed) and that no source changes were made"
-      ],
-      "checks": [
-        {
-          "text": "Correct abstain: statkit/ is byte-identical to the fixture (no source change)",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py stats-fixed statkit"
-        },
-        {
-          "text": "Existing test suite still passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 7,
-      "name": "slug-partial-fix",
-      "prompt": "bug report from the content team: slugify leaves a trailing separator. slugify('Hello World!') gives 'hello-world-' and slugify('New Post!', sep='_') gives 'new_post_'. they should be 'hello-world' and 'new_post'. can you fix this?",
-      "fixture": "evals/fixtures/slug-partial",
-      "expected_output": "The first example already passes (a partial patch strips '-' only) but the custom-separator example still fails. The agent must not abstain: red repro on the sep='_' case, fix to strip the actual sep, tests pass, regression test added.",
-      "expectations": [
-        "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)",
-        "The agent did not conclude that the bug was already fixed; it identified that at least one reported example still fails and fixed it"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to slugger/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'slugger/'"
-        },
-        {
-          "text": "Both reported examples are fixed (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from slugger import slugify as s; assert s('Hello World!')=='hello-world', s('Hello World!'); assert s('New Post!', sep='_')=='new_post', s('New Post!', sep='_'); assert s('a b', sep='_')=='a_b'; print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 8,
-      "name": "cfg-partial-fix",
-      "prompt": "load_config used to blow up with KeyError: 'timeout' when the config file has no timeout key. someone patched it so it doesn't crash anymore, but config.example.json (which has no timeout) now gives timeout=None. timeout is supposed to default to 30 like the other optional keys. please sort this out",
-      "fixture": "evals/fixtures/cfg-partial",
-      "expected_output": "No crash (partial patch) but timeout is None instead of 30. The agent reproduces the wrong default, fixes it so timeout defaults to 30, tests pass, regression test added.",
-      "expectations": [
-        "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)",
-        "The agent did not conclude that the bug was already fixed; it identified that at least one reported example still fails and fixed it"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to appcfg/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'appcfg/'"
-        },
-        {
-          "text": "load_config on config.example.json gives timeout 30 (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from appcfg import load_config as l; c=l('config.example.json'); assert c.timeout==30 and c.retries==3 and c.verbose is False and c.port==8080, c; print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 9,
-      "name": "stats-partial-fix",
-      "prompt": "statkit.median is wrong for even-length input: median([1,2,3,4]) and median([4,1,3,2]) should both be 2.5. I think someone half-fixed it recently. fix it pls",
-      "fixture": "evals/fixtures/stats-partial",
-      "expected_output": "[1,2,3,4] already gives 2.5 but [4,1,3,2] gives 2.0 (even branch runs before sorting). The agent must not abstain: red repro on the unsorted case, fix, tests pass, regression test added.",
-      "expectations": [
-        "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)",
-        "The agent did not conclude that the bug was already fixed; it identified that at least one reported example still fails and fixed it"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to statkit/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'statkit/'"
-        },
-        {
-          "text": "median handles even and odd lengths including unsorted input (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from statkit import median as m; assert m([1,2,3,4])==2.5; assert m([4,1,3,2])==2.5; assert m([3,1,2])==2; assert m([5])==5; assert m([2,1])==1.5; print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 10,
-      "name": "ledger-fixed-stale-api",
-      "prompt": "ticket #88 got reopened by a customer: invoice totals are off by one cent when there are more than 3 taxed line items. repro from the original ticket:\n\n```\nfrom decimal import Decimal\nfrom ledger.totals import compute_total\nitems = [(Decimal('1.005'), 1, Decimal('0.0825'))] * 5\nprint(compute_total(items))   # prints 5.44, accounting says it should be 5.45\n```\n\ncan you look into this and fix it?",
-      "fixture": "evals/fixtures/ledger-fixed-stale-api",
-      "expected_output": "ledger.totals no longer exists (CHANGELOG 0.4.0: moved into Invoice.total(), per-line rounding fixed). The ModuleNotFoundError is not the bug. Reproducing with the current API (Invoice with 5 x 1.005 @ 8.25%) gives 5.45 — the bug is already fixed. Correct outcome: report not reproducible, change nothing.",
-      "expectations": [
-        "The agent reproduced the report with the CURRENT API (built an Invoice/LineItems with 5 items at 1.005 and 8.25% tax, or equivalent) and the transcript shows the correct total 5.45, i.e. the bug did not reproduce",
-        "The final message states that the reported one-cent bug could not be reproduced on the current code (already fixed / module moved) and that no source changes were made; it does not present the ModuleNotFoundError as the bug"
-      ],
-      "checks": [
-        {
-          "text": "Correct abstain: ledger/ package is byte-identical to the fixture",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-stale-api ledger"
-        },
-        {
-          "text": "Did not recreate the removed ledger/totals.py to satisfy the stale repro",
-          "type": "script",
-          "cmd": "test ! -e outputs/ledger/totals.py"
-        },
-        {
-          "text": "Existing test suite still passes in outputs (ignoring the one pre-existing unrelated failure where noted)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 11,
-      "name": "ledger-fixed-unrelated-failure",
-      "prompt": "QA says the one-cent total drift with 4+ taxed lines (#88, the per-line rounding thing) is back — `python3 -m pytest` is red on main again. please fix",
-      "fixture": "evals/fixtures/ledger-fixed-unrelated-failure",
-      "expected_output": "The suite's only failure is tests/test_export_csv.py::test_csv_crlf_for_excel (CRLF line endings), unrelated to #88. Reproducing #88 with 5 x 1.005 @ 8.25% gives 5.45 (correct). Correct outcome: report that #88 does not reproduce and the red test is a different issue; do not change ledger/ to chase the CRLF test.",
-      "expectations": [
-        "The agent ran a reproduction of the reported rounding bug itself (an invoice with 5+ taxed lines, e.g. 5 x 1.005 at 8.25%) and the transcript shows the correct total, i.e. #88 did not reproduce",
-        "The final message says the rounding bug (#88) could not be reproduced and that the failing test (CSV CRLF line endings) is unrelated to it; it does not claim to have fixed #88"
-      ],
-      "checks": [
-        {
-          "text": "Correct abstain: ledger/ package is byte-identical to the fixture (CRLF test not 'fixed' by changing the library)",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-unrelated-failure ledger"
-        },
-        {
-          "text": "Rounding tests still pass in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider tests/test_invoice.py tests/test_money.py tests/test_tax.py 2>&1 | tail -1 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 12,
-      "name": "ledger-fixed-wrong-report",
-      "prompt": "Invoice.total() is undercharging. three line items at 0.333 each (qty 1, no tax) come out as 0.99, but 3 x 0.333 = 0.999 which rounds to 1.00. we're losing a cent on these. fix the rounding in ledger/",
-      "fixture": "evals/fixtures/ledger-fixed-wrong-report",
-      "expected_output": "The reporter's expectation is wrong: the library documents per-line rounding (each 0.333 -> 0.33, subtotal 0.99; the docstring has this exact worked example). Correct outcome: explain that 0.99 is the documented accounting rule, make no change (or ask before changing the rule).",
-      "expectations": [
-        "The agent reproduced the example (3 x 0.333) and checked the documented rule (invoice.py docstring: per-line rounding, worked example 0.99) before deciding",
-        "The final message explains that 0.99 follows the documented per-line rounding rule, that the reported expectation of 1.00 is not a bug in the code, and that no change was made (asking the user whether the rule itself should change is acceptable)"
-      ],
-      "checks": [
-        {
-          "text": "Correct abstain: ledger/ package is byte-identical to the fixture",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-wrong-report ledger"
-        },
-        {
-          "text": "Existing test suite still passes in outputs (ignoring the one pre-existing unrelated failure where noted)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 13,
-      "name": "ledger-partial-specialcase",
-      "prompt": "#88 again: invoice totals are off by one cent when there are more than 3 taxed line items. the example from the original ticket (sample/invoice.json, 4 lines) looks fine to me now, but accounting says bigger invoices still drift. please fix it properly this time",
-      "fixture": "evals/fixtures/ledger-partial-specialcase",
-      "expected_output": "A previous quick fix special-cased invoices with <= 4 lines; 5+ lines still round at the end (5 x 1.005 @ 8.25% gives 5.44, should be 5.45). The agent must generalize the reproduction beyond the 4-line example, remove the special case so total() is per-line for any size, keep tests green, add a regression test.",
-      "expectations": [
-        "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
-        "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to ledger/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
-        },
-        {
-          "text": "total() is per-line for any invoice size: 5 x 1.005 @ 8.25% == 5.45 and total == subtotal + tax_total for 6 lines (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from decimal import Decimal as D; from ledger import Invoice, LineItem as L; inv=Invoice([L('X', D('1.005'), 1, D('0.0825'))]*5); assert inv.total()==D('5.45'), inv.total(); inv6=Invoice([L('Y', D('2.005'), 1, D('0.07'))]*6); assert inv6.total()==inv6.subtotal()+inv6.tax_total(), (inv6.total(), inv6.subtotal(), inv6.tax_total()); print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 14,
-      "name": "ledger-partial-changed-symptom",
-      "prompt": "#88: totals come out one cent off on invoices that have both a percent discount and tax. sample/invoice.json is the case — accounting computes 240.39 for it. please fix the rounding",
-      "fixture": "evals/fixtures/ledger-partial-changed-symptom",
-      "expected_output": "The symptom has changed: running sample/invoice.json now raises TypeError (Decimal * float in a helper added by a previous attempt). The bug is still there (the discount path is broken); the agent must not abstain because 'the report says one cent off but I see a crash'. Fix the Decimal path so the CLI prints Total: 240.39 USD; tests green; regression test added.",
-      "expectations": [
-        "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
-        "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to ledger/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
-        },
-        {
-          "text": "CLI on sample/invoice.json prints Total: 240.39 USD with no exception (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m ledger.cli sample/invoice.json 2>&1 | grep -q 'Total: 240.39 USD'"
-        },
-        {
-          "text": "Percent-discount invoice total == subtotal + tax_total and equals 240.39 (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"import json; from decimal import Decimal as D; from ledger import Invoice; inv=Invoice.from_dict(json.load(open('sample/invoice.json'))); assert inv.total()==D('240.39'), inv.total(); assert inv.total()==inv.subtotal()+inv.tax_total(); print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
-    },
-    {
-      "id": 15,
-      "name": "ledger-real-deep",
-      "prompt": "`python3 -m ledger.cli sample/invoice.json` prints `Total: 235.27 USD` but our accountant gets 235.28 for that invoice. something in the discount or tax math is dropping a cent. please find it and fix it",
-      "fixture": "evals/fixtures/ledger-real-deep",
-      "expected_output": "Root cause is ledger/discounts.py: percent_off truncates (ROUND_DOWN) to cents, so 26.25 at 10% off becomes 23.62 instead of 23.625 -> 23.63 per-line. The agent reproduces at CLI/Invoice level, traces to discounts.py, removes the truncation, CLI prints 235.28, tests green, regression test added.",
-      "expectations": [
-        "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
-        "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
-        "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
-      ],
-      "checks": [
-        {
-          "text": "A failing command ran before the first edit to ledger/",
-          "type": "script",
-          "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
-        },
-        {
-          "text": "CLI on sample/invoice.json prints Total: 235.28 USD (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m ledger.cli sample/invoice.json 2>&1 | grep -q 'Total: 235.28 USD'"
-        },
-        {
-          "text": "percent_off no longer truncates: 26.25 at 10% is 23.625 exactly or rounds half-up to 23.63 at the line (behavioral check)",
-          "type": "script",
-          "cmd": "cd outputs && python3 -c \"from decimal import Decimal as D; from ledger.discounts import percent_off as p; v=p(D('26.25'), D('10')); assert v in (D('23.625'), D('23.63')), v; from ledger import LineItem as L; assert L('B', D('3.75'), 7, D('0.0825'), [('percent', D('10'))]).net()==D('23.63'); print('ok')\""
-        },
-        {
-          "text": "Existing test suite passes in outputs",
-          "type": "script",
-          "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
-        }
-      ]
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
     }
-  ]
+   ]
+  },
+  {
+   "id": 2,
+   "name": "config-missing-timeout",
+   "prompt": "load_config blows up when the config file doesn't have a timeout key:\n\n  File \"appcfg/loader.py\", line 23, in load_config\n    timeout=int(merged[\"timeout\"]),\nKeyError: 'timeout'\n\nconfig.example.json in the repo is exactly that kind of file. timeout is supposed to default to 30 like the other optional keys. please fix",
+   "fixture": "evals/fixtures/cfg",
+   "expected_output": "Red repro (loading config.example.json or a test without timeout) before editing; timeout defaults to 30; tests pass; regression test added; three-line report.",
+   "expectations": [
+    "A new test covering a config without the timeout key was added to tests/ and passes after the fix",
+    "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to appcfg/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'appcfg/'"
+    },
+    {
+     "text": "load_config on config.example.json gives timeout 30 (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from appcfg import load_config as l; c=l('config.example.json'); assert c.timeout==30 and c.retries==3 and c.verbose is False and c.port==8080, c; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "median-even-length",
+   "prompt": "statkit.median gives wrong answers for even-length input. median([1,2,3,4]) returns 3, should be 2.5. fix it pls",
+   "fixture": "evals/fixtures/stats",
+   "expected_output": "Red repro before editing statkit/core.py; median averages the two middle values; tests pass; regression test added; three-line report.",
+   "expectations": [
+    "A new test covering even-length median was added to tests/ and passes after the fix",
+    "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to statkit/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'statkit/'"
+    },
+    {
+     "text": "median handles even and odd lengths (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from statkit import median as m; assert m([1,2,3,4])==2.5; assert m([4,1,3,2])==2.5; assert m([3,1,2])==2; assert m([5])==5; assert m([1,2])==1.5; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "slug-already-fixed",
+   "prompt": "bug report from the content team: slugify('Hello World!') returns 'hello-world-' with a trailing dash, it should be 'hello-world'. same thing with 'Title: Part 2?' -> 'title-part-2-'. can you fix this?",
+   "fixture": "evals/fixtures/slug-fixed",
+   "expected_output": "The reported behavior does not reproduce (slugify already strips the trailing separator). The agent runs a reproduction, sees it pass, reports that it is not reproducible / already fixed, and makes no change to slugger/.",
+   "expectations": [
+    "The agent ran a command or test that exercises the reported examples before deciding anything, and the transcript shows it passing (the bug did not reproduce)",
+    "The final message states clearly that the reported behavior could not be reproduced on the current code (or is already fixed) and that no source changes were made"
+   ],
+   "checks": [
+    {
+     "text": "Correct abstain: slugger/ is byte-identical to the fixture (no source change)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py slug-fixed slugger"
+    },
+    {
+     "text": "Existing test suite still passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "cfg-already-fixed",
+   "prompt": "load_config blows up when the config file doesn't have a timeout key:\n\n  File \"appcfg/loader.py\", line 23, in load_config\n    timeout=int(merged[\"timeout\"]),\nKeyError: 'timeout'\n\nconfig.example.json in the repo is exactly that kind of file. timeout is supposed to default to 30 like the other optional keys. please fix",
+   "fixture": "evals/fixtures/cfg-fixed",
+   "expected_output": "load_config already defaults timeout to 30; the agent reproduces, sees no KeyError and timeout == 30, reports not reproducible, no change to appcfg/.",
+   "expectations": [
+    "The agent ran a command or test that exercises the reported examples before deciding anything, and the transcript shows it passing (the bug did not reproduce)",
+    "The final message states clearly that the reported behavior could not be reproduced on the current code (or is already fixed) and that no source changes were made"
+   ],
+   "checks": [
+    {
+     "text": "Correct abstain: appcfg/ is byte-identical to the fixture (no source change)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py cfg-fixed appcfg"
+    },
+    {
+     "text": "Existing test suite still passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "stats-already-fixed",
+   "prompt": "statkit.median gives wrong answers for even-length input. median([1,2,3,4]) returns 3, should be 2.5. fix it pls",
+   "fixture": "evals/fixtures/stats-fixed",
+   "expected_output": "median already averages the middle two; the agent reproduces, sees 2.5, reports not reproducible, no change to statkit/.",
+   "expectations": [
+    "The agent ran a command or test that exercises the reported examples before deciding anything, and the transcript shows it passing (the bug did not reproduce)",
+    "The final message states clearly that the reported behavior could not be reproduced on the current code (or is already fixed) and that no source changes were made"
+   ],
+   "checks": [
+    {
+     "text": "Correct abstain: statkit/ is byte-identical to the fixture (no source change)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py stats-fixed statkit"
+    },
+    {
+     "text": "Existing test suite still passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "slug-partial-fix",
+   "prompt": "bug report from the content team: slugify leaves a trailing separator. slugify('Hello World!') gives 'hello-world-' and slugify('New Post!', sep='_') gives 'new_post_'. they should be 'hello-world' and 'new_post'. can you fix this?",
+   "fixture": "evals/fixtures/slug-partial",
+   "expected_output": "The first example already passes (a partial patch strips '-' only) but the custom-separator example still fails. The agent must not abstain: red repro on the sep='_' case, fix to strip the actual sep, tests pass, regression test added.",
+   "expectations": [
+    "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)",
+    "The agent did not conclude that the bug was already fixed; it identified that at least one reported example still fails and fixed it"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to slugger/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'slugger/'"
+    },
+    {
+     "text": "Both reported examples are fixed (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from slugger import slugify as s; assert s('Hello World!')=='hello-world', s('Hello World!'); assert s('New Post!', sep='_')=='new_post', s('New Post!', sep='_'); assert s('a b', sep='_')=='a_b'; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "name": "cfg-partial-fix",
+   "prompt": "load_config used to blow up with KeyError: 'timeout' when the config file has no timeout key. someone patched it so it doesn't crash anymore, but config.example.json (which has no timeout) now gives timeout=None. timeout is supposed to default to 30 like the other optional keys. please sort this out",
+   "fixture": "evals/fixtures/cfg-partial",
+   "expected_output": "No crash (partial patch) but timeout is None instead of 30. The agent reproduces the wrong default, fixes it so timeout defaults to 30, tests pass, regression test added.",
+   "expectations": [
+    "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)",
+    "The agent did not conclude that the bug was already fixed; it identified that at least one reported example still fails and fixed it"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to appcfg/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'appcfg/'"
+    },
+    {
+     "text": "load_config on config.example.json gives timeout 30 (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from appcfg import load_config as l; c=l('config.example.json'); assert c.timeout==30 and c.retries==3 and c.verbose is False and c.port==8080, c; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "stats-partial-fix",
+   "prompt": "statkit.median is wrong for even-length input: median([1,2,3,4]) and median([4,1,3,2]) should both be 2.5. I think someone half-fixed it recently. fix it pls",
+   "fixture": "evals/fixtures/stats-partial",
+   "expected_output": "[1,2,3,4] already gives 2.5 but [4,1,3,2] gives 2.0 (even branch runs before sorting). The agent must not abstain: red repro on the unsorted case, fix, tests pass, regression test added.",
+   "expectations": [
+    "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)",
+    "The agent did not conclude that the bug was already fixed; it identified that at least one reported example still fails and fixed it"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to statkit/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'statkit/'"
+    },
+    {
+     "text": "median handles even and odd lengths including unsorted input (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from statkit import median as m; assert m([1,2,3,4])==2.5; assert m([4,1,3,2])==2.5; assert m([3,1,2])==2; assert m([5])==5; assert m([2,1])==1.5; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "name": "ledger-fixed-stale-api",
+   "prompt": "ticket #88 got reopened by a customer: invoice totals are off by one cent when there are more than 3 taxed line items. repro from the original ticket:\n\n```\nfrom decimal import Decimal\nfrom ledger.totals import compute_total\nitems = [(Decimal('1.005'), 1, Decimal('0.0825'))] * 5\nprint(compute_total(items))   # prints 5.44, accounting says it should be 5.45\n```\n\ncan you look into this and fix it?",
+   "fixture": "evals/fixtures/ledger-fixed-stale-api",
+   "expected_output": "ledger.totals no longer exists (CHANGELOG 0.4.0: moved into Invoice.total(), per-line rounding fixed). The ModuleNotFoundError is not the bug. Reproducing with the current API (Invoice with 5 x 1.005 @ 8.25%) gives 5.45 — the bug is already fixed. Correct outcome: report not reproducible, change nothing.",
+   "expectations": [
+    "The agent reproduced the report with the CURRENT API (built an Invoice/LineItems with 5 items at 1.005 and 8.25% tax, or equivalent) and the transcript shows the correct total 5.45, i.e. the bug did not reproduce",
+    "The final message states that the reported one-cent bug could not be reproduced on the current code (already fixed / module moved) and that no source changes were made; it does not present the ModuleNotFoundError as the bug"
+   ],
+   "checks": [
+    {
+     "text": "Correct abstain: ledger/ package is byte-identical to the fixture",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-stale-api ledger"
+    },
+    {
+     "text": "Did not recreate the removed ledger/totals.py to satisfy the stale repro",
+     "type": "script",
+     "cmd": "test ! -e outputs/ledger/totals.py"
+    },
+    {
+     "text": "Existing test suite still passes in outputs (ignoring the one pre-existing unrelated failure where noted)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "name": "ledger-fixed-unrelated-failure",
+   "prompt": "QA says the one-cent total drift with 4+ taxed lines (#88, the per-line rounding thing) is back — `python3 -m pytest` is red on main again. please fix",
+   "fixture": "evals/fixtures/ledger-fixed-unrelated-failure",
+   "expected_output": "The suite's only failure is tests/test_export_csv.py::test_csv_crlf_for_excel (CRLF line endings), unrelated to #88. Reproducing #88 with 5 x 1.005 @ 8.25% gives 5.45 (correct). Correct outcome: report that #88 does not reproduce and the red test is a different issue; do not change ledger/ to chase the CRLF test.",
+   "expectations": [
+    "The agent ran a reproduction of the reported rounding bug itself (an invoice with 5+ taxed lines, e.g. 5 x 1.005 at 8.25%) and the transcript shows the correct total, i.e. #88 did not reproduce",
+    "The final message says the rounding bug (#88) could not be reproduced and that the failing test (CSV CRLF line endings) is unrelated to it; it does not claim to have fixed #88"
+   ],
+   "checks": [
+    {
+     "text": "Correct abstain: ledger/ package is byte-identical to the fixture (CRLF test not 'fixed' by changing the library)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-unrelated-failure ledger"
+    },
+    {
+     "text": "Rounding tests still pass in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider tests/test_invoice.py tests/test_money.py tests/test_tax.py 2>&1 | tail -1 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "name": "ledger-fixed-wrong-report",
+   "prompt": "Invoice.total() is undercharging. three line items at 0.333 each (qty 1, no tax) come out as 0.99, but 3 x 0.333 = 0.999 which rounds to 1.00. we're losing a cent on these. fix the rounding in ledger/",
+   "fixture": "evals/fixtures/ledger-fixed-wrong-report",
+   "expected_output": "The reporter's expectation is wrong: the library documents per-line rounding (each 0.333 -> 0.33, subtotal 0.99; the docstring has this exact worked example). Correct outcome: explain that 0.99 is the documented accounting rule, make no change (or ask before changing the rule).",
+   "expectations": [
+    "The agent reproduced the example (3 x 0.333) and checked the documented rule (invoice.py docstring: per-line rounding, worked example 0.99) before deciding",
+    "The final message explains that 0.99 follows the documented per-line rounding rule, that the reported expectation of 1.00 is not a bug in the code, and that no change was made (asking the user whether the rule itself should change is acceptable)"
+   ],
+   "checks": [
+    {
+     "text": "Correct abstain: ledger/ package is byte-identical to the fixture",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_source_diff.py ledger-fixed-wrong-report ledger"
+    },
+    {
+     "text": "Existing test suite still passes in outputs (ignoring the one pre-existing unrelated failure where noted)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "name": "ledger-partial-specialcase",
+   "prompt": "#88 again: invoice totals are off by one cent when there are more than 3 taxed line items. the example from the original ticket (sample/invoice.json, 4 lines) looks fine to me now, but accounting says bigger invoices still drift. please fix it properly this time",
+   "fixture": "evals/fixtures/ledger-partial-specialcase",
+   "expected_output": "A previous quick fix special-cased invoices with <= 4 lines; 5+ lines still round at the end (5 x 1.005 @ 8.25% gives 5.44, should be 5.45). The agent must generalize the reproduction beyond the 4-line example, remove the special case so total() is per-line for any size, keep tests green, add a regression test.",
+   "expectations": [
+    "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
+    "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to ledger/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
+    },
+    {
+     "text": "total() is per-line for any invoice size: 5 x 1.005 @ 8.25% == 5.45 and total == subtotal + tax_total for 6 lines (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from decimal import Decimal as D; from ledger import Invoice, LineItem as L; inv=Invoice([L('X', D('1.005'), 1, D('0.0825'))]*5); assert inv.total()==D('5.45'), inv.total(); inv6=Invoice([L('Y', D('2.005'), 1, D('0.07'))]*6); assert inv6.total()==inv6.subtotal()+inv6.tax_total(), (inv6.total(), inv6.subtotal(), inv6.tax_total()); print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "name": "ledger-partial-changed-symptom",
+   "prompt": "#88: totals come out one cent off on invoices that have both a percent discount and tax. sample/invoice.json is the case — accounting computes 240.39 for it. please fix the rounding",
+   "fixture": "evals/fixtures/ledger-partial-changed-symptom",
+   "expected_output": "The symptom has changed: running sample/invoice.json now raises TypeError (Decimal * float in a helper added by a previous attempt). The bug is still there (the discount path is broken); the agent must not abstain because 'the report says one cent off but I see a crash'. Fix the Decimal path so the CLI prints Total: 240.39 USD; tests green; regression test added.",
+   "expectations": [
+    "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
+    "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to ledger/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
+    },
+    {
+     "text": "CLI on sample/invoice.json prints Total: 240.39 USD with no exception (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m ledger.cli sample/invoice.json 2>&1 | grep -q 'Total: 240.39 USD'"
+    },
+    {
+     "text": "Percent-discount invoice total == subtotal + tax_total and equals 240.39 (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"import json; from decimal import Decimal as D; from ledger import Invoice; inv=Invoice.from_dict(json.load(open('sample/invoice.json'))); assert inv.total()==D('240.39'), inv.total(); assert inv.total()==inv.subtotal()+inv.tax_total(); print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "name": "ledger-real-deep",
+   "prompt": "`python3 -m ledger.cli sample/invoice.json` prints `Total: 235.27 USD` but our accountant gets 235.28 for that invoice. something in the discount or tax math is dropping a cent. please find it and fix it",
+   "fixture": "evals/fixtures/ledger-real-deep",
+   "expected_output": "Root cause is ledger/discounts.py: percent_off truncates (ROUND_DOWN) to cents, so 26.25 at 10% off becomes 23.62 instead of 23.625 -> 23.63 per-line. The agent reproduces at CLI/Invoice level, traces to discounts.py, removes the truncation, CLI prints 235.28, tests green, regression test added.",
+   "expectations": [
+    "After editing the source, the agent re-ran the reproduction and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (an added regression test, or a specific check)",
+    "The agent did not conclude that the bug was already fixed or not reproducible; it found a failing reproduction and fixed the code"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to ledger/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'ledger/'"
+    },
+    {
+     "text": "CLI on sample/invoice.json prints Total: 235.28 USD (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m ledger.cli sample/invoice.json 2>&1 | grep -q 'Total: 235.28 USD'"
+    },
+    {
+     "text": "percent_off no longer truncates: 26.25 at 10% is 23.625 exactly or rounds half-up to 23.63 at the line (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from decimal import Decimal as D; from ledger.discounts import percent_off as p; v=p(D('26.25'), D('10')); assert v in (D('23.625'), D('23.63')), v; from ledger import LineItem as L; assert L('B', D('3.75'), 7, D('0.0825'), [('percent', D('10'))]).net()==D('23.63'); print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q -p no:cacheprovider 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "name": "slugify-trailing-sep-terse",
+   "prompt": "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be 'hello-world'. fix pls",
+   "fixture": "evals/fixtures/slug",
+   "expected_output": "A failing test/command is run before editing slugger/slug.py; slugify strips trailing separator; existing tests pass; a regression test is added; final message states repro command, cause, prevention.",
+   "expectations": [
+    "A new test that reproduces the trailing-separator bug was added to tests/ and it passes after the fix",
+    "After editing the source, the agent re-ran the reproduction (test or command) and it passed, and also ran the full test suite",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to slugger/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'slugger/'"
+    },
+    {
+     "text": "slugify no longer returns trailing separator (behavioral check on outputs)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from slugger import slugify as s; assert s('Hello World!')=='hello-world', s('Hello World!'); assert s('Title: Part 2?')=='title-part-2'; assert s('a b', sep='_')=='a_b'; assert s('Crème Brûlée')=='creme-brulee'; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "name": "config-missing-timeout-terse",
+   "prompt": "getting KeyError: 'timeout' from load_config when the config file has no timeout key. it should default to 30. please fix",
+   "fixture": "evals/fixtures/cfg",
+   "expected_output": "Red repro (loading config.example.json or a test without timeout) before editing; timeout defaults to 30; tests pass; regression test added; three-line report.",
+   "expectations": [
+    "A new test covering a config without the timeout key was added to tests/ and passes after the fix",
+    "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to appcfg/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'appcfg/'"
+    },
+    {
+     "text": "load_config on config.example.json gives timeout 30 (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from appcfg import load_config as l; c=l('config.example.json'); assert c.timeout==30 and c.retries==3 and c.verbose is False and c.port==8080, c; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "name": "median-even-length-terse",
+   "prompt": "the median of an even-length list is wrong, it returns the upper middle element instead of the average of the two middle ones",
+   "fixture": "evals/fixtures/stats",
+   "expected_output": "Red repro before editing statkit/core.py; median averages the two middle values; tests pass; regression test added; three-line report.",
+   "expectations": [
+    "A new test covering even-length median was added to tests/ and passes after the fix",
+    "After editing the source, the agent re-ran the reproduction and the full test suite and both passed",
+    "The final message states a concrete recurrence-prevention measure (the added regression test, or a specific check)"
+   ],
+   "checks": [
+    {
+     "text": "A failing command ran before the first edit to statkit/",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_CHECKS/red_before_edit.py 'statkit/'"
+    },
+    {
+     "text": "median handles even and odd lengths (behavioral check)",
+     "type": "script",
+     "cmd": "cd outputs && python3 -c \"from statkit import median as m; assert m([1,2,3,4])==2.5; assert m([4,1,3,2])==2.5; assert m([3,1,2])==2; assert m([5])==5; assert m([1,2])==1.5; print('ok')\""
+    },
+    {
+     "text": "Existing test suite passes in outputs",
+     "type": "script",
+     "cmd": "cd outputs && python3 -m pytest -q 2>&1 | tail -3 | grep -E ' passed' | grep -v failed"
+    }
+   ]
+  }
+ ]
 }
