@@ -53,9 +53,12 @@ code-review, simplify, security-review, skill-creator 등 내장과 역할이 �
 |---|---|
 | 모든 분기가 반드시 거치는 짧은 제어 | SKILL.md 본문 인라인 |
 | 도메인 지식, 긴 참조, 일부 분기만 쓰는 것 | `references/` (필요 시 로드) |
-| 결정적으로 검사 가능한 규칙 | **기존 린터·CI 먼저.** Claude Code 훅은 반복 위반이 관찰되고 거짓양성률을 측정한 뒤에만. 훅에도 G1(거짓양성)·G3(실행 비용) 적용 |
+| 결정적으로 검사 가능한 규칙 | **기존 린터·CI 먼저.** Claude Code 훅은 반복 위반이 관찰되고 거짓양성률을 측정한 뒤에만. 훅에도 G1(거짓양성)·G3(실행 비용) 적용. 훅의 G1은 "정당한 작업에서 막았을 때 결과가 나빠지는가"를 오탐 fixture의 회귀로 잰다(차단 자체보다 결과) |
+| 과제 끝에 반드시 일어나야 하는 일(완료 전 검사 등) | **Stop 훅.** 모델은 스킬을 과제를 시작할 때 고르고 끝날 때 다시 고르지 않으므로, description으로는 끌어낼 수 없다. 막을 땐 한 번만(`stop_hook_active`), 문구는 "고치거나, 의도된·무관한 실패면 보고하고 멈춰라" |
 | 결정적 작업(정제, 차분, 파싱) | `scripts/`. LLM을 파서로 쓰지 않는다. 도구 출력은 수십 줄 이내 |
 | 비표준 규약, 코드에서 추론 불가한 것, 문서 포인터 | CLAUDE.md (최소) |
+
+근거(Stop 훅 행): `study/gate-eval-round-2.md` ① 재측정(수행 중 G1 haiku 0%·opus 50%, 호출은 전부 2~5턴째)과 ④ verify-on-stop(두 모델 품질형 통과, 오탐 fixture 회귀 0). 훅의 G1 조작화: test-integrity-check 훅은 정당한 과제를 0/5 완료로 만들어 보류됐고(③), verify-on-stop은 오탐 fixture에서 20/20 막았지만 결과 회귀는 0이었다(④).
 
 "지시로 강제"는 선택지가 아니다. CLAUDE.md·메모리는 context이지 enforced configuration이 아니다. 근거: `WK R1·R7`, `DR F5·F8·7.3-3`(훅은 "층으로 더하라", 프로즈 생략은 기각됨), `DR F11`(사람 평가자는 훅 없는 쪽 선호).
 
@@ -120,6 +123,7 @@ code-review, simplify, security-review, skill-creator 등 내장과 역할이 �
   |---|---|---|
   | 제작중 | `skills/<name>/` | 미등록 |
   | 배포 | `skills/<name>/` | 등록 (플러그인 하나 = 스킬 하나, 이름 동일) |
+  | 배포(훅) | `plugins/<name>/` (`hooks/`, `scripts/`, `evals/`) | 등록 (`source: ./plugins/<name>`, plugin.json name 동일). 상태 규칙은 스킬과 같다 |
   | 폐기 | `deprecated/<name>/` + `deprecated/README.md` 한 줄 | 등록 금지 |
 
   1. **판정은 측정 PR에서 끝낸다.** 세 게이트 결론을 기록하는 PR이 상태도 바꾼다: 측정한 모든 모델에서 §6.3 통과 → 등록, 하나라도 미통과 → `git mv`로 `deprecated/` 이동. 같은 PR 안에서 description·본문을 고쳐 다시 재는 것은 허용.

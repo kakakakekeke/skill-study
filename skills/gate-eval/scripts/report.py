@@ -285,7 +285,7 @@ def main() -> None:
                 if has_skill:
                     lines.append(f"- 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)")
                 if any(hb):
-                    lines.append(f"- 훅 차단: run당 평균 {mean(hb):.1f}회 (tool_result is_error에 'hook')")
+                    lines.append(f"- 훅 차단: run당 평균 {mean(hb):.1f}회 (PreToolUse 거부 + Stop hook feedback)")
                 lines += [f"- **{m} 판정: {kind_txt}**", ""]
                 if osmosis:
                     lines.append("  - 미호출 run 통과율: " + ", ".join(f"{r['eval_name']}/rep{r['rep']}={fmt(r['grading']['summary']['pass_rate'], True)}" for r in osmosis))

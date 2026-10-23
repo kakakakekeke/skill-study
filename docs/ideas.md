@@ -23,7 +23,7 @@
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
-| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **폐기 (G1 haiku만 미발동)** (`deprecated/`, 10-23 §6.4) (10-23 5회: G2 품질형 통과 haiku +12.6%/opus +13.3%/sonnet +23.0%·회귀 0, G3 통과. G1은 description v3로 opus·sonnet held-out 14/14 통과, haiku 11/14 — 검증을 언급 안 한 평범한 변경 요청에 라우터가 NONE. 실제 수행 중 호출은 haiku 11/15·opus 15/15로 G1 프록시와 갈림. 20번 ci-preflight 흡수(`scripts/preflight.py`). `study/gate-eval-round-2.md`. 10-23 재측정(수행 중 G1): haiku 재현율 0%·opus 50%로 두 모델 실패, G2 통과(+11.3%/+28.0%) → 재폐기. 모델은 과제 시작 때만 스킬을 고른다. 남은 길은 Stop 훅(§3.2, 거짓양성률 측정 필요, "최종 메시지 인용" 이득은 훅이 못 줌)) |
+| 13 | `verify-before-done` | skill + scripts/verify.sh | 완료 선언 전 테스트·타입체크·린트를 새로 실행하고 exit code를 최종 메시지에 인용. 거짓 완료율이 지표 | 1 | 없음 | **폐기 (G1 haiku만 미발동)** (`deprecated/`, 10-23 §6.4) (10-23 5회: G2 품질형 통과 haiku +12.6%/opus +13.3%/sonnet +23.0%·회귀 0, G3 통과. G1은 description v3로 opus·sonnet held-out 14/14 통과, haiku 11/14 — 검증을 언급 안 한 평범한 변경 요청에 라우터가 NONE. 실제 수행 중 호출은 haiku 11/15·opus 15/15로 G1 프록시와 갈림. 20번 ci-preflight 흡수(`scripts/preflight.py`). `study/gate-eval-round-2.md`. 10-23 재측정(수행 중 G1): haiku 재현율 0%·opus 50%로 두 모델 실패, G2 통과(+11.3%/+28.0%) → 재폐기. 모델은 과제 시작 때만 스킬을 고른다. → 29번 `verify-on-stop`(Stop 훅)으로 대체. 인용 이득은 훅의 systemMessage가 대신함) |
 | 14 | `repro-first` v2 (abstain-or-fix) | 기존 스킬 확장 + scripts/repro_check.py | 재현이 올바른 이유로 실패하는지 확인, 재현 불가면 변경 없이 보고. fixture에 진짜 버그/이미 수정/부분 수정 3군 | 1, 4.6 | 없음 | **보류 (기준선이 이미 중단함)** (10-23 5회, fixture 3군 9개: without/v1/v2 모두 정답 중단 15/15·잘못된 중단 0·해결 15/15. v2−v1 Δ는 노이즈 안(+1.3/−3.0pp), v2 opus는 without 대비 동률로 G2 실패. v1 유지, v2 본문·repro_check.py는 evals/에 보관. 모듈 7개짜리 ledger 세트(옛 API·무관한 실패·틀린 신고·특수 처리·증상 변화·깊은 버그 6개)에서도 세 조건 모두 결과 assertion 60/60으로 동일 → 현 모델엔 빈칸 없음. `study/gate-eval-round-2.md`) |
 | 15 | `plan-first` | skill | 첫 Edit 전 ≤8단계 계획 | 1 | **Claude Code plan mode와 중복 가능성 — §3.1 확인 전엔 착수 금지** | 보류: 소형 모델만 검증(+5.4pp), opus 소멸 위험 |
 | 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 보류: 23번 impact-map과 같은 것. 13번 verify-before-done의 연관 테스트 선택으로 흡수 |
@@ -44,6 +44,12 @@
 | 26 | `loop-breaker` | skill + scripts | 실패 시그니처 반복 감지 시 전환 요구 | 비진전 반복 | abstain-or-fix 인접 | 아이디어 |
 | 27 | `coverage-delta` / `dead-code-sweep` / `migration-reversibility` | scripts | 비용형 후보 풀 | 낮음 | simplify 부분 | 아이디어 |
 | 28 | secret-scan, force-push 차단 | **hook** | 스킬 아님 | — | security-review | §3.2에 따라 반복 위반 관찰 후 훅으로 |
+
+## 2026-10-23 후속
+
+| # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
+|---|---|---|---|---|---|---|
+| 29 | `verify-on-stop` | plugin (Stop hook + scripts/preflight.py) | 이번 요청에서 소스를 고쳤는데 그 뒤로 preflight가 안 돌았으면 끝내기 전에 훅이 직접 돌림. 실패면 한 번만 막고, 통과면 systemMessage로 결과를 사용자에게 보임 | 1, 3 | 없음 | **게이트 통과 → 배포** (10-23 5회, 7 fixture: 이득 3·오탐 4. 두 모델 품질형 +16.7%, 회귀 0/23, 노이즈 바닥 1%. typecheck-only mypy clean 0/10→10/10. 오탐 fixture는 모순 테스트·TDD red에서 20/20 막았지만 결과 회귀 0, 문서만·무관한 기존 실패에서는 0/20 막음. 비용 출력 +36%/+25%, 시간 +36%/+37%. 13번 verify-before-done의 후속. `study/gate-eval-round-2.md` ④) |
 
 ### 통합 우선순위 (리서치 1+2, 2026-10-23)
 

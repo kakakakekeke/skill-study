@@ -3,7 +3,7 @@
     "Stop": [
       {
         "hooks": [
-          {"type": "command", "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/stop_verify.py", "timeout": 240}
+          {"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/stop_verify.py\"", "timeout": 240}
         ]
       }
     ]

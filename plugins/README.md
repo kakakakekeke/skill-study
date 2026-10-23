@@ -16,3 +16,10 @@ plugins/
 
 - 로컬 테스트: `claude --plugin-dir ./plugins/<plugin-name>`
 - 플러그인 안의 스킬은 `plugin-name:skill-name`으로 호출된다
+- 상태·등록 규칙은 스킬과 같다(`docs/principles.md` §6.4). 측정은 `gate-eval`에 이 디렉터리를 넘기고 `--configs "without,hook=hook" --hook <dir>/evals/hook-settings.json`
+
+설치 (배포 중):
+
+```
+/plugin install verify-on-stop --marketplace kakakakekeke/skill-study
+```
