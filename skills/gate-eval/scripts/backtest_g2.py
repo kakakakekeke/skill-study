@@ -6,7 +6,7 @@
   셀 회귀(eval×assertion) = 기준선 k/k 통과인데 처리 다수결 실패, 또는 단측 Fisher p < 0.05
   비용형 = 셀 회귀 0 AND 순Δ ≥ −5%p AND 품질 저하 순열 p ≥ 0.05 AND 출력 토큰 또는 시간 30% 이상 감소
   노이즈 바닥은 판정에서 빼고 참고치로. run 짝 비교 과반은 삭제(순열 검정과 중복).
-2026-10-24 실행 결과(57건, 판정 변경 8건): docs/study/gate-eval-round-2/g2-rule-backtest-2026-10-24.txt
+2026-10-24 실행 결과(57건, 판정 변경 9건 — 처음엔 8건으로 잘못 셌다): docs/study/gate-eval-round-2/g2-rule-backtest-2026-10-24.txt
 
 사용: python3 backtest_g2.py <results_dir> [<results_dir> ...]   (각 디렉터리 = gate-eval 결과 폴더, quality/ 포함)
 결과 폴더의 configs.json/baseline 규칙은 report.py와 같다. 증분 측정 폴더는 '<dir>::<baseline>'으로 기준선을 지정한다.
