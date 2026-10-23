@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """세 게이트 eval 오케스트레이터.
 
-python3 gate_eval.py --skill skills/<name> [--models haiku,opus] [--reps 3] [--skip-trigger] [--skip-quality] [--grader sonnet]
+python3 gate_eval.py --skill skills/<name> [--models haiku,sonnet] [--reps 3] [--skip-trigger] [--skip-quality] [--grader sonnet]
 결과: <skill>/evals/results/<YYYY-MM-DD>/ (gitignore 대상) 에 report.md, summary.json
 단계는 각각 캐시되므로 중단 후 같은 명령을 다시 실행하면 이어서 한다.
 """
@@ -25,7 +25,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", default=None)
-    ap.add_argument("--models", default="haiku,opus")
+    ap.add_argument("--models", default="haiku,sonnet")
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--grader", default="sonnet")
     ap.add_argument("--workers", type=int, default=6)

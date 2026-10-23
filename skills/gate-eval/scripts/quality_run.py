@@ -134,7 +134,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--models", default="haiku,opus")
+    ap.add_argument("--models", default="haiku,sonnet")
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--configs", default="with,without", help="예: with,without | without=,skill=skill,hook=hook,both=skill+hook")
     ap.add_argument("--hook", default=None, help="hook 구성요소용 settings.json (${SKILL_DIR} 치환, 임시 프로젝트 .claude/settings.json으로 복사)")

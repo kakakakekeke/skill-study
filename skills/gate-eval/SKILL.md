@@ -1,6 +1,6 @@
 ---
 name: gate-eval
-description: Measures a skill in this repository against the three adoption gates (trigger accuracy, with/without quality with a noise floor, token cost) on haiku and opus with repeated runs, and writes a fixed-format report under the skill's evals/results/. Invoke as /gate-eval skills/<name>.
+description: Measures a skill in this repository against the three adoption gates (trigger accuracy, with/without quality with a noise floor, token cost) on haiku and sonnet with repeated runs, and writes a fixed-format report under the skill's evals/results/. Invoke as /gate-eval skills/<name>.
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 ## 왜 이 절차인가
 
-단일 실행 비교는 노이즈를 효과로 착각한다. 그래서 기준선을 자기 자신과 반복 비교해 뒤집힘률(노이즈 바닥)을 먼저 재고, 그 아래의 "회귀"는 회귀로 치지 않는다. 뒤집힘 0건은 노이즈가 없다는 뜻이 아니라 못 봤다는 뜻이므로 바닥은 max(관측, 3/N)으로 잡는다(3회 반복 0%가 5회에서 3%로 드러난 사례 있음). Δ가 3/N 근처면 `--reps 5`로 다시 잰다. 이득과 회귀는 쌍으로 보고한다(한쪽만 보면 선별 편향). 모델 2종(haiku, opus)으로 돌리는 이유는 작은 모델에서 효과가 크고 큰 모델에서 사라지는 스킬이 흔하기 때문이다.
+단일 실행 비교는 노이즈를 효과로 착각한다. 그래서 기준선을 자기 자신과 반복 비교해 뒤집힘률(노이즈 바닥)을 먼저 재고, 그 아래의 "회귀"는 회귀로 치지 않는다. 뒤집힘 0건은 노이즈가 없다는 뜻이 아니라 못 봤다는 뜻이므로 바닥은 max(관측, 3/N)으로 잡는다(3회 반복 0%가 5회에서 3%로 드러난 사례 있음). Δ가 3/N 근처면 `--reps 5`로 다시 잰다. 이득과 회귀는 쌍으로 보고한다(한쪽만 보면 선별 편향). 모델 2종(haiku, sonnet; 2026-10-23까지는 opus)으로 돌리는 이유는 작은 모델에서 효과가 크고 큰 모델에서 사라지는 스킬이 흔하기 때문이다.
 
 ## 실행
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 스크립트는 이 스킬 디렉터리의 `scripts/gate_eval.py`다 (이 저장소에서는 `skills/gate-eval/scripts/gate_eval.py`).
 
 ```bash
-python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name>            # 기본: haiku,opus × 3회
+python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name>            # 기본: haiku,sonnet × 3회
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5   # 노이즈가 크면 반복 증가
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --skip-trigger --only 1,2
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \

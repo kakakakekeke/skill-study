@@ -124,7 +124,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--models", default="haiku,opus")
+    ap.add_argument("--models", default="haiku,sonnet")
     ap.add_argument("--runs-per-query", type=int, default=3)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timeout", type=int, default=120)
