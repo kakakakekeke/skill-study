@@ -37,6 +37,7 @@ def main() -> None:
     ap.add_argument("--only", default="")
     ap.add_argument("--configs", default="with,without", help="quality_run.py --configs 와 같음")
     ap.add_argument("--hook", default=None, help="quality_run.py --hook 과 같음")
+    ap.add_argument("--baseline", default=None, help="report.py --baseline 과 같음 (증분 측정)")
     a = ap.parse_args()
     skill = Path(a.skill).resolve()
     out = Path(a.out) if a.out else skill / "evals" / "results" / date.today().isoformat()
@@ -70,7 +71,7 @@ def main() -> None:
         sh(cmd)
     if not a.skip_grade and (out / "quality").exists():
         sh([py, str(HERE / "grade.py"), "--skill", str(skill), "--out", str(out), "--grader", a.grader, "--workers", str(a.workers)])
-    sh([py, str(HERE / "report.py"), "--skill", str(skill), "--out", str(out)])
+    sh([py, str(HERE / "report.py"), "--skill", str(skill), "--out", str(out), *(["--baseline", a.baseline] if a.baseline else [])])
 
 
 if __name__ == "__main__":

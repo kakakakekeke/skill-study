@@ -27,7 +27,8 @@ LEGACY = {"with": ("with_skill", {"skill"}), "without": ("without_skill", set())
 
 def parse_configs(spec: str) -> list[tuple[str, set[str]]]:
     """'with,without' (호환) 또는 'without=,skill=skill,hook=hook,both=skill+hook' → [(디렉터리 이름, 구성요소 집합)].
-    구성요소: skill(.claude/skills/<name> 링크), hook(--hook settings.json 복사). 이름만 있고 '='가 없으면 이름 자체를 구성요소로 해석한다."""
+    구성요소: skill(.claude/skills/<name> 링크), hook(--hook settings.json 복사), siblings(같은 상위 디렉터리의 model-invoked 형제 스킬도 링크;
+    실제 설치 환경의 경쟁을 재현한다). 이름만 있고 '='가 없으면 이름 자체를 구성요소로 해석한다."""
     out = []
     for item in spec.split(","):
         item = item.strip()
@@ -36,10 +37,10 @@ def parse_configs(spec: str) -> list[tuple[str, set[str]]]:
         if item in LEGACY:
             out.append(LEGACY[item]); continue
         name, _, comps = item.partition("=")
-        comps = {c for c in comps.split("+") if c} if _ else ({name} if name in ("skill", "hook") else set())
-        bad = comps - {"skill", "hook"}
+        comps = {c for c in comps.split("+") if c} if _ else ({name} if name in ("skill", "hook", "siblings") else set())
+        bad = comps - {"skill", "hook", "siblings"}
         if bad:
-            raise ValueError(f"알 수 없는 구성요소 {bad} (skill|hook)")
+            raise ValueError(f"알 수 없는 구성요소 {bad} (skill|hook|siblings)")
         out.append((name, comps))
     return out
 
@@ -61,6 +62,14 @@ def prepare_project(skill_dir: Path, ev: dict, comps: set[str], name: str, hook_
         skills_dir = proj / ".claude" / "skills"
         skills_dir.mkdir(parents=True, exist_ok=True)
         (skills_dir / name).symlink_to(skill_dir.resolve(), target_is_directory=True)
+    if "siblings" in comps:
+        skills_dir = proj / ".claude" / "skills"
+        skills_dir.mkdir(parents=True, exist_ok=True)
+        for d in sorted(skill_dir.resolve().parent.iterdir()):
+            md = d / "SKILL.md"
+            if d.name == name or not md.exists() or "disable-model-invocation: true" in md.read_text().split("---")[1]:
+                continue
+            (skills_dir / d.name).symlink_to(d, target_is_directory=True)
     if "hook" in comps:
         if not hook_settings:
             raise ValueError("hook 구성요소에는 --hook <settings.json>이 필요하다")

@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {"hooks": [{"type": "command", "command": "python3 \"${SKILL_DIR}/hooks/inject_trigger.py\"", "timeout": 5}]}
+    ]
+  }
+}

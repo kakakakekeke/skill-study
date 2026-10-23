@@ -89,6 +89,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--baseline", default=None, help="기준선 조건 이름(증분 측정: 예 sib). 없으면 구성요소 없는 조건")
     a = ap.parse_args()
     skill_dir = Path(a.skill).resolve()
     out = Path(a.out)
@@ -162,7 +163,7 @@ def main() -> None:
     cfg_file = out / "quality" / "configs.json"
     cfg_defs = json.loads(cfg_file.read_text()) if cfg_file.exists() else {}
     configs = sorted({k[2] for k in by})
-    baseline = next((c for c in configs if cfg_defs.get(c) == []), "without_skill" if "without_skill" in configs else None)
+    baseline = a.baseline if a.baseline in configs else next((c for c in configs if cfg_defs.get(c) == []), "without_skill" if "without_skill" in configs else None)
     treatments = [c for c in configs if c != baseline]
     treatments.sort(key=lambda c: (c != "with_skill", c))  # legacy with_skill을 1차 처리로
     primary = treatments[0] if treatments else None  # 스킬 게이트 판정에 쓰는 처리
