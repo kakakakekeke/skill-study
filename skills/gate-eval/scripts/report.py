@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """세 게이트 보고서: quality/·trigger/ 결과를 모아 report.md + summary.json.
 
-G2 판정 규칙(조작적 정의, principles §2):
-  노이즈 바닥 = without 반복들 사이에서 같은 assertion의 통과/실패가 뒤집히는 비율(쌍 단위, eval×model 평균).
-  회귀 = without 다수결 통과 → with 다수결 실패인 assertion. 회귀율 = 회귀 수 / assertion 수.
-  이득 = 반대 방향.
-  노이즈 바닥 = max(관측 뒤집힘률, 3/N). N = without 반복 쌍 비교 횟수. 0건 관측은 과소추정이므로 rule-of-three 상한을 하한으로.
-  필수 = 모델마다 회귀율 ≤ 노이즈 바닥.
-  품질형 통과 = 필수 AND 순Δ(평균 통과율 with − without) > 노이즈 바닥 AND rep 짝 비교에서 with ≥ without 과반.
-  비용형 통과 = 필수 AND |순Δ| ≤ 노이즈 바닥(동률) AND 출력 토큰 또는 소요 시간이 30% 이상 감소(COST_CUT).
-  둘 다 아니면 실패. 노이즈 바닥 안의 순Δ는 품질 이득이 아니다. 컨텍스트 토큰 비율은 턴 수에 비례하므로 참고치.
+G2 판정 규칙(조작적 정의, principles §2, 2026-10-24 개정):
+  순Δ = eval별 (처리 평균 통과율 − 기준선 평균 통과율)의 평균.
+  순열 검정 = 층화(eval 안에서만 run의 조건 라벨을 섞음), 20,000회, seed 42. 통계량은 순Δ.
+    p↑ = 섞은 순Δ ≥ 관측 순Δ 비율(처리가 낫다), p↓ = 섞은 순Δ ≤ 관측 순Δ 비율(처리가 나쁘다). 단측, (k+1)/(B+1).
+  셀 회귀(eval×assertion) = 기준선 k/k 통과인데 처리 다수결 실패, 또는 단측 Fisher p < 0.05(기준선 통과율 > 처리).
+  품질형 통과 = p↑ < 0.05 AND 순Δ ≥ 5%p AND 셀 회귀 0.
+  비용형 통과 = 셀 회귀 0 AND 순Δ ≥ −5%p AND p↓ ≥ 0.05 AND 출력 토큰 또는 소요 시간이 30% 이상 감소(COST_CUT).
+  둘 다 아니면 실패. 5%p·α 0.05는 잠정. 이득(다수결 실패 → 통과) 수는 참고치.
+  노이즈 바닥(기준선 반복 쌍의 뒤집힘률, max(관측, 3/N))은 판정에 쓰지 않는 참고치. 컨텍스트 토큰 비율도 턴 수에 비례하므로 참고치.
+  검산: backtest_g2.py(개정안 소급 비교)와 같은 계산이다.
 G3 (잠정): description ≈토큰, SKILL.md 줄 수(<200), 실행 토큰 비율 with/without. 공식 측정은 /skill-doctor. 비율 > 1.5이고 G2 실패면 실패.
 """
 from __future__ import annotations
@@ -17,6 +18,8 @@ from __future__ import annotations
 import argparse
 import itertools
 import json
+import math
+import random
 import statistics as st
 import sys
 from collections import defaultdict
@@ -66,6 +69,36 @@ def flip_rate(reps: list[dict]) -> float | None:
 def mean(xs):
     xs = [x for x in xs if x is not None]
     return st.mean(xs) if xs else None
+
+
+MDE = 0.05      # 품질형 최소 순Δ (잠정)
+ALPHA = 0.05    # 순열 검정·Fisher 단측 유의수준 (잠정)
+NONINF = -0.05  # 비용형 비열등 한계 (잠정)
+PERM_B = 20000
+PERM_SEED = 42
+
+
+def fisher_worse(t_pass: int, t_n: int, b_pass: int, b_n: int) -> float:
+    """단측 Fisher: H1 = 기준선 통과율 > 처리 통과율. 처리 통과 수가 관측 이하일 초기하 확률."""
+    k_all, n_all = t_pass + b_pass, t_n + b_n
+    lo = max(0, k_all - b_n)
+    return sum(math.comb(k_all, k) * math.comb(n_all - k_all, t_n - k) for k in range(lo, t_pass + 1)) / math.comb(n_all, t_n)
+
+
+def perm_test(pools: list[tuple[list[float], list[float]]], obs: float) -> tuple[float, float]:
+    """층화 순열 검정. pools = eval별 (처리 통과율들, 기준선 통과율들). 반환 (p↑, p↓)."""
+    rng = random.Random(PERM_SEED)
+    ge = le = 0
+    for _ in range(PERM_B):
+        ds = []
+        for t_, b_ in pools:
+            allv = t_ + b_
+            rng.shuffle(allv)
+            ds.append(st.mean(allv[:len(t_)]) - st.mean(allv[len(t_):]))
+        d = st.mean(ds)
+        ge += d >= obs - 1e-12
+        le += d <= obs + 1e-12
+    return (ge + 1) / (PERM_B + 1), (le + 1) / (PERM_B + 1)
 
 
 def sd(xs):
@@ -223,8 +256,8 @@ def main() -> None:
             g2 = {}
             lines += [f"### 처리 `{t}` (구성요소 {comp_txt(t)}) vs `{baseline}`", ""]
             for m in models:
-                lines += [f"#### 모델 {m}", "", f"| eval | {t} 통과율 (mean±sd) | {baseline} 통과율 (mean±sd) | Δ | 노이즈 바닥({baseline}) | 뒤집힘({t}) | 이득 | 회귀 | 스킬 미호출 |", "|---|---|---|---|---|---|---|---|---|"]
-                nf_all, reg_all, gain_all, n_items_all, pair_wins, pair_total, deltas = [], 0, 0, 0, 0, 0, []
+                lines += [f"#### 모델 {m}", "", f"| eval | {t} 통과율 (mean±sd) | {baseline} 통과율 (mean±sd) | Δ | 뒤집힘({baseline}, 참고) | 뒤집힘({t}) | 이득 | 셀 회귀 | 스킬 미호출 |", "|---|---|---|---|---|---|---|---|---|"]
+                nf_all, reg_all, gain_all, n_items_all, deltas, pools = [], 0, 0, 0, [], []
                 osmosis = []
                 cmp_total = cmp_flips = 0  # 기준선 반복 쌍 비교 횟수·뒤집힘 수 (노이즈 바닥의 표본 크기)
                 has_skill = "skill" in (cfg_defs.get(t) or (["skill"] if t == "with_skill" else []))
@@ -241,16 +274,16 @@ def main() -> None:
                     n_items = len(w[0]["grading"]["expectations"])
                     gains, regs = [], []
                     for i in range(n_items):
-                        mw = majority([r["grading"]["expectations"][i]["passed"] for r in w])
-                        mwo = majority([r["grading"]["expectations"][i]["passed"] for r in wo])
+                        vw = [r["grading"]["expectations"][i]["passed"] for r in w]
+                        vwo = [r["grading"]["expectations"][i]["passed"] for r in wo]
                         txt = w[0]["grading"]["expectations"][i]["text"]
-                        if mw and not mwo:
+                        if majority(vw) and not majority(vwo):
                             gains.append(txt)
-                        elif mwo and not mw:
-                            regs.append(txt)
-                    for rw, rwo in zip(sorted(w, key=lambda r: r["rep"]), sorted(wo, key=lambda r: r["rep"])):
-                        pair_total += 1
-                        pair_wins += rw["grading"]["summary"]["pass_rate"] >= rwo["grading"]["summary"]["pass_rate"]
+                        # 셀 회귀: 기준선 k/k 통과인데 처리 다수결 실패, 또는 단측 Fisher p < α
+                        p_f = fisher_worse(sum(vw), len(vw), sum(vwo), len(vwo))
+                        if (all(vwo) and not majority(vw)) or p_f < ALPHA:
+                            regs.append(f"[처리 {sum(vw)}/{len(vw)}, 기준선 {sum(vwo)}/{len(vwo)}, Fisher p={p_f:.3f}] {txt}")
+                    pools.append((pw, pwo))
                     not_invoked = [r for r in w if not r.get("skill_invoked")] if has_skill else []
                     osmosis += not_invoked
                     nf_all.append(nf); reg_all += len(regs); gain_all += len(gains); n_items_all += n_items
@@ -260,20 +293,19 @@ def main() -> None:
                     for g_ in gains:
                         lines.append(f"|  | ↑ 이득: {g_[:90]} | | | | | | | |")
                     for r_ in regs:
-                        lines.append(f"|  | ↓ 회귀: {r_[:90]} | | | | | | | |")
+                        lines.append(f"|  | ↓ 셀 회귀: {r_[:130]} | | | | | | | |")
                 noise = mean(nf_all) or 0.0
-                noise_ub = 3 / cmp_total if cmp_total else None  # 뒤집힘 0건일 때의 95% 상한(rule of three)
-                floor = max(noise, noise_ub or 0.0)  # principles §2: 노이즈 바닥 = max(관측, 3/N)
+                noise_ub = 3 / cmp_total if cmp_total else None
+                floor = max(noise, noise_ub or 0.0)  # 참고치: 판정에 쓰지 않는다(2026-10-24 개정)
                 reg_rate = reg_all / n_items_all if n_items_all else 0.0
                 net = mean(deltas) or 0.0
-                consistent = pair_total and pair_wins * 2 > pair_total
-                reg_ok = reg_rate <= floor + 1e-9
+                p_up, p_down = perm_test(pools, net) if pools else (1.0, 1.0)
                 c = cost.get((t, m), {})
                 cuts = [x for x in (c.get("output_cut"), c.get("duration_cut")) if x is not None]
                 best_cut = max(cuts) if cuts else 0.0
-                if reg_ok and net > floor + 1e-9 and consistent:
+                if reg_all == 0 and p_up < ALPHA and net >= MDE - 1e-9:
                     kind = "quality"
-                elif reg_ok and abs(net) <= floor + 1e-9 and best_cut >= COST_CUT:
+                elif reg_all == 0 and p_down >= ALPHA and net >= NONINF - 1e-9 and best_cut >= COST_CUT:
                     kind = "cost"
                 else:
                     kind = None
@@ -281,11 +313,12 @@ def main() -> None:
                 hb = [r.get("hook_blocks") or 0 for e in evals for r in by.get((e, m, t), [])]
                 g2[m] = {"noise_floor_observed": noise, "noise_comparisons": cmp_total, "noise_flips": cmp_flips, "noise_floor_rule_of_three": noise_ub, "noise_floor": floor,
                          "regression_rate": reg_rate, "gains": gain_all, "regressions": reg_all, "net_delta": net,
-                         "pair_wins": f"{pair_wins}/{pair_total}", "verdict": "pass" if ok else "fail", "kind": kind,
+                         "perm_p_up": p_up, "perm_p_down": p_down, "verdict": "pass" if ok else "fail", "kind": kind,
                          "output_cut": c.get("output_cut"), "duration_cut": c.get("duration_cut"),
                          "with_not_invoked": len(osmosis), "hook_blocks_mean": mean(hb) if hb else None}
                 kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형)", None: "실패"}[kind]
-                lines += ["", f"- 노이즈 바닥: **{fmt(floor, True)}** = max(관측 {fmt(noise, True)} [뒤집힘 {cmp_flips}/{cmp_total}회 비교], 3/N {fmt(noise_ub, True) if noise_ub is not None else '-'}) · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 {t}≥{baseline} {pair_wins}/{pair_total}",
+                lines += ["", f"- 순Δ **{net*100:+.1f}%** (품질형 기준 ≥ {MDE*100:.0f}%p) · 층화 순열 p↑ **{p_up:.4f}** / p↓ {p_down:.4f} (α {ALPHA}) · 셀 회귀 **{reg_all}**/{n_items_all} · 이득 {gain_all}건",
+                          f"- 참고: 노이즈 바닥 {fmt(floor, True)} = max(관측 {fmt(noise, True)} [뒤집힘 {cmp_flips}/{cmp_total}회 비교], 3/N {fmt(noise_ub, True) if noise_ub is not None else '-'}) — 판정에 쓰지 않음",
                           f"- 비용: 출력 토큰 {cut_txt(c.get('output_cut'))} · 시간 {cut_txt(c.get('duration_cut'))} (비용형 기준 {int(COST_CUT*100)}% 이상 감소)"]
                 if has_skill:
                     lines.append(f"- 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)")
@@ -302,7 +335,7 @@ def main() -> None:
             kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형: 품질 동률, 비용 확연히 감소)", None: "실패"}[overall_kind]
             lines += [f"**처리 `{t}` G2 판정: {kind_txt}**", ""]
         summary["g2"] = {**g2_all[primary], "baseline": baseline, "primary": primary, "treatments": g2_all}
-        lines += [f"**G2 판정 (스킬 게이트 = 처리 `{primary}`): {({'quality': '통과 (품질형)', 'cost': '통과 (비용형)', None: '실패'})[g2_all[primary]['kind']]}** (필수: 모든 모델에서 회귀율 ≤ 노이즈 바닥. 품질형: 순Δ > 노이즈 바닥 그리고 짝 비교 과반. 비용형: 순Δ가 노이즈 바닥 안이고 출력 토큰 또는 시간 {int(COST_CUT*100)}% 이상 감소)", ""]
+        lines += [f"**G2 판정 (스킬 게이트 = 처리 `{primary}`): {({'quality': '통과 (품질형)', 'cost': '통과 (비용형)', None: '실패'})[g2_all[primary]['kind']]}** (모델마다. 품질형: 층화 순열 p↑ < {ALPHA} 그리고 순Δ ≥ {MDE*100:.0f}%p 그리고 셀 회귀 0. 비용형: 셀 회귀 0 그리고 순Δ ≥ {NONINF*100:.0f}%p 그리고 p↓ ≥ {ALPHA} 그리고 출력 토큰 또는 시간 {int(COST_CUT*100)}% 이상 감소)", ""]
         lines += ["회귀 사례는 하나씩 정성 검토한다 — 각 run의 `grading.json` evidence와 `transcript.md`를 본다.", ""]
 
     # ---- 수행 중 호출률 (보고용, 원칙 §2 "수행 중 호출률과 보완")

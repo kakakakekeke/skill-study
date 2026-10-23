@@ -1,6 +1,6 @@
 ---
 name: gate-eval
-description: Measures a skill in this repository against the three adoption gates (trigger accuracy, with/without quality with a noise floor, token cost) on haiku and sonnet with repeated runs, and writes a fixed-format report under the skill's evals/results/. Invoke as /gate-eval skills/<name>.
+description: Measures a skill in this repository against the three adoption gates (trigger accuracy, with/without quality via a stratified permutation test and per-cell regressions, token cost) on haiku and sonnet with repeated runs, and writes a fixed-format report under the skill's evals/results/. Invoke as /gate-eval skills/<name>.
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 ## 왜 이 절차인가
 
-단일 실행 비교는 노이즈를 효과로 착각한다. 그래서 기준선을 자기 자신과 반복 비교해 뒤집힘률(노이즈 바닥)을 먼저 재고, 그 아래의 "회귀"는 회귀로 치지 않는다. 뒤집힘 0건은 노이즈가 없다는 뜻이 아니라 못 봤다는 뜻이므로 바닥은 max(관측, 3/N)으로 잡는다(3회 반복 0%가 5회에서 3%로 드러난 사례 있음). Δ가 3/N 근처면 `--reps 5`로 다시 잰다. 이득과 회귀는 쌍으로 보고한다(한쪽만 보면 선별 편향). 모델 2종(haiku, sonnet; 2026-10-23까지는 opus)으로 돌리는 이유는 작은 모델에서 효과가 크고 큰 모델에서 사라지는 스킬이 흔하기 때문이다. grader는 opus다. 측정 대상과 다른 모델이 채점해야 자기 채점 편향이 없다.
+단일 실행 비교는 노이즈를 효과로 착각한다. 그래서 이득은 **층화 순열 검정**(eval 안에서만 run의 조건 라벨을 섞어 순Δ의 우연 분포를 만든다)으로 유의성을 보고, 최소 효과 크기(순Δ 5%p)를 따로 요구한다. 회귀는 eval×assertion **셀마다** 본다. 한 셀의 회귀가 다른 셀의 이득에 묻히지 않게 하기 위해서다. 예전의 노이즈 바닥(기준선 반복 쌍의 뒤집힘률 평균)은 반복을 늘려도 줄지 않고 셀끼리 섞여서, 기준선의 비일관성을 없애는 이득은 삼키고 깨끗한 회귀는 가렸다. 그래서 지금은 참고치로만 적는다. 경계 근처(p가 0.05 근처)면 `--reps 5`로 다시 잰다. 이득과 회귀는 쌍으로 보고한다(한쪽만 보면 선별 편향). 모델 2종(haiku, sonnet; 2026-10-23까지는 opus)으로 돌리는 이유는 작은 모델에서 효과가 크고 큰 모델에서 사라지는 스킬이 흔하기 때문이다. grader는 opus다. 측정 대상과 다른 모델이 채점해야 자기 채점 편향이 없다.
 
 ## 실행
 
@@ -44,7 +44,7 @@ python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \
 | 게이트 | 판정 규칙 (report.py에 고정) | 실패 시 |
 |---|---|---|
 | G1 | 모델마다 held-out test에서 과잉·미발동 각 1건 이하 | description을 고치고 **train만 보고** 다시. test를 보며 고치면 과적합 |
-| G2 | 노이즈 바닥 = max(관측 뒤집힘률, 3/N). 필수: 회귀율 ≤ 노이즈 바닥. **품질형** = 순Δ > 노이즈 바닥 **그리고** rep 짝 비교 과반. **비용형** = 순Δ가 노이즈 바닥 안(동률) **그리고** 출력 토큰 또는 시간 30% 이상 감소. 보고서에 유형을 적는다 | 회귀 사례를 하나씩 `grading.json` evidence·`transcript.md`로 정성 검토. assertion을 통과하게 고치는 것은 금지. 노이즈 바닥 안의 순Δ는 품질 이득으로 쓰지 않는다 |
+| G2 | 모델마다. **셀 회귀**(eval×assertion) = 기준선 k/k 통과인데 처리 다수결 실패, 또는 단측 Fisher p < 0.05. **품질형** = 층화 순열 검정(20,000회, seed 42) 단측 p↑ < 0.05 **그리고** 순Δ ≥ 5%p **그리고** 셀 회귀 0. **비용형** = 셀 회귀 0 **그리고** 순Δ ≥ −5%p **그리고** 품질 저하 p↓ ≥ 0.05 **그리고** 출력 토큰 또는 시간 30% 이상 감소. 5%p·α는 잠정. 노이즈 바닥은 참고치. 보고서에 유형을 적는다 | 셀 회귀를 하나씩 `grading.json` evidence·`transcript.md`로 정성 검토. assertion을 통과하게 고치는 것은 금지. 유의하지 않거나 5%p 미만인 순Δ는 품질 이득으로 쓰지 않는다 |
 | G3 | 본문 < 200줄, 컨텍스트 토큰 비율 > 1.5인데 G2 실패면 실패(잠정). 비율은 턴 수에 비례하는 참고치 | 공식 측정은 세션에서 `/skill-doctor`. 비싸면 라우팅(user-invoked + references/) |
 
 G2 표의 "with 미호출"은 삼투 조건이다. 스킬이 있는데 호출되지 않은 run이 통과율을 올렸다면 description 자체가 행동을 바꾼 것이니 따로 적는다.

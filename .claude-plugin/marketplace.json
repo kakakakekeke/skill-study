@@ -32,7 +32,7 @@
     {
       "name": "test-integrity-check",
       "description": "실패 테스트를 애플리케이션 코드로만 통과시키고, 테스트가 스펙과 충돌하면 테스트를 고치지 않고 근거와 함께 보고한다",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "development",
       "source": "./skills",
       "strict": false,
