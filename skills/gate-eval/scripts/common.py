@@ -36,6 +36,8 @@ def find_skill_creator() -> Path | None:
 
 
 def parse_frontmatter(skill_md: Path) -> tuple[str, str, str]:
+    if not skill_md.exists():  # 훅 전용 플러그인: 이름은 디렉터리 이름, description·본문 없음
+        return skill_md.parent.name, "", ""
     text = skill_md.read_text()
     if not text.startswith("---"):
         raise ValueError(f"frontmatter 없음: {skill_md}")
@@ -63,13 +65,15 @@ def parse_frontmatter(skill_md: Path) -> tuple[str, str, str]:
 
 
 def run_claude(prompt: str, cwd: Path, model: str, timeout: int, max_turns: int,
-               setting_sources: str = "project", extra: list[str] | None = None) -> dict:
-    """claude -p를 stream-json으로 실행. events, result, duration을 돌려준다."""
+               setting_sources: str = "project", extra: list[str] | None = None, persist: bool = False) -> dict:
+    """claude -p를 stream-json으로 실행. events, result, duration을 돌려준다.
+    persist=True면 세션 트랜스크립트를 남긴다(transcript_path를 읽는 Stop 훅용; --no-session-persistence면 파일이 없다,
+    2026-10-23 확인). 끝나면 그 트랜스크립트를 지운다."""
     cmd = [
         "claude", "-p", prompt,
         "--model", model,
         "--output-format", "stream-json", "--verbose",
-        "--no-session-persistence",
+        *([] if persist else ["--no-session-persistence"]),
         "--setting-sources", setting_sources,
         "--strict-mcp-config",
         "--max-turns", str(max_turns),
@@ -99,6 +103,11 @@ def run_claude(prompt: str, cwd: Path, model: str, timeout: int, max_turns: int,
         events.append(ev)
         if ev.get("type") == "result":
             result = ev
+    if persist:
+        sid = next((e.get("session_id") for e in events if e.get("session_id")), None)
+        if sid:
+            for f in glob.glob(os.path.expanduser(f"~/.claude/projects/*/{sid}.jsonl")):
+                os.remove(f)
     return {"events": events, "result": result, "duration_ms": duration_ms,
             "timed_out": timed_out, "stderr": stderr[-2000:]}
 

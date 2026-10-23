@@ -71,17 +71,23 @@ def prepare_project(skill_dir: Path, ev: dict, comps: set[str], name: str, hook_
 
 
 def hook_blocks(events: list[dict]) -> int:
-    """훅이 도구 호출을 거부한 횟수: is_error인 tool_result 중 내용에 'hook'이 있는 것."""
+    """훅이 막은 횟수: is_error인 tool_result 중 내용에 'hook'이 있는 것(PreToolUse) + 'Stop hook feedback' 사용자 메시지(Stop)."""
     n = 0
     for ev in events:
         if ev.get("type") != "user":
             continue
-        for c in ev.get("message", {}).get("content", []):
+        content = ev.get("message", {}).get("content", [])
+        if isinstance(content, str):
+            n += content.startswith("Stop hook feedback")
+            continue
+        for c in content:
+            if isinstance(c, dict) and c.get("type") == "text" and c.get("text", "").startswith("Stop hook feedback"):
+                n += 1
             if isinstance(c, dict) and c.get("type") == "tool_result" and c.get("is_error"):
-                content = c.get("content")
-                if isinstance(content, list):
-                    content = "\n".join(x.get("text", "") for x in content if isinstance(x, dict))
-                if "hook" in str(content or "").lower():
+                body = c.get("content")
+                if isinstance(body, list):
+                    body = "\n".join(x.get("text", "") for x in body if isinstance(x, dict))
+                if "hook" in str(body or "").lower():
                     n += 1
     return n
 
@@ -96,7 +102,7 @@ def one_run(skill_dir: Path, name: str, ev: dict, model: str, cfg: tuple[str, se
     proj = prepare_project(skill_dir, ev, comps, name, hook_settings)
     try:
         prompt = ev["prompt"] if with_skill else (ev.get("prompt_without") or ev["prompt"])
-        res = run_claude(prompt, proj, model, timeout, max_turns)
+        res = run_claude(prompt, proj, model, timeout, max_turns, persist="hook" in comps)
         events, result = res["events"], res["result"]
         (run_dir / "stream.jsonl").write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events))
         (run_dir / "transcript.md").write_text(transcript_md(events, prompt))
@@ -110,6 +116,7 @@ def one_run(skill_dir: Path, name: str, ev: dict, model: str, cfg: tuple[str, se
             "eval_id": ev["id"], "prompt_used": prompt, "eval_name": ev.get("name") or f"eval-{ev['id']}",
             "model_alias": model, "config": cfg_name, "components": sorted(comps), "rep": rep,
             "hook_blocks": hook_blocks(events) if "hook" in comps else 0,
+            "hook_messages": [e.get("content") for e in events if e.get("type") == "system" and e.get("subtype") == "informational"] if "hook" in comps else [],
             "skill_invoked": (skill_invoked(events, name) or prompt.lstrip().startswith(f"/{name}")) if with_skill else False,  # 슬래시 호출은 도구 호출 없이 전개된다
             "duration_ms": res["duration_ms"], "timed_out": res["timed_out"],
             "final_text": (result or {}).get("result", ""),

@@ -93,8 +93,9 @@ def main() -> None:
     skill_dir = Path(a.skill).resolve()
     out = Path(a.out)
     name, desc, body = parse_frontmatter(skill_dir / "SKILL.md")
-    fm = (skill_dir / "SKILL.md").read_text()
-    user_invoked = "disable-model-invocation: true" in fm.split("---")[1]
+    hook_only = not (skill_dir / "SKILL.md").exists()
+    fm = "" if hook_only else (skill_dir / "SKILL.md").read_text()
+    user_invoked = not hook_only and "disable-model-invocation: true" in fm.split("---")[1]
 
     runs = load_runs(out / "quality") if (out / "quality").exists() else []
     by = defaultdict(list)  # (eval, model, config) -> runs
@@ -112,7 +113,10 @@ def main() -> None:
     # ---- G1
     lines += ["## G1 정확한 트리거", ""]
     tsum = out / "trigger" / "summary.json"
-    if user_invoked:
+    if hook_only:
+        lines += ["훅 전용(SKILL.md 없음): 트리거는 결정적이다. G1은 거짓양성으로 보며, G2 표의 오탐 fixture(`fp-*`) 회귀와 차단 횟수로 판정한다(원칙 §3.2).", ""]
+        summary["g1"] = {"verdict": "n/a (hook)"}
+    elif user_invoked:
         lines += ["user-invoked 스킬: description이 모델에 노출되지 않으므로 G1은 해당 없음(사람이 켠다).", ""]
         summary["g1"] = {"verdict": "n/a"}
     elif tsum.exists():
@@ -315,7 +319,7 @@ def main() -> None:
     lines += ["", f"**G3 판정(잠정): {'통과' if g3_ok else '실패'}** — 공식 측정은 세션에서 `/skill-doctor`. 규칙: 본문 < 200줄, 토큰 비율 > 1.5인데 G2 실패면 실패.", ""]
 
     verdicts = [summary["g1"].get("verdict"), summary["g2"].get("verdict"), summary["g3"].get("verdict")]
-    final = "채택 가능" if all(v in ("pass", "n/a") for v in verdicts) else "백로그 (미입증 게이트 있음)"
+    final = "채택 가능" if all(v == "pass" or str(v).startswith("n/a") for v in verdicts) else "백로그 (미입증 게이트 있음)"
     summary["final"] = final
     lines += ["## 종합", "", "| G1 | G2 | G3 | 결론 |", "|---|---|---|---|", f"| {verdicts[0]} | {verdicts[1]} | {verdicts[2]} | **{final}** |", ""]
     (out / "report.md").write_text("\n".join(lines))

@@ -42,7 +42,8 @@ def main() -> None:
     out = Path(a.out) if a.out else skill / "evals" / "results" / date.today().isoformat()
     out.mkdir(parents=True, exist_ok=True)
     py = sys.executable
-    user_invoked = "disable-model-invocation: true" in (skill / "SKILL.md").read_text().split("---")[1]
+    skill_md = skill / "SKILL.md"
+    user_invoked = skill_md.exists() and "disable-model-invocation: true" in skill_md.read_text().split("---")[1]
     intask = skill / "evals" / "trigger-intask.json"
     if not a.skip_trigger and not user_invoked and intask.exists():
         # 원칙 §2 "G1 측정 시점": 수행 중 G1이 판정, 시작 시점 라우팅은 참고치(trigger-router/)
