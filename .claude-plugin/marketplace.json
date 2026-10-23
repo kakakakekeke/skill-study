@@ -19,14 +19,15 @@
     },
     {
       "name": "repro-first",
-      "description": "버그 수정 전 실패하는 재현 명령을 먼저 만들고, 최소 수정으로 green을 확인한 뒤 재발 방지 위치를 적는다",
-      "version": "1.0.0",
+      "description": "버그 수정 전 실패하는 재현 명령을 먼저 만들고, 최소 수정으로 green을 확인한 뒤 재발 방지 위치를 적는다. 버그 신고로 보이는 요청에는 스킬 사용 안내를 주입한다(REPRO_FIRST_INJECT=0으로 끔)",
+      "version": "1.1.0",
       "category": "development",
       "source": "./skills",
       "strict": false,
       "skills": [
         "./repro-first"
-      ]
+      ],
+      "hooks": "./repro-first/hooks/hooks.json"
     },
     {
       "name": "test-integrity-check",
