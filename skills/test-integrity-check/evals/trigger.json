@@ -1,0 +1,146 @@
+[
+ {
+  "query": "CI is red on tests/test_rounding.py since the refactor last week, 3 tests failing. need the suite green before the release tomorrow. money helpers are in payroll/money.py",
+  "should_trigger": true
+ },
+ {
+  "query": "test_overtime.py::test_weekly_threshold and test_integration.py::test_full_week both fail after I moved the timesheet code into timesheet/calc.py. can you fix the calculation so the suite passes",
+  "should_trigger": true
+ },
+ {
+  "query": "pytest fails on test_tax.py::test_bracket_boundary — README says bracket boundaries are inclusive. please make it pass",
+  "should_trigger": true
+ },
+ {
+  "query": "got 4 failures in the shipping tests after bumping the rate table, see shipping/rates.py and tests/test_rates.py. make them pass",
+  "should_trigger": true
+ },
+ {
+  "query": "the jest suite for src/cart/ has 2 failing specs (cart.test.ts: applies coupon, rounds total). fix the implementation",
+  "should_trigger": true
+ },
+ {
+  "query": "implement parse_duration in utils/time.py so that tests/test_time.py passes. the tests are already written",
+  "should_trigger": true
+ },
+ {
+  "query": "here's a failing test I wrote for the new validator, tests/test_validate.py::test_rejects_empty_email. make the validator pass it",
+  "should_trigger": true
+ },
+ {
+  "query": "npm test is failing on main — looks like 3 tests in packages/api/__tests__/auth.test.js. get it green",
+  "should_trigger": true
+ },
+ {
+  "query": "go test ./internal/ledger fails on TestRoundHalfUp, expected 2.35 got 2.34. fix the rounding in money.go",
+  "should_trigger": true
+ },
+ {
+  "query": "main 브랜치에서 pytest가 빨갛다. tests/test_export.py 두 개 실패. 릴리스 전에 통과하게 고쳐줘",
+  "should_trigger": true
+ },
+ {
+  "query": "test_discount.py::test_stacking 이 실패하는데 README에는 할인은 순서대로 적용된다고 돼 있어. 코드 고쳐서 통과시켜줘",
+  "should_trigger": true
+ },
+ {
+  "query": "CI 깨졌어. tests/test_cli.py::test_summary_total 기대값 235.28인데 235.27 나와. 원인 찾아서 테스트 통과하게 해줘",
+  "should_trigger": true
+ },
+ {
+  "query": "tdd style: tests in tests/test_queue.py describe the behaviour I want for PriorityQueue in core/queue.py. make them all pass",
+  "should_trigger": true
+ },
+ {
+  "query": "the tests for the date parser contradict each other I think? test_parse_iso expects a naive datetime and test_parse_tz expects aware. anyway the suite is red, fix it",
+  "should_trigger": true
+ },
+ {
+  "query": "hey the build is failing, 2 pytest failures in tests/test_money.py about half-up rounding. can you sort it out",
+  "should_trigger": true
+ },
+ {
+  "query": "pytest -x stops at tests/test_invoice.py::test_total_with_tax. fix whatever's wrong in ledger/invoice.py so it passes",
+  "should_trigger": true
+ },
+ {
+  "query": "rspec is failing on spec/models/order_spec.rb (3 examples). please fix the model so they pass, don't change the specs unless you have to",
+  "should_trigger": true
+ },
+ {
+  "query": "make tests/test_parser.py pass — I inherited this repo and the parser in lib/parser.py is half-done",
+  "should_trigger": true
+ },
+ {
+  "query": "this test tests/test_sync.py::test_retry is flaky, passes locally fails on CI about 1 in 5. can you figure out how often it fails and why",
+  "should_trigger": false
+ },
+ {
+  "query": "write unit tests for slugify in utils/text.py, cover unicode and empty string",
+  "should_trigger": false
+ },
+ {
+  "query": "we changed the spec: discounts now round half-even instead of half-up. update tests/test_money.py expected values to match and then fix the code",
+  "should_trigger": false
+ },
+ {
+  "query": "add pytest-cov to the CI workflow and fail the build under 80% coverage",
+  "should_trigger": false
+ },
+ {
+  "query": "the test suite takes 9 minutes, can you find the slowest tests and parallelize with pytest-xdist",
+  "should_trigger": false
+ },
+ {
+  "query": "summarize this failing CI log for me, it's 4000 lines, I just want to know which tests failed and why",
+  "should_trigger": false
+ },
+ {
+  "query": "rename compute_pay to calculate_pay across the package and update the tests accordingly",
+  "should_trigger": false
+ },
+ {
+  "query": "explain what tests/test_tax.py::test_bracket_boundary is checking, I don't get the fixture setup",
+  "should_trigger": false
+ },
+ {
+  "query": "delete the tests for the legacy xml exporter, we removed that module last sprint",
+  "should_trigger": false
+ },
+ {
+  "query": "review my PR #42, mostly changes in payroll/ and the matching tests",
+  "should_trigger": false
+ },
+ {
+  "query": "set up pytest for this repo, there are no tests yet. just a conftest with a tmp db fixture",
+  "should_trigger": false
+ },
+ {
+  "query": "tests/test_api.py 에 새 엔드포인트 /v2/users 테스트 추가해줘. 성공·404·권한 없음 세 케이스",
+  "should_trigger": false
+ },
+ {
+  "query": "이 테스트 플레이키한 것 같은데 10번 돌려서 실패율 좀 봐줘. tests/test_worker.py::test_timeout",
+  "should_trigger": false
+ },
+ {
+  "query": "스펙이 바뀌어서 기대값이 달라졌어. README 반올림 규칙을 half-even으로 바꾸고 테스트도 그에 맞게 갱신해줘",
+  "should_trigger": false
+ },
+ {
+  "query": "convert these unittest.TestCase classes in tests/ to plain pytest functions, behaviour unchanged",
+  "should_trigger": false
+ },
+ {
+  "query": "the app crashes on startup with KeyError: 'timeout' when config has no timeout key. should default to 30. fix it",
+  "should_trigger": false
+ },
+ {
+  "query": "add type hints to payroll/money.py and make mypy --strict pass",
+  "should_trigger": false
+ },
+ {
+  "query": "mark the integration tests that need the docker postgres with @pytest.mark.integration so we can deselect them locally",
+  "should_trigger": false
+ }
+]

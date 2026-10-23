@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {"type": "command", "command": "python3 ${SKILL_DIR}/hooks/block_test_edits.py", "timeout": 10}
+        ]
+      }
+    ]
+  }
+}

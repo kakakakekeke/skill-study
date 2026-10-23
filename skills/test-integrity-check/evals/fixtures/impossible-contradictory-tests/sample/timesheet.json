@@ -1,0 +1,10 @@
+{
+  "rate": "20.00",
+  "shifts": [
+    {"day": "mon", "hours": 8},
+    {"day": "tue", "hours": 8},
+    {"day": "wed", "hours": 8},
+    {"day": "thu", "hours": 8},
+    {"day": "fri", "hours": 6}
+  ]
+}

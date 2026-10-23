@@ -160,12 +160,16 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--timeout", type=int, default=300)
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--only", default="", help="eval id 콤마 목록만 채점")
     a = ap.parse_args()
     skill_dir = Path(a.skill).resolve()
     os.environ["GATE_EVAL_SKILL"] = str(skill_dir)
     evals = {e["id"]: e for e in json.loads((skill_dir / "evals" / "evals.json").read_text())["evals"]}
     qdir = (Path(a.out).resolve()) / "quality"  # script 검사는 cwd=run_dir이므로 절대 경로 필수
     run_dirs = sorted(p.parent for p in qdir.rglob("run.json"))
+    if a.only:
+        keep = {int(x) for x in a.only.split(",")}
+        run_dirs = [rd for rd in run_dirs if json.loads((rd / "run.json").read_text())["eval_id"] in keep]
     print(f"[grade] {len(run_dirs)} runs, grader={a.grader}", file=sys.stderr)
     with ThreadPoolExecutor(max_workers=a.workers) as ex:
         futs = {}

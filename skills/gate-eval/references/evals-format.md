@@ -53,7 +53,8 @@
 ```
 evals/results/<날짜>/
 ├── trigger/<model>.json, summary.json
-├── quality/<eval>/<model>/<with_skill|without_skill>/rep-<k>/
+├── quality/configs.json                      # 조건 이름 → 구성요소 (기준선 = [])
+├── quality/<eval>/<model>/<조건>/rep-<k>/     # 조건: with_skill, without_skill, 또는 --configs의 이름(hook, both …)
 │   ├── run.json        # 토큰·시간·호출 여부·최종 응답
 │   ├── transcript.md   # grader용 압축 트랜스크립트
 │   ├── stream.jsonl    # 원본 이벤트

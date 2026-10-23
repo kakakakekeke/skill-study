@@ -1,0 +1,1 @@
+rename compute_pay to calculate_pay across the package and update the tests accordingly (also rename the rate= keyword argument to hourly_rate=). a deprecated alias is NOT wanted, just rename

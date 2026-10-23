@@ -22,10 +22,13 @@ disable-model-invocation: true
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name>            # 기본: haiku,opus × 3회
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5   # 노이즈가 크면 반복 증가
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --skip-trigger --only 1,2
+python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \
+  --configs "without,with,hook=hook,both=skill+hook" --hook skills/<name>/hooks/settings.json   # 조건 N개 (훅 비교)
 ```
 
 - 결과: `skills/<name>/evals/results/<날짜>/report.md`, `summary.json`. 단계별 캐시가 있어 중단 후 같은 명령으로 이어서 실행한다. 다시 재고 싶으면 그날 디렉터리를 지운다.
 - 실행은 임시 프로젝트에서 `claude -p`로 하며, with 설정은 `.claude/skills/<name>` 심볼릭 링크만 추가된다. 사용자 스킬·플러그인은 품질 실행에서 제외된다(트리거 측정은 실제 환경과 경쟁하도록 포함).
+- 조건은 `--configs`로 N개까지 둔다. `with`/`without`은 예전 이름(디렉터리 `with_skill`/`without_skill`)이고, 그 밖에는 `이름=구성요소+구성요소` 형식(구성요소: `skill`, `hook`). `hook`은 `--hook <settings.json>`을 `${SKILL_DIR}` 치환 후 임시 프로젝트 `.claude/settings.json`으로 복사한다(`claude -p`는 `--setting-sources project`라 프로젝트 훅이 적용된다, 2026-10-23 확인). 기준선은 구성요소가 없는 조건이고, 나머지 처리는 각각 기준선과 비교해 따로 판정한다. 스킬 게이트 판정은 `with_skill`(없으면 첫 처리)로 한다. 훅 거부 횟수는 run.json `hook_blocks`(is_error tool_result에 "hook")로 센다.
 - 오래 걸린다(케이스 3개 기준 30~60분). 백그라운드로 돌리고 stderr 로그를 본다.
 
 ## G1은 무엇을 재는가

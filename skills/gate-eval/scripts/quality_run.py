@@ -22,7 +22,29 @@ def slug(s: str) -> str:
     return "".join(ch if ch.isalnum() or ch in "-_" else "-" for ch in s.lower()).strip("-")[:48]
 
 
-def prepare_project(skill_dir: Path, ev: dict, with_skill: bool, name: str) -> Path:
+LEGACY = {"with": ("with_skill", {"skill"}), "without": ("without_skill", set())}
+
+
+def parse_configs(spec: str) -> list[tuple[str, set[str]]]:
+    """'with,without' (호환) 또는 'without=,skill=skill,hook=hook,both=skill+hook' → [(디렉터리 이름, 구성요소 집합)].
+    구성요소: skill(.claude/skills/<name> 링크), hook(--hook settings.json 복사). 이름만 있고 '='가 없으면 이름 자체를 구성요소로 해석한다."""
+    out = []
+    for item in spec.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        if item in LEGACY:
+            out.append(LEGACY[item]); continue
+        name, _, comps = item.partition("=")
+        comps = {c for c in comps.split("+") if c} if _ else ({name} if name in ("skill", "hook") else set())
+        bad = comps - {"skill", "hook"}
+        if bad:
+            raise ValueError(f"알 수 없는 구성요소 {bad} (skill|hook)")
+        out.append((name, comps))
+    return out
+
+
+def prepare_project(skill_dir: Path, ev: dict, comps: set[str], name: str, hook_settings: Path | None) -> Path:
     proj = Path(tempfile.mkdtemp(prefix=f"ge-{slug(name)}-"))
     fixture = ev.get("fixture")
     if fixture:
@@ -35,19 +57,43 @@ def prepare_project(skill_dir: Path, ev: dict, with_skill: bool, name: str) -> P
         dst = proj / Path(f).name
         shutil.copytree(src, dst) if src.is_dir() else shutil.copy2(src, dst)
     (proj / ".claude").mkdir(exist_ok=True)
-    if with_skill:
+    if "skill" in comps:
         skills_dir = proj / ".claude" / "skills"
         skills_dir.mkdir(parents=True, exist_ok=True)
         (skills_dir / name).symlink_to(skill_dir.resolve(), target_is_directory=True)
+    if "hook" in comps:
+        if not hook_settings:
+            raise ValueError("hook 구성요소에는 --hook <settings.json>이 필요하다")
+        # claude -p는 --setting-sources project로 돌므로 프로젝트 settings.json의 훅이 적용된다 (2026-10-23 확인).
+        txt = hook_settings.read_text().replace("${SKILL_DIR}", str(skill_dir.resolve()))
+        (proj / ".claude" / "settings.json").write_text(txt)
     return proj
 
 
-def one_run(skill_dir: Path, name: str, ev: dict, model: str, with_skill: bool, rep: int,
-            run_dir: Path, timeout: int, max_turns: int) -> dict:
+def hook_blocks(events: list[dict]) -> int:
+    """훅이 도구 호출을 거부한 횟수: is_error인 tool_result 중 내용에 'hook'이 있는 것."""
+    n = 0
+    for ev in events:
+        if ev.get("type") != "user":
+            continue
+        for c in ev.get("message", {}).get("content", []):
+            if isinstance(c, dict) and c.get("type") == "tool_result" and c.get("is_error"):
+                content = c.get("content")
+                if isinstance(content, list):
+                    content = "\n".join(x.get("text", "") for x in content if isinstance(x, dict))
+                if "hook" in str(content or "").lower():
+                    n += 1
+    return n
+
+
+def one_run(skill_dir: Path, name: str, ev: dict, model: str, cfg: tuple[str, set[str]], rep: int,
+            run_dir: Path, timeout: int, max_turns: int, hook_settings: Path | None) -> dict:
     run_dir.mkdir(parents=True, exist_ok=True)
     if (run_dir / "run.json").exists():
         return json.loads((run_dir / "run.json").read_text())  # 재실행 시 캐시
-    proj = prepare_project(skill_dir, ev, with_skill, name)
+    cfg_name, comps = cfg
+    with_skill = "skill" in comps
+    proj = prepare_project(skill_dir, ev, comps, name, hook_settings)
     try:
         prompt = ev["prompt"] if with_skill else (ev.get("prompt_without") or ev["prompt"])
         res = run_claude(prompt, proj, model, timeout, max_turns)
@@ -62,7 +108,8 @@ def one_run(skill_dir: Path, name: str, ev: dict, model: str, with_skill: bool, 
         shutil.copytree(proj, out, ignore=shutil.ignore_patterns(".claude", "__pycache__", ".pytest_cache", "node_modules", ".git"), symlinks=True)
         info = {
             "eval_id": ev["id"], "prompt_used": prompt, "eval_name": ev.get("name") or f"eval-{ev['id']}",
-            "model_alias": model, "config": "with_skill" if with_skill else "without_skill", "rep": rep,
+            "model_alias": model, "config": cfg_name, "components": sorted(comps), "rep": rep,
+            "hook_blocks": hook_blocks(events) if "hook" in comps else 0,
             "skill_invoked": (skill_invoked(events, name) or prompt.lstrip().startswith(f"/{name}")) if with_skill else False,  # 슬래시 호출은 도구 호출 없이 전개된다
             "duration_ms": res["duration_ms"], "timed_out": res["timed_out"],
             "final_text": (result or {}).get("result", ""),
@@ -82,7 +129,8 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--models", default="haiku,opus")
     ap.add_argument("--reps", type=int, default=3)
-    ap.add_argument("--configs", default="with,without")
+    ap.add_argument("--configs", default="with,without", help="예: with,without | without=,skill=skill,hook=hook,both=skill+hook")
+    ap.add_argument("--hook", default=None, help="hook 구성요소용 settings.json (${SKILL_DIR} 치환, 임시 프로젝트 .claude/settings.json으로 복사)")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--max-turns", type=int, default=40)
@@ -96,28 +144,35 @@ def main() -> None:
         keep = {int(x) for x in a.only.split(",")}
         evals = [e for e in evals if e["id"] in keep]
     out = Path(a.out) / "quality"
+    out.mkdir(parents=True, exist_ok=True)
+    configs = parse_configs(a.configs)
+    hook_settings = Path(a.hook).resolve() if a.hook else None
+    # 조건 정의를 결과 디렉터리에 남긴다 (report.py가 기준선=구성요소 없는 조건을 찾는 데 쓴다). 기존 항목과 병합.
+    cfg_file = out / "configs.json"
+    known = json.loads(cfg_file.read_text()) if cfg_file.exists() else {}
+    known.update({n: sorted(c) for n, c in configs})
+    cfg_file.write_text(json.dumps(known, ensure_ascii=False, indent=1))
     jobs = []
     for ev in evals:
         ename = slug(ev.get("name") or f"eval-{ev['id']}")
         for model in a.models.split(","):
-            for cfg in a.configs.split(","):
-                with_skill = cfg.strip() == "with"
+            for cfg in configs:
                 for rep in range(1, a.reps + 1):
-                    run_dir = out / ename / model / ("with_skill" if with_skill else "without_skill") / f"rep-{rep}"
-                    jobs.append((ev, model, with_skill, rep, run_dir))
-    print(f"[quality] {len(jobs)} runs ({len(evals)} evals × {a.models} × {a.configs} × {a.reps})", file=sys.stderr)
+                    run_dir = out / ename / model / cfg[0] / f"rep-{rep}"
+                    jobs.append((ev, model, cfg, rep, run_dir))
+    print(f"[quality] {len(jobs)} runs ({len(evals)} evals × {a.models} × {[c[0] for c in configs]} × {a.reps})", file=sys.stderr)
     done = 0
     with ThreadPoolExecutor(max_workers=a.workers) as ex:
-        futs = {ex.submit(one_run, skill_dir, name, ev, m, w, r, d, a.timeout, a.max_turns): (ev, m, w, r) for ev, m, w, r, d in jobs}
+        futs = {ex.submit(one_run, skill_dir, name, ev, m, c, r, d, a.timeout, a.max_turns, hook_settings): (ev, m, c, r) for ev, m, c, r, d in jobs}
         for fut in as_completed(futs):
-            ev, m, w, r = futs[fut]
+            ev, m, c, r = futs[fut]
             done += 1
             try:
                 info = fut.result()
-                print(f"[quality] {done}/{len(jobs)} {info['eval_name']} {m} {'with' if w else 'without'} rep{r}: "
-                      f"tokens={info.get('total_context_tokens')} turns={info.get('num_turns')} invoked={info.get('skill_invoked')}", file=sys.stderr)
+                print(f"[quality] {done}/{len(jobs)} {info['eval_name']} {m} {c[0]} rep{r}: "
+                      f"tokens={info.get('total_context_tokens')} turns={info.get('num_turns')} invoked={info.get('skill_invoked')} hook_blocks={info.get('hook_blocks')}", file=sys.stderr)
             except Exception as e:  # noqa: BLE001
-                print(f"[quality] {done}/{len(jobs)} FAILED {ev.get('name')} {m} {w} rep{r}: {e}", file=sys.stderr)
+                print(f"[quality] {done}/{len(jobs)} FAILED {ev.get('name')} {m} {c[0]} rep{r}: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

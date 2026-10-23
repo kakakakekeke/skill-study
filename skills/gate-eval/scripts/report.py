@@ -141,103 +141,146 @@ def main() -> None:
         lines += ["trigger 결과 없음 (`evals/trigger.json` 또는 실행 누락).", ""]
         summary["g1"] = {"verdict": "missing"}
 
-    # ---- 비용 지표 (G2 비용형 판정과 G3가 함께 쓴다)
+    # ---- 조건 정의: 기준선 = 구성요소 없는 조건(configs.json) 또는 legacy 'without_skill'. 나머지는 처리(treatment).
+    cfg_file = out / "quality" / "configs.json"
+    cfg_defs = json.loads(cfg_file.read_text()) if cfg_file.exists() else {}
+    configs = sorted({k[2] for k in by})
+    baseline = next((c for c in configs if cfg_defs.get(c) == []), "without_skill" if "without_skill" in configs else None)
+    treatments = [c for c in configs if c != baseline]
+    treatments.sort(key=lambda c: (c != "with_skill", c))  # legacy with_skill을 1차 처리로
+    primary = treatments[0] if treatments else None  # 스킬 게이트 판정에 쓰는 처리
+    comp_txt = lambda c: "+".join(cfg_defs.get(c) or (["skill"] if c == "with_skill" else [])) or "없음"  # noqa: E731
+
+    # ---- 비용 지표 (처리별, 기준선 대비; G2 비용형 판정과 G3가 함께 쓴다)
     COST_CUT = 0.30
-    cost = {}
-    for m in models:
-        tw = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, "with_skill"), [])]
-        two = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, "without_skill"), [])]
-        ow = [r.get("output_tokens") for e in evals for r in by.get((e, m, "with_skill"), [])]
-        owo = [r.get("output_tokens") for e in evals for r in by.get((e, m, "without_skill"), [])]
-        dw = [r.get("duration_ms") for e in evals for r in by.get((e, m, "with_skill"), [])]
-        dwo = [r.get("duration_ms") for e in evals for r in by.get((e, m, "without_skill"), [])]
-        out_cut = 1 - mean(ow) / mean(owo) if mean(ow) and mean(owo) else None
-        dur_cut = 1 - mean(dw) / mean(dwo) if mean(dw) and mean(dwo) else None
-        cost[m] = {"context_tokens_with": mean(tw), "context_tokens_without": mean(two),
-                   "ratio": (mean(tw) / mean(two)) if mean(tw) and mean(two) else None,
-                   "output_tokens_with": mean(ow), "output_tokens_without": mean(owo), "output_cut": out_cut,
-                   "duration_s_with": (mean(dw) or 0) / 1000, "duration_s_without": (mean(dwo) or 0) / 1000, "duration_cut": dur_cut}
+    cost = {}  # (treatment, model) -> dict
+    for t in treatments:
+        for m in models:
+            tw = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, t), [])]
+            two = [r.get("total_context_tokens") for e in evals for r in by.get((e, m, baseline), [])]
+            ow = [r.get("output_tokens") for e in evals for r in by.get((e, m, t), [])]
+            owo = [r.get("output_tokens") for e in evals for r in by.get((e, m, baseline), [])]
+            dw = [r.get("duration_ms") for e in evals for r in by.get((e, m, t), [])]
+            dwo = [r.get("duration_ms") for e in evals for r in by.get((e, m, baseline), [])]
+            out_cut = 1 - mean(ow) / mean(owo) if mean(ow) and mean(owo) else None
+            dur_cut = 1 - mean(dw) / mean(dwo) if mean(dw) and mean(dwo) else None
+            cost[(t, m)] = {"context_tokens_with": mean(tw), "context_tokens_without": mean(two),
+                            "ratio": (mean(tw) / mean(two)) if mean(tw) and mean(two) else None,
+                            "output_tokens_with": mean(ow), "output_tokens_without": mean(owo), "output_cut": out_cut,
+                            "duration_s_with": (mean(dw) or 0) / 1000, "duration_s_without": (mean(dwo) or 0) / 1000, "duration_cut": dur_cut}
 
     # ---- G2
     lines += ["## G2 확연한 이득 (품질 또는 비용)", ""]
-    if not runs:
-        lines += ["quality 결과 없음.", ""]
+    if not runs or baseline is None or not treatments:
+        lines += ["quality 결과 없음 (또는 기준선/처리 조건 누락).", ""]
         summary["g2"] = {"verdict": "missing"}
     else:
-        g2 = {}
-        for m in models:
-            lines += [f"### 모델 {m}", "", "| eval | with 통과율 (mean±sd) | without 통과율 (mean±sd) | Δ | 노이즈 바닥(without) | 뒤집힘(with) | 이득 | 회귀 | with 미호출 |", "|---|---|---|---|---|---|---|---|---|"]
-            nf_all, reg_all, gain_all, n_items_all, pair_wins, pair_total, deltas = [], 0, 0, 0, 0, 0, []
-            osmosis = []
-            cmp_total = cmp_flips = 0  # without 반복 쌍 비교 횟수·뒤집힘 수 (노이즈 바닥의 표본 크기)
-            for e in evals:
-                w, wo = by.get((e, m, "with_skill"), []), by.get((e, m, "without_skill"), [])
-                if not w or not wo:
-                    continue
-                pw = [r["grading"]["summary"]["pass_rate"] for r in w]
-                pwo = [r["grading"]["summary"]["pass_rate"] for r in wo]
-                nf = flip_rate(wo)
-                nfw = flip_rate(w)
-                f_, t_ = flip_counts(wo)
-                cmp_flips += f_; cmp_total += t_
-                n_items = len(w[0]["grading"]["expectations"])
-                gains, regs = [], []
-                for i in range(n_items):
-                    mw = majority([r["grading"]["expectations"][i]["passed"] for r in w])
-                    mwo = majority([r["grading"]["expectations"][i]["passed"] for r in wo])
-                    txt = w[0]["grading"]["expectations"][i]["text"]
-                    if mw and not mwo:
-                        gains.append(txt)
-                    elif mwo and not mw:
-                        regs.append(txt)
-                for rw, rwo in zip(sorted(w, key=lambda r: r["rep"]), sorted(wo, key=lambda r: r["rep"])):
-                    pair_total += 1
-                    pair_wins += rw["grading"]["summary"]["pass_rate"] >= rwo["grading"]["summary"]["pass_rate"]
-                not_invoked = [r for r in w if not r.get("skill_invoked")]
-                osmosis += not_invoked
-                nf_all.append(nf); reg_all += len(regs); gain_all += len(gains); n_items_all += n_items
-                deltas.append(mean(pw) - mean(pwo))
-                lines.append(f"| {e} | {fmt(mean(pw), True)}±{fmt(sd(pw), True)} | {fmt(mean(pwo), True)}±{fmt(sd(pwo), True)} | {fmt(mean(pw)-mean(pwo), True)} | {fmt(nf, True)} | {fmt(nfw, True)} | {len(gains)} | {len(regs)} | {len(not_invoked)}/{len(w)} |")
-                for g_ in gains:
-                    lines.append(f"|  | ↑ 이득: {g_[:90]} | | | | | | | |")
-                for r_ in regs:
-                    lines.append(f"|  | ↓ 회귀: {r_[:90]} | | | | | | | |")
-            noise = mean(nf_all) or 0.0
-            noise_ub = 3 / cmp_total if cmp_total else None  # 뒤집힘 0건일 때의 95% 상한(rule of three)
-            floor = max(noise, noise_ub or 0.0)  # principles §2: 노이즈 바닥 = max(관측, 3/N)
-            reg_rate = reg_all / n_items_all if n_items_all else 0.0
-            net = mean(deltas) or 0.0
-            consistent = pair_total and pair_wins * 2 > pair_total
-            reg_ok = reg_rate <= floor + 1e-9
-            c = cost.get(m, {})
-            cuts = [x for x in (c.get("output_cut"), c.get("duration_cut")) if x is not None]
-            best_cut = max(cuts) if cuts else 0.0
-            if reg_ok and net > floor + 1e-9 and consistent:
-                kind = "quality"
-            elif reg_ok and abs(net) <= floor + 1e-9 and best_cut >= COST_CUT:
-                kind = "cost"
-            else:
-                kind = None
-            ok = kind is not None
-            g2[m] = {"noise_floor_observed": noise, "noise_comparisons": cmp_total, "noise_flips": cmp_flips, "noise_floor_rule_of_three": noise_ub, "noise_floor": floor,
-                     "regression_rate": reg_rate, "gains": gain_all, "regressions": reg_all, "net_delta": net,
-                     "pair_wins": f"{pair_wins}/{pair_total}", "verdict": "pass" if ok else "fail", "kind": kind,
-                     "output_cut": c.get("output_cut"), "duration_cut": c.get("duration_cut"),
-                     "with_not_invoked": len(osmosis)}
-            kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형)", None: "실패"}[kind]
-            lines += ["", f"- 노이즈 바닥: **{fmt(floor, True)}** = max(관측 {fmt(noise, True)} [뒤집힘 {cmp_flips}/{cmp_total}회 비교], 3/N {fmt(noise_ub, True) if noise_ub is not None else '-'}) · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 with≥without {pair_wins}/{pair_total}",
-                      f"- 비용: 출력 토큰 {cut_txt(c.get('output_cut'))} · 시간 {cut_txt(c.get('duration_cut'))} (비용형 기준 {int(COST_CUT*100)}% 이상 감소)",
-                      f"- with 설정에서 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)",
-                      f"- **{m} 판정: {kind_txt}**", ""]
-            if osmosis:
-                lines.append("  - 미호출 run 통과율: " + ", ".join(f"{r['eval_name']}/rep{r['rep']}={fmt(r['grading']['summary']['pass_rate'], True)}" for r in osmosis))
-                lines.append("")
-        all_ok = all(v["verdict"] == "pass" for v in g2.values())
-        kinds = {v["kind"] for v in g2.values()}
-        overall_kind = "quality" if kinds == {"quality"} else ("cost" if all_ok else None)
-        summary["g2"] = {"verdict": "pass" if all_ok else "fail", "kind": overall_kind, "models": g2}
-        kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형: 품질 동률, 비용 확연히 감소)", None: "실패"}[overall_kind]
-        lines += [f"**G2 판정: {kind_txt}** (필수: 모든 모델에서 회귀율 ≤ 노이즈 바닥. 품질형: 순Δ > 노이즈 바닥 그리고 짝 비교 과반. 비용형: 순Δ가 노이즈 바닥 안이고 출력 토큰 또는 시간 {int(COST_CUT*100)}% 이상 감소)", ""]
+        lines += [f"조건: 기준선 `{baseline}`(구성요소 {comp_txt(baseline)}) vs 처리 " + ", ".join(f"`{t}`({comp_txt(t)})" for t in treatments) + ". 각 처리는 기준선과 따로 비교한다.", ""]
+        # 조건 나란히 표 (eval × 조건 통과율, 훅 차단 수)
+        if len(treatments) > 1 or any(r.get("hook_blocks") for r in runs):
+            lines += ["### 조건 나란히 (통과율 mean±sd / 훅 차단 평균)", "",
+                      "| 모델 | eval | " + " | ".join(f"`{c}`" for c in [baseline] + treatments) + " |",
+                      "|---|---|" + "---|" * (len(treatments) + 1)]
+            for m in models:
+                for e in evals:
+                    cells = []
+                    for c in [baseline] + treatments:
+                        rs = by.get((e, m, c), [])
+                        if not rs:
+                            cells.append("—"); continue
+                        pr = [r["grading"]["summary"]["pass_rate"] for r in rs]
+                        hb = [r.get("hook_blocks") or 0 for r in rs]
+                        cell = f"{fmt(mean(pr), True)}±{fmt(sd(pr), True)}"
+                        if any(hb):
+                            cell += f" / 차단 {mean(hb):.1f}"
+                        cells.append(cell)
+                    lines.append(f"| {m} | {e} | " + " | ".join(cells) + " |")
+            lines.append("")
+        g2_all = {}  # treatment -> model -> dict
+        for t in treatments:
+            g2 = {}
+            lines += [f"### 처리 `{t}` (구성요소 {comp_txt(t)}) vs `{baseline}`", ""]
+            for m in models:
+                lines += [f"#### 모델 {m}", "", f"| eval | {t} 통과율 (mean±sd) | {baseline} 통과율 (mean±sd) | Δ | 노이즈 바닥({baseline}) | 뒤집힘({t}) | 이득 | 회귀 | 스킬 미호출 |", "|---|---|---|---|---|---|---|---|---|"]
+                nf_all, reg_all, gain_all, n_items_all, pair_wins, pair_total, deltas = [], 0, 0, 0, 0, 0, []
+                osmosis = []
+                cmp_total = cmp_flips = 0  # 기준선 반복 쌍 비교 횟수·뒤집힘 수 (노이즈 바닥의 표본 크기)
+                has_skill = "skill" in (cfg_defs.get(t) or (["skill"] if t == "with_skill" else []))
+                for e in evals:
+                    w, wo = by.get((e, m, t), []), by.get((e, m, baseline), [])
+                    if not w or not wo:
+                        continue
+                    pw = [r["grading"]["summary"]["pass_rate"] for r in w]
+                    pwo = [r["grading"]["summary"]["pass_rate"] for r in wo]
+                    nf = flip_rate(wo)
+                    nfw = flip_rate(w)
+                    f_, t_ = flip_counts(wo)
+                    cmp_flips += f_; cmp_total += t_
+                    n_items = len(w[0]["grading"]["expectations"])
+                    gains, regs = [], []
+                    for i in range(n_items):
+                        mw = majority([r["grading"]["expectations"][i]["passed"] for r in w])
+                        mwo = majority([r["grading"]["expectations"][i]["passed"] for r in wo])
+                        txt = w[0]["grading"]["expectations"][i]["text"]
+                        if mw and not mwo:
+                            gains.append(txt)
+                        elif mwo and not mw:
+                            regs.append(txt)
+                    for rw, rwo in zip(sorted(w, key=lambda r: r["rep"]), sorted(wo, key=lambda r: r["rep"])):
+                        pair_total += 1
+                        pair_wins += rw["grading"]["summary"]["pass_rate"] >= rwo["grading"]["summary"]["pass_rate"]
+                    not_invoked = [r for r in w if not r.get("skill_invoked")] if has_skill else []
+                    osmosis += not_invoked
+                    nf_all.append(nf); reg_all += len(regs); gain_all += len(gains); n_items_all += n_items
+                    deltas.append(mean(pw) - mean(pwo))
+                    inv_txt = f"{len(not_invoked)}/{len(w)}" if has_skill else "n/a"
+                    lines.append(f"| {e} | {fmt(mean(pw), True)}±{fmt(sd(pw), True)} | {fmt(mean(pwo), True)}±{fmt(sd(pwo), True)} | {fmt(mean(pw)-mean(pwo), True)} | {fmt(nf, True)} | {fmt(nfw, True)} | {len(gains)} | {len(regs)} | {inv_txt} |")
+                    for g_ in gains:
+                        lines.append(f"|  | ↑ 이득: {g_[:90]} | | | | | | | |")
+                    for r_ in regs:
+                        lines.append(f"|  | ↓ 회귀: {r_[:90]} | | | | | | | |")
+                noise = mean(nf_all) or 0.0
+                noise_ub = 3 / cmp_total if cmp_total else None  # 뒤집힘 0건일 때의 95% 상한(rule of three)
+                floor = max(noise, noise_ub or 0.0)  # principles §2: 노이즈 바닥 = max(관측, 3/N)
+                reg_rate = reg_all / n_items_all if n_items_all else 0.0
+                net = mean(deltas) or 0.0
+                consistent = pair_total and pair_wins * 2 > pair_total
+                reg_ok = reg_rate <= floor + 1e-9
+                c = cost.get((t, m), {})
+                cuts = [x for x in (c.get("output_cut"), c.get("duration_cut")) if x is not None]
+                best_cut = max(cuts) if cuts else 0.0
+                if reg_ok and net > floor + 1e-9 and consistent:
+                    kind = "quality"
+                elif reg_ok and abs(net) <= floor + 1e-9 and best_cut >= COST_CUT:
+                    kind = "cost"
+                else:
+                    kind = None
+                ok = kind is not None
+                hb = [r.get("hook_blocks") or 0 for e in evals for r in by.get((e, m, t), [])]
+                g2[m] = {"noise_floor_observed": noise, "noise_comparisons": cmp_total, "noise_flips": cmp_flips, "noise_floor_rule_of_three": noise_ub, "noise_floor": floor,
+                         "regression_rate": reg_rate, "gains": gain_all, "regressions": reg_all, "net_delta": net,
+                         "pair_wins": f"{pair_wins}/{pair_total}", "verdict": "pass" if ok else "fail", "kind": kind,
+                         "output_cut": c.get("output_cut"), "duration_cut": c.get("duration_cut"),
+                         "with_not_invoked": len(osmosis), "hook_blocks_mean": mean(hb) if hb else None}
+                kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형)", None: "실패"}[kind]
+                lines += ["", f"- 노이즈 바닥: **{fmt(floor, True)}** = max(관측 {fmt(noise, True)} [뒤집힘 {cmp_flips}/{cmp_total}회 비교], 3/N {fmt(noise_ub, True) if noise_ub is not None else '-'}) · 회귀율: {fmt(reg_rate, True)} ({reg_all}/{n_items_all}) · 이득 {gain_all}건 · 순Δ {net*100:+.1f}% · rep 짝 {t}≥{baseline} {pair_wins}/{pair_total}",
+                          f"- 비용: 출력 토큰 {cut_txt(c.get('output_cut'))} · 시간 {cut_txt(c.get('duration_cut'))} (비용형 기준 {int(COST_CUT*100)}% 이상 감소)"]
+                if has_skill:
+                    lines.append(f"- 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)")
+                if any(hb):
+                    lines.append(f"- 훅 차단: run당 평균 {mean(hb):.1f}회 (tool_result is_error에 'hook')")
+                lines += [f"- **{m} 판정: {kind_txt}**", ""]
+                if osmosis:
+                    lines.append("  - 미호출 run 통과율: " + ", ".join(f"{r['eval_name']}/rep{r['rep']}={fmt(r['grading']['summary']['pass_rate'], True)}" for r in osmosis))
+                    lines.append("")
+            all_ok = all(v["verdict"] == "pass" for v in g2.values())
+            kinds = {v["kind"] for v in g2.values()}
+            overall_kind = "quality" if kinds == {"quality"} else ("cost" if all_ok else None)
+            g2_all[t] = {"verdict": "pass" if all_ok else "fail", "kind": overall_kind, "models": g2}
+            kind_txt = {"quality": "통과 (품질형)", "cost": "통과 (비용형: 품질 동률, 비용 확연히 감소)", None: "실패"}[overall_kind]
+            lines += [f"**처리 `{t}` G2 판정: {kind_txt}**", ""]
+        summary["g2"] = {**g2_all[primary], "baseline": baseline, "primary": primary, "treatments": g2_all}
+        lines += [f"**G2 판정 (스킬 게이트 = 처리 `{primary}`): {({'quality': '통과 (품질형)', 'cost': '통과 (비용형)', None: '실패'})[g2_all[primary]['kind']]}** (필수: 모든 모델에서 회귀율 ≤ 노이즈 바닥. 품질형: 순Δ > 노이즈 바닥 그리고 짝 비교 과반. 비용형: 순Δ가 노이즈 바닥 안이고 출력 토큰 또는 시간 {int(COST_CUT*100)}% 이상 감소)", ""]
         lines += ["회귀 사례는 하나씩 정성 검토한다 — 각 run의 `grading.json` evidence와 `transcript.md`를 본다.", ""]
 
     # ---- G3
@@ -246,12 +289,13 @@ def main() -> None:
     lines += [f"- description ≈ {desc_tok} 토큰 (근사; 상시 로드{'되지 않음' if user_invoked else '됨'})", f"- SKILL.md 본문 {body_lines}줄 (상한 200)"]
     g3 = {"description_tokens_approx": desc_tok, "body_lines": body_lines, "models": {}}
     ratio_bad = False
-    for m in models:
-        c = cost[m]
-        g3["models"][m] = c
-        lines.append(f"- {m}: 컨텍스트 토큰 with {fmt(c['context_tokens_with'], d=0)} / without {fmt(c['context_tokens_without'], d=0)} (비율 {fmt(c['ratio'])}; 턴 수에 비례하는 참고치) · 출력 토큰 {fmt(c['output_tokens_with'], d=0)}/{fmt(c['output_tokens_without'], d=0)} · 시간 {fmt(c['duration_s_with'], d=0)}s/{fmt(c['duration_s_without'], d=0)}s")
-        if c["ratio"] and c["ratio"] > 1.5 and summary["g2"].get("models", {}).get(m, {}).get("verdict") != "pass":
-            ratio_bad = True
+    for t in treatments:
+        for m in models:
+            c = cost[(t, m)]
+            g3["models"][m if t == primary else f"{t}/{m}"] = c
+            lines.append(f"- `{t}` {m}: 컨텍스트 토큰 {fmt(c['context_tokens_with'], d=0)} / 기준선 {fmt(c['context_tokens_without'], d=0)} (비율 {fmt(c['ratio'])}; 턴 수에 비례하는 참고치) · 출력 토큰 {fmt(c['output_tokens_with'], d=0)}/{fmt(c['output_tokens_without'], d=0)} · 시간 {fmt(c['duration_s_with'], d=0)}s/{fmt(c['duration_s_without'], d=0)}s")
+            if t == primary and c["ratio"] and c["ratio"] > 1.5 and summary["g2"].get("models", {}).get(m, {}).get("verdict") != "pass":
+                ratio_bad = True
     g3_ok = body_lines < 200 and not ratio_bad
     g3["verdict"] = "pass" if g3_ok else "fail"
     summary["g3"] = g3
@@ -260,7 +304,7 @@ def main() -> None:
     verdicts = [summary["g1"].get("verdict"), summary["g2"].get("verdict"), summary["g3"].get("verdict")]
     final = "채택 가능" if all(v in ("pass", "n/a") for v in verdicts) else "백로그 (미입증 게이트 있음)"
     summary["final"] = final
-    lines += ["## 종합", "", f"| G1 | G2 | G3 | 결론 |", "|---|---|---|---|", f"| {verdicts[0]} | {verdicts[1]} | {verdicts[2]} | **{final}** |", ""]
+    lines += ["## 종합", "", "| G1 | G2 | G3 | 결론 |", "|---|---|---|---|", f"| {verdicts[0]} | {verdicts[1]} | {verdicts[2]} | **{final}** |", ""]
     (out / "report.md").write_text("\n".join(lines))
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=1, default=str))
     print(str(out / "report.md"))

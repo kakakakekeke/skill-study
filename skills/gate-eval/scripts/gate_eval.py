@@ -35,6 +35,8 @@ def main() -> None:
     ap.add_argument("--skip-quality", action="store_true")
     ap.add_argument("--skip-grade", action="store_true")
     ap.add_argument("--only", default="")
+    ap.add_argument("--configs", default="with,without", help="quality_run.py --configs 와 같음")
+    ap.add_argument("--hook", default=None, help="quality_run.py --hook 과 같음")
     a = ap.parse_args()
     skill = Path(a.skill).resolve()
     out = Path(a.out) if a.out else skill / "evals" / "results" / date.today().isoformat()
@@ -48,6 +50,9 @@ def main() -> None:
                "--reps", str(a.reps), "--workers", str(a.workers), "--timeout", str(a.timeout), "--max-turns", str(a.max_turns)]
         if a.only:
             cmd += ["--only", a.only]
+        cmd += ["--configs", a.configs]
+        if a.hook:
+            cmd += ["--hook", a.hook]
         sh(cmd)
     if not a.skip_grade and (out / "quality").exists():
         sh([py, str(HERE / "grade.py"), "--skill", str(skill), "--out", str(out), "--grader", a.grader, "--workers", str(a.workers)])
