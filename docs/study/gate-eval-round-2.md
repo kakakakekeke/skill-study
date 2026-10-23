@@ -117,8 +117,48 @@ G2에서 실제로 변별된 assertion (with / without, 15 run 기준):
 - 변별된 assertion은 "검증 명령·결과 인용" 하나(0/15 → 15/15). "mypy clean"은 without에서도 4/5로, **sonnet은 스킬 없이도 mypy를 돌린다**. 즉 sonnet에서 이 스킬의 이득은 검사 누락 방지가 아니라 **보고 형식의 일관성**(목적 3)이다. haiku·opus의 mypy 누락(0/5)과 대비되는 모델별 차이.
 - 종합: G1 실패는 haiku 한 모델뿐이다(opus·sonnet 통과). 규칙("모델마다")상 보류는 유지하되, 백로그에 "haiku만 미발동"으로 사유를 좁혀 적는다.
 
-### 조치
+### 조치 (①)
 - `evals.json`에서 비변별 assertion 삭제(추정 표현, 80줄, 행동 검사 3개, hidden-regression의 mypy clean, LLM 주장=실제) → 케이스당 4~5개(검증 실행, 거짓 완료 없음, P2P, [mypy clean | 4 passed], 명령·결과 인용). 삭제 전 결과는 보고서 사본에 그대로 있다.
 - `ideas.md` 13번 → **보류(G1 haiku만 미발동; opus·sonnet은 세 게이트 통과)**, 20번은 13번에 흡수된 채 유지. 다음 후보: (a) 끝-시점 스킬의 G1 측정법 원칙 검토, (b) Stop 훅 비교, (c) JS/TS fixture·sonnet은 사용자 확인 후.
 - JS/TS fixture, sonnet 측정은 이 세션에 넣지 않았다(기본값대로). 사용자 확인 후 다음 세션.
 - 언어 규약(description 영어, 본문 한국어)은 측정으로 유지 확정. 변형 원문은 `evals/variants/`에 둔다.
+
+## ② repro-first v2 (14번, abstain-or-fix)
+
+### 무엇을 바꿨나
+- `SKILL.md` 1단계 확장(FixedBench "Abstain or Fix" 세 문장 + SWT-Bench "올바른 이유로 실패하는지"): 보고된 예시를 **전부** 재현 → 환경 실패는 재현이 아님(`scripts/repro_check.py`로 판정) → 하나도 재현 안 되면 **변경 없이 보고** → 일부만 재현되면 버그(부분 수정)로 진행. 보고 형식에 "재현 안 됨: <명령>, 변경 없음" 추가. description에 "asks whether a reported bug is still present" 추가. v1 원문은 `evals/SKILL-v1.md`.
+- `scripts/repro_check.py`(stdlib): 명령 실행 후 REPRODUCED / NOT_REPRODUCED / ENV_ERROR / FAILED_OTHER_REASON. 환경 실패(import·수집·없는 테스트 id·타임아웃)를 걸러내고, 실패 출력과 이슈 키워드의 겹침으로 "보고된 이유"인지 본다. 9줄 JSON + 종료 코드 0/1/2/3.
+- fixture 3군 9개: 진짜 버그 3(라운드 1 그대로) + **이미 수정됨 3**(이슈 문구 동일, 코드는 올바르게 패치됨) + **부분 수정 3**(첫 번째 예시는 통과하고 두 번째는 여전히 실패하는 그럴듯한 패치: 하드코딩 `rstrip("-")`, 크래시만 막고 기본값 None, 정렬 전 평균).
+- assertion: 진짜 버그군은 라운드 1과 동일. 이미수정군 = 패키지 디렉터리가 fixture와 바이트 동일(`checks/no_source_diff.py`) + 재현 실행 + "재현 안 됨·변경 없음" 보고. 부분수정군 = 첫 편집 전 red + 두 예시 모두 수정(행동 검사) + 기존 스위트 통과 + "이미 수정됨"으로 멈추지 않음.
+- 지표: 해결률(진짜+부분, 행동 검사), 정답 중단율(이미수정, diff 없음), 잘못된 중단율(부분수정에서 diff 없음). 세 조건 비교: without / **v1** / v2. v1은 SKILL.md만 v1으로 바꾼 사본을 같은 fixture·assertion으로 with만 돌려 비교한다(without은 공유).
+- 하네스 수정: `checks/red_before_edit.py`가 `cat -n loader.py` 출력 속 "KeyError" 문자열을 실패한 명령으로 세던 거짓양성을 발견(smoke run). 실행형 명령(python·pytest·npm 등)만 세도록 고쳤다. 라운드 1 repro-first의 without 쪽 "red before edit" 통과에도 같은 거짓양성이 섞였을 수 있다(그 경우 라운드 1의 이득은 과소평가된 것이지 과대평가는 아님).
+- 제작은 에이전트 2개 병렬(fixture 6종, repro_check.py)로 약 3분.
+
+### 결과 (`gate-eval-round-2/repro-first-v2.md`, `repro-first-v1-same-fixtures.md`; 5회, without 공유)
+
+| 게이트 | haiku | opus | 판정 |
+|---|---|---|---|
+| G1 (46문항, v2 description) | train 28/28, test 18/18 | 28/28, 18/18 | 통과 |
+| G2 v2 vs without | 순Δ +22.4% > 바닥 10%, 회귀 0, 짝 45/45 | 순Δ **+11.3% ≤ 바닥 12%**, 회귀 1/48(2%), 짝 42/45 | **실패 (opus 동률)** |
+| G2 v1 vs without (같은 fixture·assertion) | 순Δ +21.1% > 10%, 회귀 0, 짝 44/45 | 순Δ +14.3% > 12%, 회귀 1/48, 짝 41/45 | 품질형 통과 |
+| v2 − v1 | +1.3pp | −3.0pp | 노이즈 안 |
+| 비용 (출력 토큰 / 시간, without 대비) | v1 +35%/−16%, v2 +35%/+6% | v1 +34%/+20%, v2 +16%/+8% | — |
+
+세 지표(각 조건 15 run = 3 fixture × 5회):
+
+| 지표 | without | v1 | v2 |
+|---|---|---|---|
+| 해결률 (진짜 버그 / 부분 수정, 행동 검사) | 15/15 / 15/15 (두 모델 동일) | 15/15 / 15/15 | 15/15 / 15/15 |
+| 정답 중단율 (이미 수정됨에서 패키지 무변경) | **15/15** (두 모델) | 15/15 | 15/15 |
+| 잘못된 중단율 (부분 수정에서 무변경) | 0 | 0 | 0 |
+
+- **abstain-or-fix는 이 fixture에서 측정 가능한 이득이 없다.** 두 모델 모두 스킬 없이도 "이미 수정됨" 3건을 15/15 정답 중단하고, 부분 수정 3건을 15/15 해결한다. FixedBench의 기준선(Sonnet 4.6 정답 중단 65%)과 다른 이유는 fixture 크기다: 함수 한 개짜리 패키지에서는 재현 한 번이 곧 판정이라 중단 결정이 어렵지 않다. 큰 저장소·긴 이슈가 없으면 abstain 효과는 보이지 않는다.
+- G2에서 잡힌 이득(haiku 11건, opus 7~9건)은 전부 **v1의 행동**(첫 편집 전 red, 수정 후 재실행+전체 스위트, 방지책 한 줄)에서 온다. 부분 수정군의 이득도 "red before edit"와 "재실행"이지 "중단하지 않음"이 아니다(without도 중단하지 않는다).
+- v2 opus가 동률로 떨어진 것은 v2 자체의 회귀라기보다 노이즈 안 변동(v1 +14.3 vs v2 +11.3, 바닥 12%)이다. 다만 v2가 v1보다 낫다는 증거는 어디에도 없고, 본문이 7줄 길어졌다.
+- 이미수정군 assertion 4개와 부분수정군의 "이미 수정됨으로 멈추지 않음"은 조건 무관 통과 → 비변별. 진짜버그·부분수정군의 red/재실행/방지책 assertion만 변별된다.
+
+### 판정과 조치
+- **v2 기각, v1 유지.** SKILL.md를 v1으로 되돌렸다. v2 본문은 `evals/SKILL-v2.md`에, `repro_check.py`는 `evals/candidates/`에 보관(SKILL.md가 참조하지 않는 스크립트를 `scripts/`에 두지 않는다, §3.3). 큰 저장소 fixture로 재측정할 때 다시 꺼낸다.
+- fixture 9개·evals.json·트리거 46문항은 유지한다(진짜버그 3개만으로 재던 라운드 1보다 넓은 세트이고, 비변별 assertion은 §5에 따라 다음 측정 전 정리). 단 v1 description으로 46문항 G1을 다시 재지는 않았다(v2 description과 "still present" 문항 5개 추가분만 차이이고, 36문항 세트에서 v1은 36/36이었다).
+- `ideas.md` 14번 → **보류(기준선이 이미 중단함; 큰 fixture 필요)**.
+- 하네스: `red_before_edit.py` 거짓양성 수정은 유지. 라운드 1 repro-first 수치는 재측정하지 않았다(같은 fixture 3개를 이번에 다시 쟀고 결론이 같다: haiku +21%, opus +14%).

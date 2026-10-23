@@ -142,5 +142,45 @@
   {
     "query": "리팩터링: orders/validate.go의 중복 검증 로직을 하나로 합쳐줘. 동작은 그대로",
     "should_trigger": false
+  },
+  {
+    "query": "someone says slugify still returns a trailing dash for 'Hello World!' but I think we fixed that last week. can you check if it's still a bug and fix it if so",
+    "should_trigger": true
+  },
+  {
+    "query": "ticket #412 says load_config crashes on configs without timeout. not sure it's still reproducible after the refactor. look into it",
+    "should_trigger": true
+  },
+  {
+    "query": "is the median even-length bug still there? the report says median([1,2,3,4]) == 3. verify and fix if needed",
+    "should_trigger": true
+  },
+  {
+    "query": "QA reopened the bug: date range picker still skips the last day sometimes. src/range.ts. we might have only half fixed it",
+    "should_trigger": true
+  },
+  {
+    "query": "고객이 다시 신고했어요: 쿠폰 코드 소문자로 넣으면 적용 안 된다고. 지난번에 고친 것 같은데 아직 그런지 확인하고 고쳐줘",
+    "should_trigger": true
+  },
+  {
+    "query": "write a changelog entry saying the trailing-separator slugify bug is fixed in 1.4.2",
+    "should_trigger": false
+  },
+  {
+    "query": "close ticket #412 as fixed, the timeout default change shipped yesterday",
+    "should_trigger": false
+  },
+  {
+    "query": "which of our open bug tickets are already fixed on main? go through the tracker and mark them",
+    "should_trigger": false
+  },
+  {
+    "query": "add a regression test for the even-length median case, the fix is already in",
+    "should_trigger": false
+  },
+  {
+    "query": "explain why the old slugify left a trailing dash, I'm writing a postmortem",
+    "should_trigger": false
   }
 ]
