@@ -1,0 +1,95 @@
+{
+ "reason": "진단(판정 아님): 시작 시점 라우팅이 이 스킬의 실제 수행 중 호출을 과대평가하는지 확인한다. 발동 조건은 요청 문장에 있으므로 원칙 §2상 판정은 시작 시점 G1이다. 2026-10-23, 측정 전 작성.",
+ "items": [
+  {
+   "query": "slugify('Hello World!') returns 'hello-world-' with a trailing dash, should be 'hello-world'. fix pls",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/slug"
+  },
+  {
+   "query": "slugs for titles that end in punctuation come out with a dash at the end, e.g. 'Done.' gives 'done-'. can you sort it out",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/slug"
+  },
+  {
+   "query": "슬러그 끝에 하이픈이 붙어서 나와요. 'Hello World!' 넣으면 'hello-world-'예요. 고쳐줘",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/slug"
+  },
+  {
+   "query": "getting KeyError: 'timeout' from load_config when the config file has no timeout key. it should default to 30. please fix",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cfg"
+  },
+  {
+   "query": "the app crashes on startup:\n  File \"appcfg/loader.py\", line 24, in load_config\n    timeout=int(merged[\"timeout\"])\nKeyError: 'timeout'\nthe config is config.example.json without the timeout line",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cfg"
+  },
+  {
+   "query": "ticket #412 says load_config crashes on configs without a timeout key. check it and fix it",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cfg"
+  },
+  {
+   "query": "median([1,2,3,4]) returns 3 in statkit, should be 2.5",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/stats"
+  },
+  {
+   "query": "the median of an even-length list is wrong, it returns the upper middle element instead of the average of the two middle ones",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/stats"
+  },
+  {
+   "query": "QA: median([10, 20]) gives 20. that's a bug right? fix it",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/stats"
+  },
+  {
+   "query": "write more unit tests for slugify covering accents, punctuation and a custom separator",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/slug"
+  },
+  {
+   "query": "add a max_length parameter to slugify that truncates at a word boundary",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/slug"
+  },
+  {
+   "query": "explain how slugify handles non-ascii characters. no changes please",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/slug"
+  },
+  {
+   "query": "add error handling so load_config raises a clear message when the config file is missing",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cfg"
+  },
+  {
+   "query": "update the README to document the timeout, retries and verbose config keys",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cfg"
+  },
+  {
+   "query": "the setdefault loop in loader.py only covers retries and verbose. just add 'timeout' to that tuple, nothing else",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cfg"
+  },
+  {
+   "query": "add a mode() function to statkit with tests",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/stats"
+  },
+  {
+   "query": "tests/test_core.py fails sometimes in CI, maybe 1 in 5 runs. how often does it actually fail?",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/stats"
+  },
+  {
+   "query": "refactor statkit/core.py to use the statistics module where it can, behaviour unchanged",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/stats"
+  }
+ ]
+}

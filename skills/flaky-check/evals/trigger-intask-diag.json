@@ -1,0 +1,100 @@
+{
+ "reason": "진단(판정 아님): 시작 시점 라우팅이 이 스킬의 실제 수행 중 호출을 과대평가하는지 확인한다. 발동 조건은 요청 문장에 있으므로 원칙 §2상 판정은 시작 시점 G1이다. 2026-10-23, 측정 전 작성.",
+ "items": [
+  {
+   "query": "test_cache_hit fails sometimes in CI but passes locally every time I try. is it actually flaky? how often does it fail?",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "run tests/test_cache.py a bunch of times and tell me if anything in it is intermittent",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "CI에서 가끔 tests/test_cache.py가 빨개요. 몇 번 돌려서 얼마나 자주 실패하는지 봐줘",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "before I add a retry to test_cache_hit I want numbers: how often does it fail and with what error?",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "our deploy's first step `bash scripts/fetch.sh` fails randomly and we just hit retry until it works. measure how often and what the errors are",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/deploy"
+  },
+  {
+   "query": "is scripts/fetch.sh stable? QA says it fails intermittently but I've never seen it",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/deploy"
+  },
+  {
+   "query": "fetch.sh sometimes exits 56 and sometimes 3, no idea why. quantify it",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/deploy"
+  },
+  {
+   "query": "a colleague marked test_total_rounding as flaky and added a retry. I'm not sure it's actually flaky. can you check",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/totals"
+  },
+  {
+   "query": "is tests/test_total.py nondeterministic? it failed in CI yesterday",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/totals"
+  },
+  {
+   "query": "CI says pytest fails on and off in this repo. how often does it really fail if I just rerun it?",
+   "should_trigger": true,
+   "fixture": "evals/fixtures/totals"
+  },
+  {
+   "query": "test_cache_hit is flaky because of the time.time() based TTL. rewrite the test to use a fake clock",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "add @pytest.mark.flaky(reruns=3) to test_cache_hit so CI stops blocking us",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "explain why a time.time() based TTL makes tests flaky. don't change anything",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "run pytest tests/test_cache.py -x one time and show me the full output",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/cache"
+  },
+  {
+   "query": "fetch.sh needs exponential backoff when curl gets a connection reset. implement that",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/deploy"
+  },
+  {
+   "query": "add a --dry-run flag to scripts/fetch.sh that only prints what it would fetch",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/deploy"
+  },
+  {
+   "query": "test_total_rounding fails every single time: 0.30000000000000004 != 0.3. fix total() so it rounds to cents",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/totals"
+  },
+  {
+   "query": "write tests for total() with an empty list and with negative quantities",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/totals"
+  },
+  {
+   "query": "set up a github actions workflow that runs pytest on python 3.11 and 3.12",
+   "should_trigger": false,
+   "fixture": "evals/fixtures/totals"
+  }
+ ]
+}
