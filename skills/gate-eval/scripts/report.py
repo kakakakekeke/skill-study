@@ -93,8 +93,9 @@ def main() -> None:
     skill_dir = Path(a.skill).resolve()
     out = Path(a.out)
     name, desc, body = parse_frontmatter(skill_dir / "SKILL.md")
-    fm = (skill_dir / "SKILL.md").read_text()
-    user_invoked = "disable-model-invocation: true" in fm.split("---")[1]
+    hook_only = not (skill_dir / "SKILL.md").exists()
+    fm = "" if hook_only else (skill_dir / "SKILL.md").read_text()
+    user_invoked = not hook_only and "disable-model-invocation: true" in fm.split("---")[1]
 
     runs = load_runs(out / "quality") if (out / "quality").exists() else []
     by = defaultdict(list)  # (eval, model, config) -> runs
@@ -112,11 +113,17 @@ def main() -> None:
     # ---- G1
     lines += ["## G1 정확한 트리거", ""]
     tsum = out / "trigger" / "summary.json"
-    if user_invoked:
+    if hook_only:
+        lines += ["훅 전용(SKILL.md 없음): 트리거는 결정적이다. G1은 거짓양성으로 보며, G2 표의 오탐 fixture(`fp-*`) 회귀와 차단 횟수로 판정한다(원칙 §3.2).", ""]
+        summary["g1"] = {"verdict": "n/a (hook)"}
+    elif user_invoked:
         lines += ["user-invoked 스킬: description이 모델에 노출되지 않으므로 G1은 해당 없음(사람이 켠다).", ""]
         summary["g1"] = {"verdict": "n/a"}
     elif tsum.exists():
         t = json.loads(tsum.read_text())
+        if t.get("in_task"):
+            lines += ["**수행 중 G1** (원칙 §2 \"G1 측정 시점\"): fixture에서 과제를 실제로 수행시키고 대상 스킬이 언제든 호출되면 발동.",
+                      f"- 측정 전 근거: {t.get('reason')}", f"- 경쟁 스킬: {', '.join(t.get('competitors', []))}", ""]
         lines += [f"쿼리 {t['n_train']+t['n_test']}개(train {t['n_train']}/test {t['n_test']}), 쿼리당 {t['runs_per_query']}회, 임계 0.5.", "",
                   "| 모델 | 구간 | 통과 | should-fire 재현율 | should-not-fire 정밀도 |", "|---|---|---|---|---|"]
         g1_ok = True
@@ -135,8 +142,18 @@ def main() -> None:
                     if items:
                         lines.append(f"- {m} {lab}: " + " / ".join(f"`{q}`" for q in items))
                 lines.append("")
-        summary["g1"] = {"verdict": "pass" if g1_ok else "fail", "models": t["models"]}
+        summary["g1"] = {"verdict": "pass" if g1_ok else "fail", "in_task": bool(t.get("in_task")), "models": t["models"]}
         lines += ["", f"**판정: {'통과' if g1_ok else '실패'}** (규칙: 모델마다 held-out test에서 과잉·미발동 각각 1건 이하)", ""]
+        rsum = out / "trigger-router" / "summary.json"
+        if t.get("in_task") and rsum.exists():
+            r = json.loads(rsum.read_text())
+            lines += ["참고치: 시작 시점 라우팅 (판정에 쓰지 않음)", "", "| 모델 | 구간 | 통과 | should-fire 재현율 | should-not-fire 정밀도 |", "|---|---|---|---|---|"]
+            for m, d in r["models"].items():
+                for part in ("train", "test"):
+                    s_ = d[part]
+                    lines.append(f"| {m} | {part} | {s_['pass']}/{s_['n']} | {fmt(s_['should_fire_recall'], True)} | {fmt(s_['should_not_fire_precision'], True)} |")
+            summary["g1"]["router_reference"] = r["models"]
+            lines.append("")
     else:
         lines += ["trigger 결과 없음 (`evals/trigger.json` 또는 실행 누락).", ""]
         summary["g1"] = {"verdict": "missing"}
@@ -268,7 +285,7 @@ def main() -> None:
                 if has_skill:
                     lines.append(f"- 스킬 미호출 run: {len(osmosis)} (삼투 조건; 있으면 해당 run의 통과율을 따로 본다)")
                 if any(hb):
-                    lines.append(f"- 훅 차단: run당 평균 {mean(hb):.1f}회 (tool_result is_error에 'hook')")
+                    lines.append(f"- 훅 차단: run당 평균 {mean(hb):.1f}회 (PreToolUse 거부 + Stop hook feedback)")
                 lines += [f"- **{m} 판정: {kind_txt}**", ""]
                 if osmosis:
                     lines.append("  - 미호출 run 통과율: " + ", ".join(f"{r['eval_name']}/rep{r['rep']}={fmt(r['grading']['summary']['pass_rate'], True)}" for r in osmosis))
@@ -302,7 +319,7 @@ def main() -> None:
     lines += ["", f"**G3 판정(잠정): {'통과' if g3_ok else '실패'}** — 공식 측정은 세션에서 `/skill-doctor`. 규칙: 본문 < 200줄, 토큰 비율 > 1.5인데 G2 실패면 실패.", ""]
 
     verdicts = [summary["g1"].get("verdict"), summary["g2"].get("verdict"), summary["g3"].get("verdict")]
-    final = "채택 가능" if all(v in ("pass", "n/a") for v in verdicts) else "백로그 (미입증 게이트 있음)"
+    final = "채택 가능" if all(v == "pass" or str(v).startswith("n/a") for v in verdicts) else "백로그 (미입증 게이트 있음)"
     summary["final"] = final
     lines += ["## 종합", "", "| G1 | G2 | G3 | 결론 |", "|---|---|---|---|", f"| {verdicts[0]} | {verdicts[1]} | {verdicts[2]} | **{final}** |", ""]
     (out / "report.md").write_text("\n".join(lines))

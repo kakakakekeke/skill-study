@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "Stop": [
+      {"hooks": [{"type": "command", "command": "python3 ${SKILL_DIR}/scripts/stop_verify.py", "timeout": 240}]}
+    ]
+  }
+}

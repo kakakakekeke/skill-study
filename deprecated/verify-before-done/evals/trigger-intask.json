@@ -1,0 +1,27 @@
+{
+ "reason": "발동 조건이 '애플리케이션 코드를 바꾼 뒤, 완료를 선언하기 전'이라 과제 진행 상태에 달려 있고, 평범한 변경 요청 문장에는 나타나지 않는다. 라운드 2에서 시작 시점 라우팅(haiku held-out 11/14)과 수행 중 호출(haiku 11/15, opus 15/15)이 갈렸다. 2026-10-23, 측정 전 작성.",
+ "items": [
+  {"query": "Cart.total() should take a currency argument (default 'USD') and return the formatted string from format_price instead of a Decimal", "should_trigger": true, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "rename format_price to render_price across the package", "should_trigger": true, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "we need fractional discounts like 12.5%. make Line.discount_pct and apply_discount work with that", "should_trigger": true, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "add a WINTER15 promo and make promo codes case-sensitive from now on", "should_trigger": true, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "add an optional phone field to Contact (default None) and mention it in welcome_message when it's set", "should_trigger": true, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "rename Directory.get to Directory.by_id", "should_trigger": true, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "reminder_subject should use the contact's full name, not just the first word", "should_trigger": true, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "find_contact에 이름으로도 찾을 수 있게 name 인자를 추가해줘. id나 name 중 하나만 받으면 돼", "should_trigger": true, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "low_stock should return (sku, qty) pairs instead of just the skus", "should_trigger": true, "fixture": "evals/fixtures/zero-tests"},
+  {"query": "add remove_stock(conn, sku, qty) to inventory.py; it should refuse to take stock below zero", "should_trigger": true, "fixture": "evals/fixtures/zero-tests"},
+  {"query": "rename the items table to stock in the schema and every query", "should_trigger": true, "fixture": "evals/fixtures/zero-tests"},
+  {"query": "let connect() take a pathlib.Path as well as a str", "should_trigger": true, "fixture": "evals/fixtures/zero-tests"},
+  {"query": "explain how Cart.total applies the per-line discounts. don't change anything", "should_trigger": false, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "write unit tests for format_price, nothing covers EUR, GBP or unknown currencies yet", "should_trigger": false, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "configure ruff to also enforce the bugbear (B) rules and set line-length to 88", "should_trigger": false, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "run the test suite once and tell me how long it takes", "should_trigger": false, "fixture": "evals/fixtures/hidden-regression"},
+  {"query": "why would mypy complain if find_contact returned Optional[Contact]? just explain, I'll change it myself", "should_trigger": false, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "add a github actions workflow that runs the three CI commands from the README on every PR", "should_trigger": false, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "add a short section to the README describing what each module in crm does", "should_trigger": false, "fixture": "evals/fixtures/typecheck-only"},
+  {"query": "run tests/test_inventory.py 10 times and tell me whether anything in it is flaky", "should_trigger": false, "fixture": "evals/fixtures/zero-tests"},
+  {"query": "add_stock with a negative qty can push stock below zero, it should raise ValueError instead. fix it", "should_trigger": false, "fixture": "evals/fixtures/zero-tests"},
+  {"query": "what does the conn fixture in conftest do, and when does the connection get closed?", "should_trigger": false, "fixture": "evals/fixtures/zero-tests"}
+ ]
+}

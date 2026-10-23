@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """세 게이트 eval 오케스트레이터.
 
-python3 gate_eval.py --skill skills/<name> [--models haiku,opus] [--reps 3] [--skip-trigger] [--skip-quality] [--grader sonnet]
+python3 gate_eval.py --skill skills/<name> [--models haiku,sonnet] [--reps 3] [--skip-trigger] [--skip-quality] [--grader opus]
 결과: <skill>/evals/results/<YYYY-MM-DD>/ (gitignore 대상) 에 report.md, summary.json
 단계는 각각 캐시되므로 중단 후 같은 명령을 다시 실행하면 이어서 한다.
 """
@@ -25,9 +25,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", default=None)
-    ap.add_argument("--models", default="haiku,opus")
+    ap.add_argument("--models", default="haiku,sonnet")
     ap.add_argument("--reps", type=int, default=3)
-    ap.add_argument("--grader", default="sonnet")
+    ap.add_argument("--grader", default="opus")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--max-turns", type=int, default=40)
@@ -42,8 +42,17 @@ def main() -> None:
     out = Path(a.out) if a.out else skill / "evals" / "results" / date.today().isoformat()
     out.mkdir(parents=True, exist_ok=True)
     py = sys.executable
-    user_invoked = "disable-model-invocation: true" in (skill / "SKILL.md").read_text().split("---")[1]
-    if not a.skip_trigger and not user_invoked and (skill / "evals" / "trigger.json").exists():
+    skill_md = skill / "SKILL.md"
+    user_invoked = skill_md.exists() and "disable-model-invocation: true" in skill_md.read_text().split("---")[1]
+    intask = skill / "evals" / "trigger-intask.json"
+    if not a.skip_trigger and not user_invoked and intask.exists():
+        # 원칙 §2 "G1 측정 시점": 수행 중 G1이 판정, 시작 시점 라우팅은 참고치(trigger-router/)
+        sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
+            "--eval-set", str(intask), "--workers", str(a.workers)])
+        if (skill / "evals" / "trigger.json").exists():
+            sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
+                "--out-name", "trigger-router"])
+    elif not a.skip_trigger and not user_invoked and (skill / "evals" / "trigger.json").exists():
         sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models])
     if not a.skip_quality and (skill / "evals" / "evals.json").exists():
         cmd = [py, str(HERE / "quality_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,

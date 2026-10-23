@@ -9,6 +9,11 @@ skill-creator의 run_eval(첫 도구가 Skill이어야 함, description만 노�
 입력: <skill>/evals/trigger.json = [{"query": ..., "should_trigger": true|false}, ...]
 출력: <out>/trigger/<model>.json, <out>/trigger/summary.json
 train/test는 skill-creator의 split_eval_set(seed 42)과 같은 분할(없으면 자체 구현)로 나눠 보고한다.
+
+수행 중 모드(원칙 §2 "G1 측정 시점"): 문항 파일이 {"reason": ..., "items": [{"query", "should_trigger", "fixture"}]}
+형식이면 문항마다 fixture를 임시 프로젝트로 복사하고 같은 경쟁 스킬을 링크한 채 과제를 실제로 수행시킨다(라우터 프롬프트 없음,
+품질 실행과 같은 도구). 대상 스킬이 언제든 호출되면 발동이며, 그 순간 프로세스를 끝내 비용을 줄인다. `reason`(요청 문장에
+발동 조건이 없다는 근거)은 측정 전에 적어야 하며 비어 있으면 거부한다.
 """
 from __future__ import annotations
 
@@ -22,8 +27,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from common import clean_env, parse_frontmatter  # noqa: E402
+from common import ALLOWED_TOOLS, clean_env, parse_frontmatter, skill_invoked  # noqa: E402
 import subprocess  # noqa: E402
+import threading  # noqa: E402
+import time  # noqa: E402
 
 ROUTER_PROMPT = (
     "The user's repository is not mounted in this sandbox, so you cannot run or read their code. "
@@ -68,26 +75,86 @@ def one(query: str, proj: Path, model: str, skill_name: str, timeout: int) -> di
     return {"triggered": chosen.split(":")[-1] == skill_name or chosen == skill_name, "chosen": chosen}
 
 
+def one_in_task(query: str, fixture: Path, competitors: list[Path], model: str, skill_name: str,
+                timeout: int, max_turns: int) -> dict:
+    """fixture에서 과제를 실제로 수행시키고 대상 스킬 호출 여부를 본다. 호출되는 즉시 종료한다."""
+    proj = Path(tempfile.mkdtemp(prefix="ge-intask-"))
+    try:
+        shutil.copytree(fixture, proj, dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", "node_modules", ".git"))
+        sk = proj / ".claude" / "skills"
+        sk.mkdir(parents=True)
+        for d in competitors:
+            (sk / d.name).symlink_to(d, target_is_directory=True)
+        cmd = ["claude", "-p", query, "--model", model, "--output-format", "stream-json", "--verbose",
+               "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
+               "--max-turns", str(max_turns), "--allowedTools", ALLOWED_TOOLS]
+        proc = subprocess.Popen(cmd, cwd=proj, env=clean_env(), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+        timer = threading.Timer(timeout, proc.kill)  # 출력 없이 멈춰도 끝나게
+        timer.start()
+        t0, skills_called, triggered, turns, subtype = time.time(), [], False, 0, None
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            try:
+                ev = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if ev.get("type") == "result":
+                subtype = ev.get("subtype")
+            if ev.get("type") == "assistant":
+                turns += 1
+                for c in ev["message"].get("content", []):
+                    if c.get("type") == "tool_use" and c.get("name") == "Skill":
+                        skills_called.append(str(c["input"].get("skill", "")))
+                if skill_invoked([ev], skill_name):
+                    triggered = True
+                    break
+        if proc.poll() is None:
+            proc.kill()
+        proc.wait()
+        timer.cancel()
+        timed_out = not triggered and time.time() - t0 >= timeout
+        return {"triggered": triggered, "chosen": ",".join(skills_called) or "NONE", "turns": turns,
+                "timed_out": timed_out, "duration_s": round(time.time() - t0, 1), "result_subtype": subtype}
+    finally:
+        shutil.rmtree(proj, ignore_errors=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skill", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--models", default="haiku,opus")
+    ap.add_argument("--models", default="haiku,sonnet")
     ap.add_argument("--runs-per-query", type=int, default=3)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timeout", type=int, default=120)
     ap.add_argument("--skills-root", default=None, help="경쟁시킬 스킬들의 상위 디렉터리 (기본: 대상 스킬의 부모)")
     ap.add_argument("--eval-set", default=None, help="문항 파일 (기본: <skill>/evals/trigger.json)")
     ap.add_argument("--holdout", type=float, default=0.4, help="test 비율. description을 고친 뒤 새 문항만 돌릴 때는 1.0")
+    ap.add_argument("--out-name", default="trigger", help="결과 하위 디렉터리 이름 (수행 중 판정과 라우터 참고치를 나눌 때)")
+    ap.add_argument("--max-turns", type=int, default=30, help="수행 중 모드 전용")
     a = ap.parse_args()
 
     skill_dir = Path(a.skill).resolve()
     name, desc, _ = parse_frontmatter(skill_dir / "SKILL.md")
     eval_path = Path(a.eval_set).resolve() if a.eval_set else skill_dir / "evals" / "trigger.json"
-    eval_set = json.loads(eval_path.read_text())
+    raw = json.loads(eval_path.read_text())
+    in_task = isinstance(raw, dict)
+    if in_task:
+        reason = (raw.get("reason") or "").strip()
+        if not reason:
+            sys.exit(f"수행 중 G1에는 측정 전에 적은 reason이 필요하다: {eval_path}")
+        eval_set = raw["items"]
+        for e in eval_set:
+            if not (skill_dir / e["fixture"]).is_dir():
+                sys.exit(f"fixture 없음: {e['fixture']}")
+        if a.timeout == 120:
+            a.timeout = 600  # 라우터 기본값은 수행에 너무 짧다
+    else:
+        eval_set = raw
     train, test = split_eval_set(eval_set, a.holdout)
     test_q = {q["query"] for q in test}
-    out = Path(a.out).resolve() / "trigger"
+    out = Path(a.out).resolve() / a.out_name
     out.mkdir(parents=True, exist_ok=True)
 
     proj = Path(tempfile.mkdtemp(prefix="ge-trigger-"))
@@ -102,7 +169,11 @@ def main() -> None:
                 continue  # 모델에 노출되지 않는 스킬은 경쟁자가 아니다
             (sk / d.name).symlink_to(d.resolve(), target_is_directory=True)
             competitors.append(d.name)
-    summary = {"skill": name, "description": desc, "method": "router-decision (all repo skills linked, empty project, Skill-only)",
+    comp_dirs = [root / c for c in competitors]
+    method = (f"in-task (fixture per query, all repo skills linked, full tools, max-turns {a.max_turns}, stop on invoke)"
+              if in_task else "router-decision (all repo skills linked, empty project, Skill-only)")
+    summary = {"skill": name, "description": desc, "method": method, "in_task": in_task,
+               "reason": raw.get("reason") if in_task else None,
                "competitors": competitors, "runs_per_query": a.runs_per_query, "eval_set": str(eval_path), "holdout": a.holdout,
                "n_train": len(train), "n_test": len(test), "models": {}}
     try:
@@ -112,12 +183,19 @@ def main() -> None:
                 res = json.loads(cached.read_text())
             else:
                 print(f"[trigger] {model}: {len(eval_set)} queries × {a.runs_per_query}", file=sys.stderr)
-                rows = {i: {"query": e["query"], "should_trigger": e["should_trigger"], "chosen": [], "triggers": 0, "runs": 0} for i, e in enumerate(eval_set)}
+                rows = {i: {"query": e["query"], "should_trigger": e["should_trigger"], "chosen": [], "triggers": 0, "runs": 0, "detail": []} for i, e in enumerate(eval_set)}
                 with ThreadPoolExecutor(max_workers=a.workers) as ex:
-                    futs = {ex.submit(one, e["query"], proj, model, name, a.timeout): i for i, e in enumerate(eval_set) for _ in range(a.runs_per_query)}
+                    if in_task:
+                        futs = {ex.submit(one_in_task, e["query"], (skill_dir / e["fixture"]).resolve(), [d.resolve() for d in comp_dirs],
+                                          model, name, a.timeout, a.max_turns): i
+                                for i, e in enumerate(eval_set) for _ in range(a.runs_per_query)}
+                    else:
+                        futs = {ex.submit(one, e["query"], proj, model, name, a.timeout): i for i, e in enumerate(eval_set) for _ in range(a.runs_per_query)}
                     for f in as_completed(futs):
                         r = f.result(); i = futs[f]
                         rows[i]["runs"] += 1; rows[i]["triggers"] += int(r["triggered"]); rows[i]["chosen"].append(r["chosen"])
+                        if in_task:
+                            rows[i]["detail"].append({k: r[k] for k in ("turns", "duration_s", "timed_out", "result_subtype")})
                 results = []
                 for r in rows.values():
                     rate = r["triggers"] / r["runs"] if r["runs"] else 0

@@ -1,6 +1,6 @@
 ---
 name: gate-eval
-description: Measures a skill in this repository against the three adoption gates (trigger accuracy, with/without quality with a noise floor, token cost) on haiku and opus with repeated runs, and writes a fixed-format report under the skill's evals/results/. Invoke as /gate-eval skills/<name>.
+description: Measures a skill in this repository against the three adoption gates (trigger accuracy, with/without quality with a noise floor, token cost) on haiku and sonnet with repeated runs, and writes a fixed-format report under the skill's evals/results/. Invoke as /gate-eval skills/<name>.
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 ## 왜 이 절차인가
 
-단일 실행 비교는 노이즈를 효과로 착각한다. 그래서 기준선을 자기 자신과 반복 비교해 뒤집힘률(노이즈 바닥)을 먼저 재고, 그 아래의 "회귀"는 회귀로 치지 않는다. 뒤집힘 0건은 노이즈가 없다는 뜻이 아니라 못 봤다는 뜻이므로 바닥은 max(관측, 3/N)으로 잡는다(3회 반복 0%가 5회에서 3%로 드러난 사례 있음). Δ가 3/N 근처면 `--reps 5`로 다시 잰다. 이득과 회귀는 쌍으로 보고한다(한쪽만 보면 선별 편향). 모델 2종(haiku, opus)으로 돌리는 이유는 작은 모델에서 효과가 크고 큰 모델에서 사라지는 스킬이 흔하기 때문이다.
+단일 실행 비교는 노이즈를 효과로 착각한다. 그래서 기준선을 자기 자신과 반복 비교해 뒤집힘률(노이즈 바닥)을 먼저 재고, 그 아래의 "회귀"는 회귀로 치지 않는다. 뒤집힘 0건은 노이즈가 없다는 뜻이 아니라 못 봤다는 뜻이므로 바닥은 max(관측, 3/N)으로 잡는다(3회 반복 0%가 5회에서 3%로 드러난 사례 있음). Δ가 3/N 근처면 `--reps 5`로 다시 잰다. 이득과 회귀는 쌍으로 보고한다(한쪽만 보면 선별 편향). 모델 2종(haiku, sonnet; 2026-10-23까지는 opus)으로 돌리는 이유는 작은 모델에서 효과가 크고 큰 모델에서 사라지는 스킬이 흔하기 때문이다. grader는 opus다. 측정 대상과 다른 모델이 채점해야 자기 채점 편향이 없다.
 
 ## 실행
 
@@ -19,7 +19,7 @@ disable-model-invocation: true
 스크립트는 이 스킬 디렉터리의 `scripts/gate_eval.py`다 (이 저장소에서는 `skills/gate-eval/scripts/gate_eval.py`).
 
 ```bash
-python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name>            # 기본: haiku,opus × 3회
+python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name>            # 기본: haiku,sonnet × 3회
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5   # 노이즈가 크면 반복 증가
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --skip-trigger --only 1,2
 python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \
@@ -34,6 +34,8 @@ python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \
 ## G1은 무엇을 재는가
 
 빈 임시 프로젝트에 이 저장소의 model-invoked 스킬을 **전부** 링크해 서로 경쟁시키고, 쿼리마다 "코드는 없다. 쓸 스킬이 있으면 Skill 도구로 호출하고 없으면 NONE"이라는 시스템 프롬프트 한 줄로 **라우팅 결정만** 묻는다(쿼리당 3회, 임계 0.5). 실제 과제 수행 중의 호출과는 다르다. 수행 중 호출 여부는 G2 표의 "with 미호출" 열이 보여준다. skill-creator의 `run_eval`(description만 커맨드 파일로 노출, 첫 도구가 Skill이어야 함)은 CLI 2.1.295에서 호출을 감지하지 못해(2026-10-22 확인) 쓰지 않는다.
+
+이 측정은 발동 조건이 요청 문장에 있는 스킬에만 유효하다. 과제 진행 상태에 따라 켜지는 스킬은 원칙 §2 "G1 측정 시점"대로 **수행 중 G1**로 잰다: `evals/trigger-intask.json`(형식은 `references/evals-format.md`)이 있으면 문항마다 fixture에서 과제를 실제로 수행시키고(경쟁 스킬 동일, 라우터 프롬프트 없음) 대상 스킬이 호출되는 즉시 끝낸다. 이때는 이것이 판정이고, `trigger.json`의 시작 시점 결과는 `trigger-router/`에 참고치로 남는다. 파일의 `reason`은 측정 전에 적고 커밋한다.
 
 ## 보고서 읽는 법
 

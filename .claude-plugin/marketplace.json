@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "skill-study",
-  "description": "세 게이트(트리거·품질·토큰)를 eval로 통과한 경량 개발 스킬 모음",
+  "description": "세 게이트(트리거·품질·토큰)를 eval로 통과한 경량 개발 스킬·훅 모음",
   "owner": {
     "name": "kakakakekeke"
   },
@@ -13,7 +13,9 @@
       "category": "development",
       "source": "./skills",
       "strict": false,
-      "skills": ["./flaky-check"]
+      "skills": [
+        "./flaky-check"
+      ]
     },
     {
       "name": "repro-first",
@@ -22,7 +24,9 @@
       "category": "development",
       "source": "./skills",
       "strict": false,
-      "skills": ["./repro-first"]
+      "skills": [
+        "./repro-first"
+      ]
     },
     {
       "name": "test-integrity-check",
@@ -31,7 +35,16 @@
       "category": "development",
       "source": "./skills",
       "strict": false,
-      "skills": ["./test-integrity-check"]
+      "skills": [
+        "./test-integrity-check"
+      ]
+    },
+    {
+      "name": "verify-on-stop",
+      "description": "Stop 훅: 코드를 고친 뒤 CI 검사(연관 테스트·ruff·mypy)가 돌지 않았으면 끝내기 전에 직접 돌리고, 실패면 한 번만 되돌려 보내고 통과면 결과를 사용자에게 보여 준다",
+      "version": "1.0.0",
+      "category": "development",
+      "source": "./plugins/verify-on-stop"
     }
   ]
 }

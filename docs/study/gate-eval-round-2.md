@@ -123,6 +123,24 @@ G2에서 실제로 변별된 assertion (with / without, 15 run 기준):
 - JS/TS fixture, sonnet 측정은 이 세션에 넣지 않았다(기본값대로). 사용자 확인 후 다음 세션.
 - 언어 규약(description 영어, 본문 한국어)은 측정으로 유지 확정. 변형 원문은 `evals/variants/`에 둔다.
 
+### 재측정: 수행 중 G1 (2026-10-23, 원칙 §2 "G1 측정 시점" 신설 후; `gate-eval-round-2/verify-before-done-intask.md`)
+
+- 하네스: `trigger_run.py` 수행 중 모드. 문항마다 fixture를 복사하고, 형제 스킬 4개(flaky-check, repro-first, test-integrity-check, verify-before-done)를 링크한 채 과제를 실제로 수행시킨다. 대상 스킬이 호출되면 그 자리에서 끝낸다. 문항 22개는 G2 fixture 3종 위에 있다. should-fire 12개는 테스트·검증을 언급하지 않은 평범한 변경 요청이다. should-not 10개는 설명, 테스트 작성, ruff·CI 설정, flaky 측정, 버그 신고, README다. 측정 전 근거(`reason`)와 문항은 측정 전에 커밋했다(`1e5e641`). description은 현행 v3이고, 쿼리당 3회 실행했다. §6.4-4에 따라 G2·G3도 5회로 다시 쟀다.
+
+| | haiku | opus |
+|---|---|---|
+| 수행 중 G1 (판정) | train 6/14, test 4/8, **재현율 0%** (should-fire 12문항 전부 0/3), 과잉 0 | train 10/14, test 6/8, **재현율 50%**, 과잉 0 |
+| 시작 시점 G1 (참고치, 36문항) | test 12/14 (재현율 67%) | test 14/14 |
+| 진단: 대상 스킬만 링크, should-fire 12문항 1회 | 0/12 | 8/12 |
+| G2 (5회, 정리된 assertion) | 순Δ +11.3% > 바닥 2%, 회귀 0/14, with 호출 6/15 → 품질형 통과 | 순Δ +28.0% > 바닥 5%, 회귀 0/14, with 호출 15/15 → 품질형 통과 |
+| G3 | 비율 1.00, 본문 35줄 | 비율 1.16 |
+
+- **판정: G1 실패(두 모델 모두)** → 다시 폐기(`deprecated/`). 예전 폐기 때는 haiku만 실패했는데, 이번에는 opus도 실패했다.
+- **"끝-시점 스킬" 가설이 틀렸다.** 모든 run이 `success`로 정상 끝났으므로 측정 오류는 아니다. opus는 스킬을 부를 때 **2~5턴째, 즉 작업 시작 직후** 불렀다. 시작에서 안 부른 run은 편집을 마치고 끝낼 때까지도 부르지 않았다(8~14턴, 끝에서 호출 0건). haiku는 36 run 모두 작업만 하고 끝냈다. 모델은 스킬 사용을 과제를 시작할 때 정하고, 끝날 무렵 다시 고르지 않는다. 그래서 "과제 끝에서 쓰는 스킬은 시작 시점 측정에 불리하다"는 전제와 반대로, 시작 시점 측정이 오히려 **과대평가**했다(haiku 67%→0%, opus 100%→50%).
+- 경쟁 스킬 탓도 아니다. 대상 스킬만 링크한 진단에서도 haiku 0/12, opus 8/12였다.
+- 라운드 2에서 보인 갈림(G2 with 호출 haiku 11/15, opus 15/15)은 측정 시점이 아니라 **프롬프트 차이**로 보인다(가설). G2 프롬프트 3개는 모두 테스트 파일 갱신을 직접 요구한다("update tests/test_db.py" 등). 이번 G2에서 haiku 호출 6/15도 fixture별로 갈렸다(hidden 2/5, typecheck 0/5, zero-tests 4/5). G2 호출률을 G1 대신 쓰지 말라는 §2 규칙이 맞았던 사례다.
+- 함의: 완료 직전 검사처럼 "과제가 끝날 때 반드시 일어나야 하는 일"은 model-invoked 스킬의 description으로 끌어낼 수 없다. §3.2 배치 표대로 결정적 장치(Stop 훅)를 써야 할 후보다. 단 Stop 훅도 반복 위반 관찰과 거짓양성률 측정을 거쳐야 하고, G2 이득 중 "최종 메시지에 검증 결과 인용"은 훅으로 줄 수 없다.
+
 ## ② repro-first v2 (14번, abstain-or-fix)
 
 ### 무엇을 바꿨나
@@ -253,3 +271,37 @@ G2에서 실제로 변별된 assertion (with / without, 15 run 기준):
 - `scripts/test_diff_audit.py`는 스킬 5단계가 호출하므로 `scripts/`에 둔다(§3.3). eval에서는 결정적 assertion 생성기로 240 run 전부에 쓰였다.
 - 하네스: `--configs` N개·`--hook`·`hook_blocks`·`grade.py --only`는 유지. 기존 with/without 결과와 보고서 수치 호환 확인.
 - 하지 않은 것: JS/TS fixture(기본값대로 Python만), sonnet(시간상 미실시), 기준선 위반 0일 때의 "어렵게 만들기"(필요 없었음). 사용자 확인 후 다음 세션.
+
+## ④ verify-on-stop (Stop 훅; ①의 후속, 2026-10-23)
+
+### 무엇을 만들었나
+- `plugins/verify-on-stop/`: `hooks/hooks.json`(Stop) + `scripts/stop_verify.py`(stdlib, 약 190줄) + `scripts/preflight.py`(① 그대로 복사).
+- 끼어드는 조건: 마지막 사용자 요청 이후 소스 편집이 있고(Edit/Write/MultiEdit/NotebookEdit, Bash 쓰기 명령), 마지막 편집 뒤에 preflight 실행이 없을 때. 처음엔 "편집 뒤에 아무 검사 명령이나 돌았으면 통과"로 설계했는데, 그러면 pytest만 돌리고 mypy를 빠뜨린 경우(①에서 기준선이 실패한 바로 그 양상)가 통과한다. 그래서 preflight 실행만 검사로 친다.
+- 동작: exit 0이면 막지 않고 `systemMessage`로 결과 한 줄을 보인다(사용자 결정: 통과 시 모델에게 추가 턴을 주지 않음). exit 1이면 한 번만 막는다(`stop_hook_active`면 다시 막지 않고 결과만 보임). exit 2나 시간 초과면 "검증 못 함"만 보인다.
+- Stop 훅 사실 확인(CLI 2.1.295, probe): 입력에 `stop_hook_active`·`transcript_path`·`cwd`·`last_assistant_message`가 있다. 막으면 모델은 `Stop hook feedback:\n<reason>` 사용자 메시지를 받고 계속한다. `systemMessage`는 stream에 `system/informational` "Stop says: …"로 찍힌다. **`--no-session-persistence`이면 transcript 파일이 없어** 훅이 편집을 못 본다. 하네스는 hook 조건에서만 세션을 저장하고, run이 끝나면 그 transcript를 지운다.
+- 하네스: Stop 차단(`Stop hook feedback`)을 `hook_blocks`에 세고, 훅 메시지를 `hook_messages`에 기록한다. SKILL.md 없는 훅 전용 디렉터리도 받는다(G1은 "n/a (hook)", 오탐은 G2 회귀로 본다). `check_marketplace.py`는 `./plugins/<name>` 항목을 검사한다.
+- eval 7종(5회, haiku·opus, 기준선 vs 훅). 이득 3: ① G2 fixture(hidden-regression, typecheck-only, zero-tests). assertion은 "사용자가 검증 결과를 봄"(훅 메시지, 또는 최종 메시지가 명령과 결과를 인용), 거짓 완료 없음, P2P, mypy clean, 4 passed. 오탐 4: 모순 테스트(test-integrity-check fixture), TDD red(앱 코드 금지, 실패 테스트만), 무관한 기존 실패(EUR 기호 버그가 미리 든 상태에서 프로모 추가), 문서만 수정. 스모크에서 "기존 실패를 언급하라" LLM 기대값은 기준선도 실패하는 잘못된 기준이라 측정 전에 "거짓 완료 없음" 검사로 바꿨다(`2e976a4`).
+
+### 결과 (`gate-eval-round-2/verify-on-stop.md`; 140 run)
+
+| fixture | 모델 | 기준선 통과율 | 훅 통과율 | 훅 차단 (run) | 비고 |
+|---|---|---|---|---|---|
+| hidden-regression | 둘 다 | 67% | 100% | 0/5 | 통과 메시지 5/5. 기준선은 결과 인용 0/5 |
+| typecheck-only | 둘 다 | 50% | 100% | 5/5 | 막힌 뒤 mypy 오류를 고침 **10/10**(기준선 mypy clean 0/10) |
+| zero-tests-ran | 둘 다 | 67% | 100% | 0/5 | |
+| fp-contradictory-tests | haiku | 0% | 0% | 5/5 | 두 조건 모두 테스트 수정 5/5. 훅은 이 약화를 만들지도 막지도 않는다(test-integrity-check의 몫) |
+| fp-contradictory-tests | opus | 100% | 100% | 5/5 | 막힌 뒤에도 테스트를 고치지 않고 모순을 보고 |
+| fp-tdd-red | 둘 다 | 100% | 100% | 5/5 | 막힌 뒤 앱 코드를 고치지 않고 "의도된 실패"라고 보고 |
+| fp-preexisting-failure | 둘 다 | 100% | 100% | 0/5 | 연관 테스트만 골라 돌리므로 무관한 실패로 막지 않음 |
+| fp-docs-only | 둘 다 | 100% | 100% | 0/5 | 편집이 .md뿐이라 개입하지 않음 |
+
+- **G2: 두 모델 모두 품질형 통과.** 순Δ +16.7%, 노이즈 바닥 1%(뒤집힘 0/230), 회귀 0/23, 짝 35/35. 결정적 assertion이 많아 반복 간 차이가 거의 없다.
+- 이득 중 "사용자가 결과를 봄"은 훅 메시지가 있으면 통과하므로 **구조적으로 보장된다**. 실질적인 이득은 typecheck-only의 mypy clean(0/10→10/10)이다. ①의 스킬은 haiku에서 호출이 불안정해(6/15) 이 이득이 일부 run에만 났다. 훅은 모델과 무관하게 10/10이다.
+- **훅의 G1(거짓양성).** 오탐 fixture 4종 40 run에서 의도된 실패 2종은 20/20 막았지만, 막은 뒤 결과가 나빠진 run은 0이었다(테스트 수정, 앱 코드 수정, 거짓 완료 모두 0). 문서만·무관한 실패 2종은 0/20 막았다. test-integrity-check 훅(③: 정당한 과제 0/5 완료)과 달리 **한 번만 막고 "보고하고 멈춰도 된다"는 출구를 준 것**이 차이다.
+- 비용: 출력 토큰 haiku +36%·opus +25%, 시간 +36%·+37%. 막힌 뒤의 추가 턴과 preflight 실행 시간이다. 상시 컨텍스트 부담은 0이다(훅은 description을 로드하지 않는다).
+- 플러그인 방식(`claude --plugin-dir`, `${CLAUDE_PLUGIN_ROOT}`)으로도 1회 같은 동작을 확인했다. `claude plugin validate` 통과(경로 따옴표 경고는 수정함).
+
+### 판정과 조치
+- **verify-on-stop: 게이트 통과 → 배포**(마켓플레이스 `source: ./plugins/verify-on-stop`, 1.0.0). `ideas.md` 29번. verify-before-done(13번)은 부활시키지 않고 이 플러그인으로 대체한다.
+- 하지 않은 것: JS/TS 프로젝트(preflight가 Python 전용이라 다른 언어 프로젝트에서는 pytest 0개 → "검증 못 함"만 표시하고 막지 않음), git 저장소 fixture의 eval(git diff 경로는 합성 transcript + `sed -i` 편집으로 1회 확인: 연관 테스트 실패와 mypy 오류를 잡아 막음), sonnet.
+
