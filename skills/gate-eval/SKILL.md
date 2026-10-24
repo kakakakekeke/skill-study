@@ -31,6 +31,13 @@ python3 <skill-dir>/scripts/gate_eval.py --skill skills/<name> --reps 5 \
 - 조건은 `--configs`로 N개까지 둔다. `with`/`without`은 예전 이름(디렉터리 `with_skill`/`without_skill`)이고, 그 밖에는 `이름=구성요소+구성요소` 형식(구성요소: `skill`, `hook`). `hook`은 `--hook <settings.json>`을 `${SKILL_DIR}` 치환 후 임시 프로젝트 `.claude/settings.json`으로 복사한다(`claude -p`는 `--setting-sources project`라 프로젝트 훅이 적용된다, 2026-10-23 확인). 기준선은 구성요소가 없는 조건이고, 나머지 처리는 각각 기준선과 비교해 따로 판정한다. 스킬 게이트 판정은 `with_skill`(없으면 첫 처리)로 한다. 훅 거부 횟수는 run.json `hook_blocks`(is_error tool_result에 "hook")로 센다.
 - 오래 걸린다(케이스 3개 기준 30~60분). 백그라운드로 돌리고 stderr 로그를 본다.
 
+**사전 확인(제작 전, 원칙 §6.5).** 스킬이 아직 없어도 된다. `evals/evals.json`과 fixture만 있는 디렉터리를 `--skill`로 주고 기준선만 돌린 뒤, 결정적 검사로 채점한다. `expectations`가 비어 있으면 LLM grader는 호출되지 않는다.
+
+```bash
+python3 <skill-dir>/scripts/quality_run.py --skill docs/study/<라운드>/<name>-precheck --out <dir> --configs "without=" --reps 3
+python3 <skill-dir>/scripts/grade.py --skill docs/study/<라운드>/<name>-precheck --out <dir>
+```
+
 ## G1은 무엇을 재는가
 
 빈 임시 프로젝트에 이 저장소의 model-invoked 스킬을 **전부** 링크해 서로 경쟁시키고, 쿼리마다 "코드는 없다. 쓸 스킬이 있으면 Skill 도구로 호출하고 없으면 NONE"이라는 시스템 프롬프트 한 줄로 **라우팅 결정만** 묻는다(쿼리당 3회, 임계 0.5). 실제 과제 수행 중의 호출과는 다르다. 수행 중 호출 여부는 G2 표의 "with 미호출" 열이 보여준다. skill-creator의 `run_eval`(description만 커맨드 파일로 노출, 첫 도구가 Skill이어야 함)은 CLI 2.1.295에서 호출을 감지하지 못해(2026-10-22 확인) 쓰지 않는다.
