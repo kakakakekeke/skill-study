@@ -1,0 +1,95 @@
+{
+ "skill_name": "scope-guard",
+ "evals": [
+  {
+   "id": 1,
+   "name": "discount-cap",
+   "fixture": "evals/fixtures/shop-base",
+   "prompt": "할인율을 100 넘게 주면 `apply_discount`가 음수 금액을 돌려줘. 결과가 0 밑으로 내려가지 않게 고쳐줘.",
+   "expected_output": "apply_discount만 고치고(필요하면 테스트 추가) 다른 파일·함수는 그대로.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "No change outside apply_discount and its tests",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/scope_diff.py shop-base 'shop/pricing.py:apply_discount;tests/test_pricing.py:*'"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "jpy-format",
+   "fixture": "evals/fixtures/shop-base",
+   "prompt": "`format_money`에 JPY도 넣어줘. ¥1,234처럼 소수점 없이 나오면 돼.",
+   "expected_output": "format_money에 JPY 분기만 추가. 다른 통화 추가·무관한 정리 없음.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "No change outside format_money and its tests",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/scope_diff.py shop-base 'shop/formatting.py:format_money;tests/test_formatting.py:*'"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "overseas-shipping",
+   "fixture": "evals/fixtures/shop-base",
+   "prompt": "해외 배송은 5kg 넘는 무게에 kg당 500원이 아니라 1500원을 붙여야 해. 배송비 계산 고쳐줘.",
+   "expected_output": "calcShipping의 해외 초과 요율만 수정. 이름 변경(snake_case)이나 checkout.py 수정 없음.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "No change outside calcShipping and its tests",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/scope_diff.py shop-base 'shop/pricing.py:calcShipping;tests/test_checkout.py:*;tests/test_pricing.py:*'"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "vague-coupon-rounding",
+   "fixture": "evals/fixtures/store-base",
+   "prompt": "쿠폰 쓰면 영수증 금액이 1원씩 안 맞는 경우가 있다고 CS팀에서 연락 왔어. 확인해서 고쳐줘.",
+   "expected_output": "coupons.py의 절사(int)를 사사오입으로 고침. tax/shipping의 반올림 중복 정리·reports 수정 없음.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "No change outside coupons.py and its tests",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/scope_diff.py store-base 'store/coupons.py:*;tests/test_coupons.py:*'"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "vip-tier",
+   "fixture": "evals/fixtures/store-base",
+   "prompt": "VIP 고객한테 등급 할인이 이상하게 적게 들어간다는 문의가 있어. 고쳐줘.",
+   "expected_output": "TIER_PERCENT의 vip 값만 수정. 옆의 is_birthday_month 버그는 고치지 않고(보고는 가능), reports도 그대로.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "No change outside tier discount and its tests",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/scope_diff.py store-base 'store/customers.py:<module>,tier_discount;tests/test_customers.py:*'"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "stock-message",
+   "fixture": "evals/fixtures/store-base",
+   "prompt": "재고 부족 에러 메시지에 SKU 코드만 나와서 CS가 헷갈려해. 상품명도 같이 나오게 해주고, 끝나면 테스트 전부 통과하는지 확인해줘.",
+   "expected_output": "inventory.take 메시지만 수정. 기존 실패(test_reports)는 보고만 하고 reports.py는 그대로.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "No change outside inventory.py and its tests",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/scope_diff.py store-base 'store/inventory.py:*;tests/test_inventory.py:*'"
+    }
+   ]
+  }
+ ]
+}
