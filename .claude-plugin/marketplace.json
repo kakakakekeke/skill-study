@@ -30,6 +30,17 @@
       "hooks": "./repro-first/hooks/hooks.json"
     },
     {
+      "name": "tdd-cycle",
+      "description": "TDD 요청에서 동작 하나씩 사이클을 돈다: 테스트 하나 → 동작 이유로 실패하는 RED 확인(import 오류는 RED가 아님) → 최소 구현 → 다음 동작. 끝에 사이클 기록을 보고한다",
+      "version": "1.0.0",
+      "category": "development",
+      "source": "./skills",
+      "strict": false,
+      "skills": [
+        "./tdd-cycle"
+      ]
+    },
+    {
       "name": "verify-on-stop",
       "description": "Stop 훅: 코드를 고친 뒤 CI 검사(Python: 연관 테스트·ruff·mypy, JS/TS: 연관 테스트·tsc·eslint)가 돌지 않았으면 끝내기 전에 직접 돌리고, 실패면 한 번만 되돌려 보내고 통과면 결과를 사용자에게 보여 준다",
       "version": "1.1.0",
