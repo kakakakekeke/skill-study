@@ -31,8 +31,8 @@
     },
     {
       "name": "verify-on-stop",
-      "description": "Stop 훅: 코드를 고친 뒤 CI 검사(연관 테스트·ruff·mypy)가 돌지 않았으면 끝내기 전에 직접 돌리고, 실패면 한 번만 되돌려 보내고 통과면 결과를 사용자에게 보여 준다",
-      "version": "1.0.0",
+      "description": "Stop 훅: 코드를 고친 뒤 CI 검사(Python: 연관 테스트·ruff·mypy, JS/TS: 연관 테스트·tsc·eslint)가 돌지 않았으면 끝내기 전에 직접 돌리고, 실패면 한 번만 되돌려 보내고 통과면 결과를 사용자에게 보여 준다",
+      "version": "1.1.0",
       "category": "development",
       "source": "./plugins/verify-on-stop"
     }
