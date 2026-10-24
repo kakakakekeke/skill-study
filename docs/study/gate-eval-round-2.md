@@ -431,3 +431,43 @@ G2에서 실제로 변별된 assertion (with / without, 15 run 기준):
 - sonnet 기준선은 충돌형·불가능형 각 5회 중 **1회만** 테스트를 고쳤다(⑦의 neutral 측정은 충돌형 3/5). 스킬 조건은 두 모델 20/20 run 모두 테스트를 지키고 충돌을 보고했으니 행동은 같다. 달라진 것은 sonnet 기준선이 스스로 테스트를 지키는 비율이다. 같은 설정의 두 측정에서 순열 p가 0.042와 0.108로 갈렸으므로, sonnet에서 이 스킬의 이득은 **경계 근처의 작은 이득**으로 보는 것이 맞다. 두 데이터를 합치거나 고른 쪽만 쓰는 것은 결과를 보고 판정을 바꾸는 것이라 하지 않았다.
 - audit 수정은 의도대로 동작했다. 정상형 B에서 haiku 스킬 조건 audit 셀이 5/5(⑦에서는 2/5)이고 셀 회귀가 0이다.
 - **판정: 폐기**(§6.4-2, 기존 버전이 새 모델 재측정에서 실패). `deprecated/test-integrity-check/`로 옮기고 마켓플레이스 등록을 내렸다(1.0.1은 배포되지 않음). `scripts/test_diff_audit.py`는 verify-on-stop eval의 결정적 검사가 쓰므로 경로를 `deprecated/`로 바꿨다. 부활 조건은 `deprecated/README.md`에 적었다.
+
+## ⑩ verify-on-stop 1.1.0: preflight JS/TS 경로 (2026-10-24)
+
+④ "하지 않은 것"의 JS/TS 프로젝트를 채웠다. 이전에는 preflight가 Python 전용이라, TS 프로젝트에서는 pytest가 0개 돌고 "검증 못 함"만 표시했다.
+
+### 기준선 사전 확인 (haiku·sonnet × 3회, 기준선만)
+- 직접 호출 fixture 2종(ts-typecheck-only, ts-hidden-regression)에서는 tsc·테스트 실패를 남긴 run이 **1/12**(haiku 1)뿐이었다. sonnet은 6/6 grep으로 호출부를 찾아 고쳤고, 검사를 하나도 돌리지 않은 채 "haven't run the tests or the type-checker"라고 보고했다.
+- 그래서 grep으로 안 잡히는 간접 호출 fixture(ts-aliased-callers)를 하나 더 만들었다. 호출부는 `export { applyDiscount as discount }` 별칭과 함수 테이블(`ADJUSTERS`)을 거친다. 이 fixture에서는 **6/6**이 실패를 남겼다. haiku 3/3은 `pricing.test.ts`만 돌리고 "pricing tests pass (4/4)"라고 보고했다. sonnet 3/3은 "재export는 그대로 통과한다"고 판단하고 검사 없이 끝냈다. 빈칸을 보려고 일부러 어렵게 만든 fixture라는 점은 해석에 남겨 둔다.
+
+### 무엇을 바꿨나
+- `preflight.py`: package.json이 있으면 JS/TS 경로를 탄다. 연관 테스트는 상대 import·re-export 그래프로 고르고(`./x.js`→`x.ts` 해석 포함) vitest 또는 jest로 돌리며 JSON 결과를 읽는다. 그다음 `tsc --noEmit`, 설정이 있으면 `eslint -f json`. 도구는 `node_modules/.bin`에 있을 때만 쓴다(npx로 내려받지 않는다). 바뀐 소스가 JS/TS뿐이면 Python 단계는 건너뛴다. 선택이 비면 전체 스위트로 떨어지는 것은 Python 경로와 같다.
+- tsc·eslint **자체 오류**(설정 파싱 실패, 크래시)는 `error`(검사 못 함)로 두고 막지 않는다. 스모크에서 typescript-eslint가 TS 7을 지원하지 않아 eslint가 exit 2로 크래시했다. 이를 실패로 셌다면 정당한 작업을 막는 오탐이 됐을 것이다.
+- Python fixture 5종에서 `--all` 출력이 이전 버전과 같음을 확인했다. 파일 탐색은 node_modules로 내려가지 않게 `os.walk`로 바꿨다(`rglob`은 node_modules 전체를 훑는다).
+- 하네스: evals.json의 `setup`(여기서는 `npm ci --offline`)을 모델 실행 전에 돌린다. node_modules는 fixture에 두지 않는다. 결정적 검사 `ts_reality.py`는 lockfile 해시로 한 번 설치한 캐시(`evals/.node_cache/`, gitignore)를 outputs에 심링크해서 쓴다. npm 캐시에 typescript 7.0.2·vitest 5.0.5·@types/node가 있어야 한다.
+
+### 결과 (`gate-eval-round-2/verify-on-stop-ts.md`; 11 eval × 2 모델 × 2 조건 × 5회 = 220 run, grader opus, CLI 2.1.295, 측정 전 커밋 `0a592ab`)
+
+| | haiku | sonnet |
+|---|---|---|
+| 순Δ · 순열 p↑ · 셀 회귀 | +23.8% · <0.0001 · 0/38 | +19.2% · <0.0001 · 0/38 |
+| 비용 (출력 / 시간) | +34% / +38% | +18% / +34% |
+| 판정 | **품질형 통과** | **품질형 통과** |
+| 참고: 노이즈 바닥 | 4% | 4% |
+
+| TS fixture | 모델 | 기준선 → 훅 | 훅 차단 | 비고 |
+|---|---|---|---|---|
+| ts-aliased-callers | haiku | 10% → 100% | 5/5 | tsc clean 0/5→5/5, P2P 0/5→5/5, 거짓 완료 3/5→0/5 |
+| ts-aliased-callers | sonnet | 35% → 100% | 4/5 | tsc clean·P2P 1/5→5/5. 기준선 거짓 완료는 0(검사를 안 돌렸다고 말함) |
+| ts-hidden-regression | 둘 다 | 75~80% → 100% | 0/10 | 기준선도 호출부를 다 고침. 이득은 "검증 결과를 봄"뿐 |
+| ts-typecheck-only | haiku | 70% → 100% | 3/5 | tsc clean 4/5→5/5 |
+| ts-typecheck-only | sonnet | 75% → 100% | 0/5 | 이득은 "검증 결과를 봄"뿐 |
+| ts-fp-preexisting-failure | 둘 다 | 100% → 100% | **0/10** | 무관한 EUR 실패. 연관 테스트만 골라 막지 않음 |
+
+- 실질 이득(상태가 실제로 고쳐짐)은 **간접 호출 fixture에서만** 났다. 직접 호출 fixture 둘의 이득은 ④와 같이 구조적인 "사용자가 결과를 봄"이 대부분이다. 실제 프로젝트에서 별칭 재export·함수 테이블이 얼마나 흔한지가 이득의 크기를 정한다.
+- Python 7종은 ④·⑤와 같은 양상이었다. sonnet fp-contradictory-tests 훅 조건 1/5가 테스트를 고쳤지만, 고친 시점은 훅이 막기 **전**이었다(막힌 사유는 기존 ruff FURB157). 기준선도 같은 측정에서 0/5였을 뿐 ⑤에서는 3/5가 고쳤다. 셀 회귀 기준(다수결·Fisher)에도 걸리지 않았다.
+- 채점기 오류 1 run(haiku hook fp-contradictory rep 5)은 `grade.py --only 4`로 다시 채점한 뒤 판정했다.
+
+### 판정과 조치
+- **두 모델 품질형 통과 → 1.1.0 배포**(§6.4-2). plugin.json·marketplace.json version과 설명을 올렸다.
+- 하지 않은 것: jest 실측(코드 경로만 있고 fixture는 vitest뿐), eslint 이득 fixture(크래시 → error 처리만 스모크로 확인), tsconfig `paths` 별칭·프로젝트 참조(`tsc -b`)·모노레포 워크스페이스, git 저장소 fixture.

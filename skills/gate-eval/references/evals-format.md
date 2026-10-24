@@ -27,6 +27,7 @@
 
 - `prompt_without`(선택): without 설정에서 대신 쓸 프롬프트. user-invoked 스킬은 `/name …` 호출문이 스킬 없는 쪽에서 무의미하므로 같은 뜻의 자연어를 여기 둔다.
 - `fixture`: 스킬 디렉터리 기준 경로. 내용이 임시 프로젝트 루트로 복사된다.
+- `setup` (선택): 복사 직후, 모델 실행 전에 임시 프로젝트에서 돌릴 셸 명령(예: JS fixture의 `npm ci --offline`). `node_modules`는 fixture에 두지 않는다(복사·outputs에서 제외).
 - `files`: 스킬 디렉터리 기준 파일·디렉터리. 프로젝트 루트에 같은 이름으로 복사.
 - `checks.type`
   - `regex_final`: 최종 응답 텍스트에 패턴.

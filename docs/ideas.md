@@ -49,7 +49,7 @@
 
 | # | 이름 | 종류 | 한 줄 설명 | 기여 목적 | 내장 중복 | 상태 |
 |---|---|---|---|---|---|---|
-| 29 | `verify-on-stop` | plugin (Stop hook + scripts/preflight.py) | 이번 요청에서 소스를 고쳤는데 그 뒤로 preflight가 안 돌았으면 끝내기 전에 훅이 직접 돌림. 실패면 한 번만 막고, 통과면 systemMessage로 결과를 사용자에게 보임 | 1, 3 | 없음 | **게이트 통과 → 배포** (10-23 5회, 7 fixture: 이득 3·오탐 4. 두 모델 품질형 +16.7%, 회귀 0/23, 노이즈 바닥 1%. typecheck-only mypy clean 0/10→10/10. 오탐 fixture는 모순 테스트·TDD red에서 20/20 막았지만 결과 회귀 0, 문서만·무관한 기존 실패에서는 0/20 막음. 비용 출력 +36%/+25%, 시간 +36%/+37%. 13번 verify-before-done의 후속. `study/gate-eval-round-2.md` ④). 10-23 sonnet: G2 품질형 +14.3%(바닥 13%)·회귀 0, 이득은 주로 보고. 10-24 중립 폴더: 두 모델 품질형 통과(⑦) |
+| 29 | `verify-on-stop` | plugin (Stop hook + scripts/preflight.py) | 이번 요청에서 소스를 고쳤는데 그 뒤로 preflight가 안 돌았으면 끝내기 전에 훅이 직접 돌림. 실패면 한 번만 막고, 통과면 systemMessage로 결과를 사용자에게 보임 | 1, 3 | 없음 | **게이트 통과 → 배포** (10-23 5회, 7 fixture: 이득 3·오탐 4. 두 모델 품질형 +16.7%, 회귀 0/23, 노이즈 바닥 1%. typecheck-only mypy clean 0/10→10/10. 오탐 fixture는 모순 테스트·TDD red에서 20/20 막았지만 결과 회귀 0, 문서만·무관한 기존 실패에서는 0/20 막음. 비용 출력 +36%/+25%, 시간 +36%/+37%. 13번 verify-before-done의 후속. `study/gate-eval-round-2.md` ④). 10-23 sonnet: G2 품질형 +14.3%(바닥 13%)·회귀 0, 이득은 주로 보고. 10-24 중립 폴더: 두 모델 품질형 통과(⑦). 10-24 1.1.0 JS/TS 경로(연관 테스트·tsc·eslint): 220 run, haiku +23.8%·sonnet +19.2% 품질형 통과·회귀 0. 실질 이득은 별칭 재export 간접 호출 fixture에서만(⑩) |
 
 ### 통합 우선순위 (리서치 1+2, 2026-10-23)
 

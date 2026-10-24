@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -59,6 +60,9 @@ def prepare_project(skill_dir: Path, ev: dict, comps: set[str], name: str, hook_
         src = (skill_dir / f).resolve()
         dst = proj / Path(f).name
         shutil.copytree(src, dst) if src.is_dir() else shutil.copy2(src, dst)
+    if ev.get("setup"):
+        # 예: JS fixture의 "npm ci --offline". node_modules는 fixture에 두지 않고 run마다 설치한다(복사·outputs에서 제외됨)
+        subprocess.run(ev["setup"], shell=True, cwd=proj, check=True, capture_output=True, timeout=600)
     (proj / ".claude").mkdir(exist_ok=True)
     if "skill" in comps:
         skills_dir = proj / ".claude" / "skills"

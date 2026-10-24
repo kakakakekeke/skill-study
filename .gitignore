@@ -18,6 +18,8 @@ dist/
 
 # 스킬 평가 결과 / 임시 파일
 **/evals/results/
+**/evals/.node_cache/
+node_modules/
 tmp/
 
 # 참고용 외부 저장소 클론 (추적 안 함)
