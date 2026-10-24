@@ -24,3 +24,4 @@
 - `study/deep-research-quality-skills.md` — 품질형 스킬 후보 딥 리서치 (2026-10-23)
 - `study/deep-research-failure-driven.md` — 실패 빈도·결정적 도구 관점 딥 리서치, 리서치 1과 통합 우선순위 (2026-10-23)
 - `study/gate-eval-round-2.md` — 라운드 2 측정 기록(verify-before-done부터), 보고서 사본은 `study/gate-eval-round-2/` (2026-10-23)
+- `study/gate-eval-round-3.md` — 라운드 3 측정 기록(scope-guard 사전 확인부터), 사전 확인 자료는 `study/gate-eval-round-3/` (2026-10-24)
