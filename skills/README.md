@@ -22,5 +22,11 @@ skills/
 ```
 /plugin install flaky-check --marketplace kakakakekeke/skill-study
 /plugin install repro-first --marketplace kakakakekeke/skill-study
-/plugin install test-integrity-check --marketplace kakakakekeke/skill-study
 ```
+
+자동으로 안 켜질 때는 직접 부른다. 다른 스킬이 함께 설치돼 있으면 모델이 스킬을 덜 고르는 경우가 측정됐다(repro-first 수행 중 호출 haiku 11%·sonnet 56%, `docs/study/gate-eval-round-2.md` ⑤):
+
+| 상황 | 호출 |
+|---|---|
+| 버그를 고칠 때 (재현 → 최소 수정 → 재발 방지) | `/repro-first <버그 설명>` (1.1.0부터 버그 신고로 보이는 요청에 사용 안내를 자동 주입, `REPRO_FIRST_INJECT=0`으로 끔) |
+| 테스트가 가끔 실패하는지 잴 때 | `/flaky-check <명령 또는 테스트>` |

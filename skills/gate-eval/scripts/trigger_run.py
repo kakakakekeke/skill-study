@@ -76,7 +76,7 @@ def one(query: str, proj: Path, model: str, skill_name: str, timeout: int) -> di
 
 
 def one_in_task(query: str, fixture: Path, competitors: list[Path], model: str, skill_name: str,
-                timeout: int, max_turns: int) -> dict:
+                timeout: int, max_turns: int, settings_text: str | None = None) -> dict:
     """fixture에서 과제를 실제로 수행시키고 대상 스킬 호출 여부를 본다. 호출되는 즉시 종료한다."""
     proj = Path(tempfile.mkdtemp(prefix="ge-intask-"))
     try:
@@ -86,6 +86,8 @@ def one_in_task(query: str, fixture: Path, competitors: list[Path], model: str, 
         sk.mkdir(parents=True)
         for d in competitors:
             (sk / d.name).symlink_to(d, target_is_directory=True)
+        if settings_text:  # 훅 조건(예: 트리거 주입 훅). quality_run의 --hook과 같은 방식
+            (proj / ".claude" / "settings.json").write_text(settings_text)
         cmd = ["claude", "-p", query, "--model", model, "--output-format", "stream-json", "--verbose",
                "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
                "--max-turns", str(max_turns), "--allowedTools", ALLOWED_TOOLS]
@@ -133,6 +135,7 @@ def main() -> None:
     ap.add_argument("--holdout", type=float, default=0.4, help="test 비율. description을 고친 뒤 새 문항만 돌릴 때는 1.0")
     ap.add_argument("--out-name", default="trigger", help="결과 하위 디렉터리 이름 (수행 중 판정과 라우터 참고치를 나눌 때)")
     ap.add_argument("--max-turns", type=int, default=30, help="수행 중 모드 전용")
+    ap.add_argument("--hook", default=None, help="수행 중 모드 전용: 임시 프로젝트 .claude/settings.json으로 복사할 훅 설정(${SKILL_DIR} 치환)")
     a = ap.parse_args()
 
     skill_dir = Path(a.skill).resolve()
@@ -170,9 +173,12 @@ def main() -> None:
             (sk / d.name).symlink_to(d.resolve(), target_is_directory=True)
             competitors.append(d.name)
     comp_dirs = [root / c for c in competitors]
+    settings_text = Path(a.hook).read_text().replace("${SKILL_DIR}", str(skill_dir)) if a.hook else None
     method = (f"in-task (fixture per query, all repo skills linked, full tools, max-turns {a.max_turns}, stop on invoke)"
               if in_task else "router-decision (all repo skills linked, empty project, Skill-only)")
-    summary = {"skill": name, "description": desc, "method": method, "in_task": in_task,
+    if a.hook:
+        method += f", hook {Path(a.hook).name}"
+    summary = {"skill": name, "description": desc, "method": method, "in_task": in_task, "hook": a.hook,
                "reason": raw.get("reason") if in_task else None,
                "competitors": competitors, "runs_per_query": a.runs_per_query, "eval_set": str(eval_path), "holdout": a.holdout,
                "n_train": len(train), "n_test": len(test), "models": {}}
@@ -187,7 +193,7 @@ def main() -> None:
                 with ThreadPoolExecutor(max_workers=a.workers) as ex:
                     if in_task:
                         futs = {ex.submit(one_in_task, e["query"], (skill_dir / e["fixture"]).resolve(), [d.resolve() for d in comp_dirs],
-                                          model, name, a.timeout, a.max_turns): i
+                                          model, name, a.timeout, a.max_turns, settings_text): i
                                 for i, e in enumerate(eval_set) for _ in range(a.runs_per_query)}
                     else:
                         futs = {ex.submit(one, e["query"], proj, model, name, a.timeout): i for i, e in enumerate(eval_set) for _ in range(a.runs_per_query)}

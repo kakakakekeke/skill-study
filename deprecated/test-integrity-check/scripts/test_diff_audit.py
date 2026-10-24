@@ -196,10 +196,20 @@ def loosened_reason(b: ast.AST, a: ast.AST) -> str | None:
 
 
 class _Norm(ast.NodeTransformer):
-    """식별자 이름을 지워 '이름만 바뀐' 본문을 같게 만든다."""
+    """식별자 이름을 지워 '이름만 바뀐' 본문을 같게 만든다. 키워드 인자 이름(rate= → hourly_rate=)도 식별자로 본다."""
 
     def visit_Name(self, node):
         node.id = "_"
+        return node
+
+    def visit_keyword(self, node):
+        self.generic_visit(node)
+        if node.arg is not None:
+            node.arg = "_"
+        return node
+
+    def visit_arg(self, node):
+        node.arg = "_"
         return node
 
     def visit_Attribute(self, node):

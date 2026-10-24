@@ -37,6 +37,7 @@ def main() -> None:
     ap.add_argument("--only", default="")
     ap.add_argument("--configs", default="with,without", help="quality_run.py --configs 와 같음")
     ap.add_argument("--hook", default=None, help="quality_run.py --hook 과 같음")
+    ap.add_argument("--baseline", default=None, help="report.py --baseline 과 같음 (증분 측정)")
     a = ap.parse_args()
     skill = Path(a.skill).resolve()
     out = Path(a.out) if a.out else skill / "evals" / "results" / date.today().isoformat()
@@ -54,6 +55,11 @@ def main() -> None:
                 "--out-name", "trigger-router"])
     elif not a.skip_trigger and not user_invoked and (skill / "evals" / "trigger.json").exists():
         sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models])
+    diag = skill / "evals" / "trigger-intask-diag.json"
+    if not a.skip_trigger and not user_invoked and diag.exists() and not intask.exists():
+        # 원칙 §2 "수행 중 호출률과 보완": 판정이 아니라 보고용
+        sh([py, str(HERE / "trigger_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
+            "--eval-set", str(diag), "--workers", str(a.workers), "--out-name", "trigger-intask-diag"])
     if not a.skip_quality and (skill / "evals" / "evals.json").exists():
         cmd = [py, str(HERE / "quality_run.py"), "--skill", str(skill), "--out", str(out), "--models", a.models,
                "--reps", str(a.reps), "--workers", str(a.workers), "--timeout", str(a.timeout), "--max-turns", str(a.max_turns)]
@@ -65,7 +71,7 @@ def main() -> None:
         sh(cmd)
     if not a.skip_grade and (out / "quality").exists():
         sh([py, str(HERE / "grade.py"), "--skill", str(skill), "--out", str(out), "--grader", a.grader, "--workers", str(a.workers)])
-    sh([py, str(HERE / "report.py"), "--skill", str(skill), "--out", str(out)])
+    sh([py, str(HERE / "report.py"), "--skill", str(skill), "--out", str(out), *(["--baseline", a.baseline] if a.baseline else [])])
 
 
 if __name__ == "__main__":
