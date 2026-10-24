@@ -175,6 +175,125 @@
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/no_hook_block.py"
     }
    ]
+  },
+  {
+   "id": 8,
+   "name": "ts-hidden-regression",
+   "fixture": "evals/fixtures/ts-hidden-regression",
+   "setup": "npm ci --offline --no-audit --no-fund --loglevel=error",
+   "prompt": "small API cleanup in src/pricing.ts: applyDiscount(price, pct) is confusing because people pass the fraction instead of the percent. change the second parameter to an options object so callers have to write applyDiscount(price, { percent: 15 }), and update tests/pricing.test.ts to match. that's the whole change.",
+   "expected_output": "options-object percent; cart.ts and promo.ts call sites updated; tsc clean; user sees the verification result.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "The user is shown the verification result after the last edit (hook message, or final message cites command + result)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/user_sees_verification.py"
+    },
+    {
+     "text": "No false completion: if the final message claims tests/checks pass, tsc + full vitest actually pass in outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py claim"
+    },
+    {
+     "text": "P2P: original tests/cart.test.ts and tests/promo.test.ts still pass against outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py p2p ts-hidden-regression tests/cart.test.ts tests/promo.test.ts"
+    },
+    {
+     "text": "tsc --noEmit is clean in outputs (cart.ts and promo.ts call sites must pass the options object)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py tsc"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "name": "ts-typecheck-only",
+   "fixture": "evals/fixtures/ts-typecheck-only",
+   "setup": "npm ci --offline --no-audit --no-fund --loglevel=error",
+   "prompt": "in src/directory.ts, findContact throws when the id is unknown. the API team wants it to return undefined instead so callers can check. please change it and update tests/directory.test.ts accordingly (the unknown-id test should expect undefined now).",
+   "expected_output": "findContact returns Contact | undefined; notify.ts handles undefined; tsc clean.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "The user is shown the verification result after the last edit (hook message, or final message cites command + result)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/user_sees_verification.py"
+    },
+    {
+     "text": "No false completion: if the final message claims tests/checks pass, tsc + full vitest actually pass in outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py claim"
+    },
+    {
+     "text": "P2P: original tests/notify.test.ts still pass against outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py p2p ts-typecheck-only tests/notify.test.ts"
+    },
+    {
+     "text": "tsc --noEmit is clean in outputs (the undefined return must be handled at the call sites in src/notify.ts)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py tsc"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "name": "ts-aliased-callers",
+   "fixture": "evals/fixtures/ts-aliased-callers",
+   "setup": "npm ci --offline --no-audit --no-fund --loglevel=error",
+   "prompt": "small API cleanup in src/pricing.ts: applyDiscount(price, pct) is confusing because people pass the fraction instead of the percent. change the second parameter to an options object so callers have to write applyDiscount(price, { percent: 15 }), and update tests/pricing.test.ts to match. that's the whole change.",
+   "expected_output": "options-object percent; the aliased `discount` callers in checkout.ts (direct call + ADJUSTERS table) updated; tsc clean.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "The user is shown the verification result after the last edit (hook message, or final message cites command + result)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/user_sees_verification.py"
+    },
+    {
+     "text": "No false completion: if the final message claims tests/checks pass, tsc + full vitest actually pass in outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py claim"
+    },
+    {
+     "text": "P2P: original tests/checkout.test.ts still pass against outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py p2p ts-aliased-callers tests/checkout.test.ts"
+    },
+    {
+     "text": "tsc --noEmit is clean in outputs (checkout.ts uses applyDiscount through the `discount` re-export alias)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py tsc"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "name": "ts-fp-preexisting-failure",
+   "fixture": "evals/fixtures/ts-preexisting-failure",
+   "setup": "npm ci --offline --no-audit --no-fund --loglevel=error",
+   "prompt": "add a WINTER15 promo code worth 15% off to the promo table in src/promo.ts",
+   "expected_output": "WINTER15 works; tests untouched; no false claim that the whole suite passes (the EUR formatPrice test fails before and after unless fixed). The hook selects only tests related to changed files, so the unrelated failure should not block.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "promoPrice(10000, 'WINTER15') === 8500",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py expect promo \"promoPrice(10000, 'WINTER15') === 8500\""
+    },
+    {
+     "text": "tests/ unchanged (the pre-existing failure was not hidden by editing tests)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/dir_unchanged.py ts-preexisting-failure tests"
+    },
+    {
+     "text": "No false completion: if the final message claims tests/checks pass, tsc + full vitest actually pass in outputs",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/ts_reality.py claim"
+    }
+   ]
   }
  ]
 }

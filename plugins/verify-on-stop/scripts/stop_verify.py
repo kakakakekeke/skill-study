@@ -30,7 +30,7 @@ STEP_TIMEOUT = 60
 TOTAL_TIMEOUT = 200
 
 BLOCK_REASON = (
-    "verify-on-stop: 마지막 편집 뒤 CI 검사(preflight: 연관 테스트·ruff·mypy)가 실패했습니다.\n{summary}\n"
+    "verify-on-stop: 마지막 편집 뒤 CI 검사(preflight: 연관 테스트·린트·타입 검사)가 실패했습니다.\n{summary}\n"
     "이번 변경 때문이면 고친 뒤 끝내십시오. 이번 변경과 무관한 기존 실패이거나, 의도된 실패(먼저 쓴 실패 테스트, "
     "테스트와 스펙의 충돌 보고 등)이거나, 고칠 수 없으면 코드를 더 바꾸지 말고 그 사실을 그대로 보고하고 멈추십시오. "
     "테스트를 약화시켜 통과시키지 마십시오."
@@ -108,28 +108,41 @@ def preflight_args(cwd: Path, paths: list[str | None]) -> list[str]:
 
 
 def summarize(report: dict) -> str:
-    pt = report.get("pytest") or {}
-    parts = [f"pytest {pt.get('passed', 0)} passed" + (f", {pt['failed']} failed" if pt.get("failed") else "")
-             + (f", {pt['errors']} errors" if pt.get("errors") else "")]
-    for k in ("ruff", "mypy"):
-        v = report.get(k) or {}
+    parts = []
+    for k in ("pytest", "js_tests"):
+        pt = report.get(k)
+        if not pt:
+            continue
+        if pt.get("status") == "skipped":
+            parts.append(f"{k} 없음")
+            continue
+        name = pt.get("runner") or k
+        parts.append(f"{name} {pt.get('passed', 0)} passed" + (f", {pt['failed']} failed" if pt.get("failed") else "")
+                     + (f", {pt['errors']} errors" if pt.get("errors") else ""))
+    for k in ("ruff", "mypy", "tsc", "eslint"):
+        v = report.get(k)
+        if not v:
+            continue
         if v.get("status") == "pass":
             parts.append(f"{k} ok")
         elif v.get("status") == "fail":
             parts.append(f"{k} {v.get('count')} errors")
         elif v.get("status") == "skipped":
             parts.append(f"{k} 없음")
-    return ", ".join(parts)
+        elif v.get("status") == "error":
+            parts.append(f"{k} 실행 오류(검사 못 함)")
+    return ", ".join(parts) or "검사 없음"
 
 
 def details(report: dict) -> str:
     lines = []
-    pt = report.get("pytest") or {}
-    for f in pt.get("first_failures") or []:
-        lines.append(f"- FAILED {f}")
-    if pt.get("collection_error"):
-        lines += [f"- {t}" for t in pt.get("tail") or []]
-    for k in ("ruff", "mypy"):
+    for k in ("pytest", "js_tests"):
+        pt = report.get(k) or {}
+        for f in pt.get("first_failures") or []:
+            lines.append(f"- FAILED {f}")
+        if pt.get("collection_error") or (pt.get("status") == "fail" and not pt.get("first_failures")):
+            lines += [f"- {t}" for t in pt.get("tail") or []]
+    for k in ("ruff", "mypy", "tsc", "eslint"):
         for f in (report.get(k) or {}).get("first") or []:
             lines.append(f"- {k}: {f}")
     return "\n".join(lines[:12])
