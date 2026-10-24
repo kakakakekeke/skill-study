@@ -1,0 +1,11 @@
+{
+ "reason": "진단(판정 아님): 발동 조건(TDD 요청)은 요청 문장에 있으므로 원칙 §2상 판정은 시작 시점 G1이다. 형제 스킬(repro-first·flaky-check)과 경쟁할 때 실제 과제 수행 중 호출률을 본다. 2026-10-25, 측정 전 작성.",
+ "items": [
+  {"query": "README에 있는 명세대로 구현해줘. TDD로 개발해.", "should_trigger": true, "fixture": "evals/fixtures/feed-base"},
+  {"query": "README 명세 보고 durations 패키지 만들어줘. 테스트 먼저 쓰고 구현하는 방식으로.", "should_trigger": true, "fixture": "evals/fixtures/duration-base"},
+  {"query": "build the article store described in the README, test-driven please", "should_trigger": true, "fixture": "evals/fixtures/store-base"},
+  {"query": "README대로 parse_feed 구현해줘. tdd로 가자", "should_trigger": true, "fixture": "evals/fixtures/feed-base"},
+  {"query": "README에 있는 명세대로 구현해줘.", "should_trigger": false, "fixture": "evals/fixtures/duration-base"},
+  {"query": "README 명세를 읽고 빠졌거나 모호한 부분이 있는지만 정리해줘. 코드는 아직 쓰지 마.", "should_trigger": false, "fixture": "evals/fixtures/store-base"}
+ ]
+}

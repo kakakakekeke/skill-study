@@ -28,7 +28,7 @@
 | 15 | `plan-first` | skill | 첫 Edit 전 ≤8단계 계획 | 1 | **Claude Code plan mode와 중복 가능성 — §3.1 확인 전엔 착수 금지** | 보류: 소형 모델만 검증(+5.4pp), opus 소멸 위험 |
 | 16 | `regression-guard` | skill + scripts | 수정 후 변경 모듈을 임포트하는 기존 테스트만 골라 실행, P2P 회귀 0 확인 | 1, 2 | 없음 | 보류: 23번 impact-map과 같은 것. 13번 verify-before-done의 연관 테스트 선택으로 흡수 |
 | 17 | `runtime-diagnose` | skill | 재현 후 수정 전 디버거·로그로 런타임 관찰 | 1 | 없음 | 보류 (원문의 Stage 2는 PDB 디버거 에이전트 — SKILL.md로 재현 어려움. FF 케이스에만 효과. 라운드 3 이후) |
-| 18 | `tdd-enforce` | skill | 실패 테스트 없이 프로덕션 코드 금지 | 1 | 없음 | **기각 후보** (TDAD 동률 + 회귀 +42%, superpowers 저준수. 새 기능 과제 한정 재검토 여지) |
+| 18 | `tdd-enforce` → `tdd-cycle` | skill + scripts/red_check.py | "TDD로 개발해" 요청에서 동작 하나씩 테스트 → 동작 이유 RED → 최소 구현 사이클, 끝에 사이클 기록 | 1 | 없음 | **게이트 통과 → 배포 1.0.0** (10-25: G1 두 모델 20/20, G2 품질형 haiku +34.9%·sonnet +39.7%, p<0.0001, 셀 회귀 0/21, 수행 중 진단 75%/100%. 비용 출력 +141%/+163%·시간 +209%/+168%. 결과 assertion은 두 조건 모두 만점(과정 이득만). `study/gate-eval-round-3.md` ③·④). 이전: 기각 후보(TDAD 동률 + 회귀 +42%, superpowers 저준수) → 10-25 사전 확인 과정 빈칸 0/18 |
 | 19 | `self-review`, CoT 가이드라인 | — | — | — | code-review 중복 / §3.5 | **기각** (self-repair ≤1.08배, CoT는 추론 모델에서 ±3pp·지연 증가) |
 
 ## 2026-10-23 딥 리서치 2 후보 — 실패 빈도·결정적 도구 (근거: `study/deep-research-failure-driven.md`)

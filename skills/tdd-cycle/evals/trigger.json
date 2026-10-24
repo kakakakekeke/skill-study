@@ -1,0 +1,22 @@
+[
+ {"query": "README에 있는 명세대로 구현해줘. TDD로 개발해.", "should_trigger": true},
+ {"query": "새로 시작하는 크롤러 프로젝트인데 rss 수집 모듈부터 tdd로 개발하자. src/crawler/rss.py에 넣으면 돼. 시간대 없는 pubDate는 서울 기준", "should_trigger": true},
+ {"query": "let's build the rate limiter in app/limits.py test-first. token bucket, 10 req/s per user, burst of 20. red green refactor please", "should_trigger": true},
+ {"query": "pricing 모듈에 쿠폰 중첩 규칙 추가해야 해. 테스트 먼저 쓰고 구현하는 식으로 진행해줘. 정률 쿠폰은 하나만, 정액은 두 개까지", "should_trigger": true},
+ {"query": "I want to do this TDD style: a CLI `todo` with add/list/done commands storing to ~/.todo.json. starting from an empty repo", "should_trigger": true},
+ {"query": "go로 설정 파일 파서 만들 건데 TDD로 가자. yaml 아니고 key=value 형식이고 주석은 #으로 시작해", "should_trigger": true},
+ {"query": "implement the parse_duration helper described in docs/spec.md, and please actually do TDD this time — one failing test at a time", "should_trigger": true},
+ {"query": "텔레그램 알림 포매터를 TDD로 짜줘. 메시지가 4096자 넘으면 나눠 보내야 하고 MarkdownV2 이스케이프도 필요함", "should_trigger": true},
+ {"query": "can you add a CSV export to reports/export.py? write the tests first and watch them fail before implementing, we do TDD on this team", "should_trigger": true},
+ {"query": "옵시디언 노트 writer 클래스 새로 만들어줘. 위키링크 별칭이랑 파일명 정리 규칙은 README 참고하고, 개발은 tdd로", "should_trigger": true},
+ {"query": "feedparse/parser.py는 이미 다 짜 놨는데 테스트가 하나도 없어. pytest로 테스트 좀 붙여줘", "should_trigger": false},
+ {"query": "parse_duration('1h30m')가 90을 돌려줘. 5400이어야 하는데. utils/time.py 고쳐줘", "should_trigger": false},
+ {"query": "TDD랑 BDD 차이가 뭐야? 우리 팀(백엔드 4명, 파이썬)에 어떤 게 맞을지 설명해줘", "should_trigger": false},
+ {"query": "tests/test_store.py가 CI에서 가끔 실패해. 몇 번에 한 번 꼴로 깨지는지 좀 봐줘", "should_trigger": false},
+ {"query": "pytest 커버리지가 62%인데 80%까지 올려줘. billing 쪽 빠진 분기 위주로 테스트 추가하면 돼", "should_trigger": false},
+ {"query": "README 명세대로 durations 모듈 구현해줘. parse_duration이랑 format_duration 두 개야", "should_trigger": false},
+ {"query": "TDD로 짠 코드인데 리팩터링 좀 해줘. 테스트는 건드리지 말고 utils.py의 중복 함수만 정리", "should_trigger": false},
+ {"query": "jest 설정이 깨져서 테스트가 아예 안 돌아. 'Cannot use import statement outside a module' 에러가 나", "should_trigger": false},
+ {"query": "write a pre-commit hook that blocks the commit if any pytest test fails", "should_trigger": false},
+ {"query": "이 테스트 기대값이 이상한 것 같아. test_summary가 '새 모델 을'을 기대하는데 README 명세랑 맞는지 봐줘", "should_trigger": false}
+]
