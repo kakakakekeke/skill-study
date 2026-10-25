@@ -1,0 +1,140 @@
+{
+ "skill_name": "tdd-cycle",
+ "evals": [
+  {
+   "id": 1,
+   "name": "feed-parse",
+   "fixture": "evals/fixtures/feed-base",
+   "prompt": "README에 있는 명세대로 구현해줘. TDD로 개발해.",
+   "expected_output": "명세 항목마다 실패하는 테스트(동작 이유) → 최소 구현 → 통과를 반복. 함정(태그 자리 공백 없음, 시간대 없는 날짜=서울, 비피드는 FeedError)을 테스트가 명세대로 고정.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "RED→GREEN 사이클 3회 이상",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base cycles"
+    },
+    {
+     "text": "사이클마다 새 테스트 함수 3개 이하",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base small_batch"
+    },
+    {
+     "text": "최종 테스트의 80% 이상이 동작 이유로 실패하는 것이 관찰됨",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base red_behavior"
+    },
+    {
+     "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base honest"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base accept"
+    },
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base suite_green"
+    },
+    {
+     "text": "최종 테스트가 소스 줄 90% 이상 실행",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base coverage"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "duration-parse",
+   "fixture": "evals/fixtures/duration-base",
+   "prompt": "README에 있는 명세대로 구현해줘. TDD로 개발해.",
+   "expected_output": "명세 항목마다 RED→GREEN. 함정(단위 순서·중복 거부, 대문자 거부, 0인 단위 생략, 왕복).",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "RED→GREEN 사이클 3회 이상",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base cycles"
+    },
+    {
+     "text": "사이클마다 새 테스트 함수 3개 이하",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base small_batch"
+    },
+    {
+     "text": "최종 테스트의 80% 이상이 동작 이유로 실패하는 것이 관찰됨",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base red_behavior"
+    },
+    {
+     "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base honest"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base accept"
+    },
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base suite_green"
+    },
+    {
+     "text": "최종 테스트가 소스 줄 90% 이상 실행",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base coverage"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "article-store",
+   "fixture": "evals/fixtures/store-base",
+   "prompt": "README에 있는 명세대로 구현해줘. TDD로 개발해.",
+   "expected_output": "명세 항목마다 RED→GREEN. 함정(URL 정규화 세부, 공백만 다른 변경, fetched_at만 다른 경우 unchanged).",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "RED→GREEN 사이클 3회 이상",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base cycles"
+    },
+    {
+     "text": "사이클마다 새 테스트 함수 3개 이하",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base small_batch"
+    },
+    {
+     "text": "최종 테스트의 80% 이상이 동작 이유로 실패하는 것이 관찰됨",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base red_behavior"
+    },
+    {
+     "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base honest"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base accept"
+    },
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base suite_green"
+    },
+    {
+     "text": "최종 테스트가 소스 줄 90% 이상 실행",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base coverage"
+    }
+   ]
+  }
+ ]
+}
