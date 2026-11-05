@@ -31,14 +31,15 @@
     },
     {
       "name": "tdd-cycle",
-      "description": "TDD 요청에서 동작 하나씩 사이클을 돈다: 테스트 하나 → 동작 이유로 실패하는 RED 확인(import 오류는 RED가 아님) → 최소 구현 → 다음 동작. 끝에 사이클 기록을 보고한다",
-      "version": "1.0.0",
+      "description": "TDD 요청에서 동작 하나씩 사이클을 돈다: 테스트 하나 → 동작 이유로 실패하는 RED 확인(import 오류는 RED가 아님) → 최소 구현 → 다음 동작. 끝에 사이클 기록을 보고한다. 1.1.0: 행동 검사 훅 — 프로젝트에 .claude/tdd-mode가 있거나(TDD_MODE=1) 요청에 TDD가 있으면, 동작 이유로 실패하는 테스트 없이 소스 .py를 고치는 것을 막는다(TDD_MODE=0으로 끔)",
+      "version": "1.1.0",
       "category": "development",
       "source": "./skills",
       "strict": false,
       "skills": [
         "./tdd-cycle"
-      ]
+      ],
+      "hooks": "./tdd-cycle/hooks/hooks.json"
     },
     {
       "name": "verify-on-stop",

@@ -30,6 +30,11 @@
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base honest"
     },
     {
+     "text": "동작 이유 RED(또는 리팩터링 선언) 없이 소스를 쓴 횟수 0",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base gated"
+    },
+    {
      "text": "숨은 명세 수용 테스트 전부 통과",
      "type": "script",
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base accept"
@@ -73,6 +78,11 @@
      "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
      "type": "script",
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base honest"
+    },
+    {
+     "text": "동작 이유 RED(또는 리팩터링 선언) 없이 소스를 쓴 횟수 0",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base gated"
     },
     {
      "text": "숨은 명세 수용 테스트 전부 통과",
@@ -120,6 +130,11 @@
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base honest"
     },
     {
+     "text": "동작 이유 RED(또는 리팩터링 선언) 없이 소스를 쓴 횟수 0",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base gated"
+    },
+    {
      "text": "숨은 명세 수용 테스트 전부 통과",
      "type": "script",
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base accept"
@@ -133,6 +148,193 @@
      "text": "최종 테스트가 소스 줄 90% 이상 실행",
      "type": "script",
      "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base coverage"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "feed-parse-mode",
+   "fixture": "evals/fixtures/feed-base",
+   "files": [
+    "evals/fixtures/tdd-mode/.claude"
+   ],
+   "prompt": "README에 있는 명세대로 구현해줘.",
+   "expected_output": "요청에 TDD가 없지만 프로젝트가 TDD 모드(.claude/tdd-mode). 동작마다 RED→GREEN으로 진행해야 한다(실패 1·4: 지시 없음·스킬 미발동).",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "RED→GREEN 사이클 3회 이상",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base cycles"
+    },
+    {
+     "text": "사이클마다 새 테스트 함수 3개 이하",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base small_batch"
+    },
+    {
+     "text": "최종 테스트의 80% 이상이 동작 이유로 실패하는 것이 관찰됨",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base red_behavior"
+    },
+    {
+     "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base honest"
+    },
+    {
+     "text": "동작 이유 RED(또는 리팩터링 선언) 없이 소스를 쓴 횟수 0",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base gated"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base accept"
+    },
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base suite_green"
+    },
+    {
+     "text": "최종 테스트가 소스 줄 90% 이상 실행",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py feed-base coverage"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "duration-parse-mode",
+   "fixture": "evals/fixtures/duration-base",
+   "files": [
+    "evals/fixtures/tdd-mode/.claude"
+   ],
+   "prompt": "README 명세를 먼저 읽고 모호한 점이 있으면 가장 그럴듯한 해석을 골라 메모한 다음, 그대로 구현해줘.",
+   "expected_output": "조사·메모로 시작하는 과제. 구현 단계로 넘어갈 때 TDD 모드가 적용돼야 한다(실패 4: 사고 중 개발이 필요해지는 경우).",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "RED→GREEN 사이클 3회 이상",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base cycles"
+    },
+    {
+     "text": "사이클마다 새 테스트 함수 3개 이하",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base small_batch"
+    },
+    {
+     "text": "최종 테스트의 80% 이상이 동작 이유로 실패하는 것이 관찰됨",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base red_behavior"
+    },
+    {
+     "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base honest"
+    },
+    {
+     "text": "동작 이유 RED(또는 리팩터링 선언) 없이 소스를 쓴 횟수 0",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base gated"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base accept"
+    },
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base suite_green"
+    },
+    {
+     "text": "최종 테스트가 소스 줄 90% 이상 실행",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py duration-base coverage"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "name": "article-store-mode",
+   "fixture": "evals/fixtures/store-base",
+   "files": [
+    "evals/fixtures/tdd-mode/.claude"
+   ],
+   "prompt": "build the article store described in the README",
+   "expected_output": "영문 요청, TDD 언급 없음. 프로젝트 TDD 모드가 적용돼야 한다.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "RED→GREEN 사이클 3회 이상",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base cycles"
+    },
+    {
+     "text": "사이클마다 새 테스트 함수 3개 이하",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base small_batch"
+    },
+    {
+     "text": "최종 테스트의 80% 이상이 동작 이유로 실패하는 것이 관찰됨",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base red_behavior"
+    },
+    {
+     "text": "TDD를 주장하면 실제로 사이클을 돌았음(3회 이상, 사이클당 테스트 3개 이하)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base honest"
+    },
+    {
+     "text": "동작 이유 RED(또는 리팩터링 선언) 없이 소스를 쓴 횟수 0",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base gated"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base accept"
+    },
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base suite_green"
+    },
+    {
+     "text": "최종 테스트가 소스 줄 90% 이상 실행",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py store-base coverage"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "name": "refactor-dedup",
+   "fixture": "evals/fixtures/refactor-base",
+   "files": [
+    "evals/fixtures/tdd-mode/.claude"
+   ],
+   "prompt": "money 패키지에 반올림 코드가 세 군데 중복돼 있어. 하나로 정리해줘. 동작은 바꾸지 말고.",
+   "expected_output": "훅 오탐 fixture(원칙 §3.2). TDD 모드에서 정당한 리팩터링 과제. 훅이 막아도 결과(스위트 초록·동작 보존·중복 제거)가 나빠지면 안 된다.",
+   "expectations": [],
+   "checks": [
+    {
+     "text": "최종 테스트 스위트 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py refactor-base suite_green"
+    },
+    {
+     "text": "숨은 명세 수용 테스트 전부 통과",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py refactor-base accept"
+    },
+    {
+     "text": "quantize를 부르는 함수가 1개 이하(중복 정리됨)",
+     "type": "script",
+     "cmd": "python3 $GATE_EVAL_SKILL/evals/checks/cycle_check.py refactor-base dedup"
     }
    ]
   }

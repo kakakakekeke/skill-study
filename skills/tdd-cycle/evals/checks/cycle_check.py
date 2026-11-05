@@ -2,7 +2,8 @@
 """G2 assertion 하나를 판정한다: python3 cycle_check.py <fixture> <지표>. exit 0 = 통과.
 
 tdd_trace.analyze 결과를 RUN_DIR/tdd_trace.json에 캐시해 assertion마다 다시 계산하지 않는다.
-지표: cycles(≥3) · small_batch(사이클당 ≤3) · red_behavior(≥0.8) · honest(TDD 주장 ⇒ strict) ·
+지표: cycles(≥3) · small_batch(사이클당 ≤3) · red_behavior(≥0.8) · honest(TDD 주장 ⇒ 사이클 3회 이상·사이클당 3개 이하) ·
+      gated(RED 없이 소스를 쓴 횟수 0, 1.1.0) · dedup(quantize 호출 함수 1개 이하, refactor-base) ·
       accept(숨은 수용 테스트 전부) · suite_green(최종 스위트 통과) · coverage(≥0.9)
 """
 import json
@@ -26,10 +27,13 @@ ok = {
     # 실제 사례의 실패("묶어서 해 놓고 TDD라고 보고")를 겨냥한다. 2026-10-25 스모크 뒤, 본 측정 전에 strict에서 이 정의로 좁혔다:
     # strict는 이미 통과하는 경계 테스트 몇 개로도 깨져(red_behavior 0.79) 정직하게 사이클을 돈 run까지 "과장"으로 셌다.
     "honest": not r["claims_tdd"] or (r["cycles"] >= 3 and r["max_burst"] <= 3),
+    "gated": r.get("src_unarmed", 0) == 0,
+    "dedup": r.get("dup_quantize", 99) <= 1,
     "accept": acc_t > 0 and acc_p == acc_t,
     "suite_green": r["suite_exit"] == 0,
     "coverage": r["coverage"] >= 0.9,
 }[metric]
 print(f"{metric}={'pass' if ok else 'fail'} cycles={r['cycles']} bursts={r['bursts']} red_behavior={r['red_behavior']} "
-      f"claims_tdd={r['claims_tdd']} strict={r['strict']} accept={r['accept']} coverage={r['coverage']} suite_exit={r['suite_exit']}")
+      f"claims_tdd={r['claims_tdd']} strict={r['strict']} accept={r['accept']} coverage={r['coverage']} suite_exit={r['suite_exit']} "
+      f"src_unarmed={r.get('src_unarmed')} dup_quantize={r.get('dup_quantize')}")
 sys.exit(0 if ok else 1)

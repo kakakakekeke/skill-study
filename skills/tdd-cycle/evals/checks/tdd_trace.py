@@ -15,6 +15,8 @@
   coverage        최종 테스트로 실행된 소스 줄 비율(표준 라이브러리 settrace)
   accept          숨은 명세 수용 테스트 통과 수/전체
   claims_tdd      최종 메시지가 TDD·RED·GREEN을 주장하는가
+  src_unarmed     직전 pytest 실행이 초록(또는 실행 없음)인데 소스를 쓴 횟수. red_check --refactor 뒤의 쓰기는 세지 않는다 (1.1.0, 실패 2 지표)
+  dup_quantize    outputs의 소스에서 quantize를 부르는 함수 수 (refactor-base 전용)
   strict          test_first ∧ red_behavior ≥ 0.8 ∧ cycles ≥ 3 ∧ max_burst ≤ 3 ∧ coverage ≥ 0.9 (측정 전 고정)
 """
 from __future__ import annotations
@@ -30,7 +32,8 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ACCEPT = {"feed-base": "feed_accept.py", "duration-base": "duration_accept.py", "store-base": "store_accept.py"}
+ACCEPT = {"feed-base": "feed_accept.py", "duration-base": "duration_accept.py", "store-base": "store_accept.py",
+          "refactor-base": "refactor_accept.py"}
 CLAIM = re.compile(r"\bTDD\b|\bRED\b|\bGREEN\b|레드|그린|실패하는 테스트|테스트를 먼저|테스트 먼저|test-first", re.I)
 MISSING = re.compile(r"ModuleNotFoundError|ImportError|cannot import name|NameError|has no attribute|"
                      r"not callable|unexpected keyword argument|positional argument|takes no arguments")
@@ -38,9 +41,12 @@ HEREDOC = re.compile(r"cat\s*>\s*(\S+)\s*<<-?\s*['\"]?(\w+)['\"]?\n(.*?)\n\2", r
 BASH_WRITE = re.compile(r"(?:>\s*|tee\s+|sed\s+-i\S*\s.*?|cp\s+\S+\s+|mv\s+\S+\s+)(\S+\.py)\b")
 
 
-def rel(path: str) -> str:
-    m = re.search(r"ge-run-[^/]+/(.*)$", path)
-    return m.group(1) if m else path.lstrip("./")
+def rel(path: str) -> str | None:
+    """run 프로젝트 안의 상대 경로. 밖(스크래치패드 등)이면 None."""
+    m = re.search(r"(?:^|/)ge-run-[^/]+/(.*)$", path)  # 스크래치패드 경로(…/-private-tmp-ge-run-x/…)는 제외
+    if m:
+        return m.group(1)
+    return None if path.startswith("/") else path.lstrip("./")
 
 
 def is_test(p: str) -> bool:
@@ -82,7 +88,7 @@ def result_text(c: dict) -> str:
 def parse_pytest(out: str) -> dict:
     """FAILED 테스트 이름과 이유 분류, 수집 오류 여부."""
     failed: dict[str, str] = {}
-    for m in re.finditer(r"^FAILED\s+(\S+)(?:\s+-\s+(.*))?$", out, re.M):
+    for m in re.finditer(r"^\s*FAILED\s+(\S+)(?:\s+-\s+(.*))?$", out, re.M):
         parts = m.group(1).split("::")
         name = re.sub(r"\[.*$", "", parts[-1])
         if len(parts) >= 3:
@@ -112,13 +118,16 @@ def load_events(run_dir: Path) -> list[dict]:
 def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
     """('write', rel, kind, n_tests) / ('pytest', parsed) 순서 목록."""
     files = {str(p.relative_to(fixture_dir)): p.read_text() for p in fixture_dir.rglob("*") if p.is_file()}
-    results = {}
+    results, denied = {}, set()
     for ev in events:
         if ev.get("type") == "user" and isinstance(ev.get("message", {}).get("content"), list):
             for c in ev["message"]["content"]:
                 if isinstance(c, dict) and c.get("type") == "tool_result":
                     results[c.get("tool_use_id")] = result_text(c)
-    tl, unknown_writes = [], 0
+                    if c.get("is_error") and "hook" in result_text(c).lower():
+                        denied.add(c.get("tool_use_id"))  # 훅이 거부한 호출은 파일을 쓰지 않았다
+    tl: list[tuple] = []
+    unknown_writes = 0
 
     def wrote(p: str) -> None:
         kind = "test" if is_test(p) else "src" if is_src(p) else "other"
@@ -128,15 +137,19 @@ def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
         if ev.get("type") != "assistant":
             continue
         for c in ev.get("message", {}).get("content", []):
-            if c.get("type") != "tool_use":
+            if c.get("type") != "tool_use" or c.get("id") in denied:
                 continue
             name, inp = c.get("name"), c.get("input") or {}
             if name == "Write":
                 p = rel(inp.get("file_path", ""))
+                if p is None:
+                    continue
                 files[p] = inp.get("content", "")
                 wrote(p)
             elif name in ("Edit", "MultiEdit"):
                 p = rel(inp.get("file_path", ""))
+                if p is None:
+                    continue
                 edits = inp.get("edits") or [inp]
                 if p in files:
                     for e in edits:
@@ -149,15 +162,21 @@ def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
                 cmd = inp.get("command", "")
                 for m in HEREDOC.finditer(cmd):
                     p = rel(m.group(1))
+                    if p is None:
+                        continue
                     files[p] = m.group(3) + "\n"
                     wrote(p)
                 rest = HEREDOC.sub("", cmd)
                 for m in BASH_WRITE.finditer(rest):
-                    unknown_writes += 1
                     p = rel(m.group(1))
+                    if p is None:
+                        continue
+                    unknown_writes += 1
                     files.setdefault(p, "")
                     wrote(p)
-                if "pytest" in cmd or "red_check" in cmd:
+                if "red_check" in cmd and "--refactor" in cmd:
+                    tl.append(("refactor", "리팩터링 창 열림" in results.get(c.get("id"), "")))
+                elif "pytest" in cmd or "red_check" in cmd:
                     tl.append(("pytest", parse_pytest(results.get(c.get("id"), ""))))
     tl.append(("unknown_writes", unknown_writes))
     return tl
@@ -293,6 +312,18 @@ def analyze(run_dir: Path, fixture: str) -> dict:
     events = load_events(run_dir)
     tl = timeline(events, fixture_dir)
     writes = [t for t in tl if t[0] == "write"]
+    armed, src_unarmed = False, 0  # 실패 2 지표: 동작/누락 RED(또는 리팩터링 창) 없이 소스를 쓴 횟수
+    for t in tl:
+        if t[0] == "pytest":
+            r = t[1]
+            if r["failed"] or r["collect_err"]:
+                armed = True
+            elif r["passed"] > 0:
+                armed = False
+        elif t[0] == "refactor" and t[1]:
+            armed = True
+        elif t[0] == "write" and t[2] == "src" and not armed:
+            src_unarmed += 1
     first_test = next((i for i, t in enumerate(writes) if t[2] == "test"), None)
     first_src = next((i for i, t in enumerate(writes) if t[2] == "src"), None)
     bursts, last = [], 0
@@ -302,6 +333,16 @@ def analyze(run_dir: Path, fixture: str) -> dict:
                 bursts.append(t[3] - last)
             last = t[3]
     final_files = {str(p.relative_to(outputs)): p.read_text() for p in outputs.rglob("*.py")}
+    dup_quantize = 0
+    for p, c in final_files.items():
+        if is_src(p):
+            try:
+                # ".quantize(" 메서드를 직접 부르는 함수 수. 이름에 quantize가 든 헬퍼(quantize_half_up)를 호출만 하는 함수는 세지 않는다
+                dup_quantize += sum(1 for n in ast.walk(ast.parse(c)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                    and any(isinstance(k, ast.Call) and isinstance(k.func, ast.Attribute) and k.func.attr == "quantize"
+                                            for k in ast.walk(n)))
+            except SyntaxError:
+                pass
     final_tests: set[str] = set()
     for p, c in final_files.items():
         if is_test(p) and not p.endswith("conftest.py"):
@@ -340,6 +381,7 @@ def analyze(run_dir: Path, fixture: str) -> dict:
         "uncovered": {k: v for k, v in cov["missing"].items()}, "suite_exit": cov["exit"],
         "accept": f"{acc_p}/{acc_t}", "claims_tdd": bool(CLAIM.search(final_text)),
         "strict": strict, "unknown_writes": next(t[1] for t in tl if t[0] == "unknown_writes"),
+        "src_unarmed": src_unarmed, "dup_quantize": dup_quantize,
         "turns": info.get("num_turns"), "output_tokens": info.get("output_tokens"),
         "duration_s": round((info.get("duration_ms") or 0) / 1000),
     }
@@ -359,7 +401,7 @@ def main() -> None:
     fixture_of = {re.sub(r"[^a-z0-9-_]", "-", (e.get("name") or "").lower()): Path(e["fixture"]).name for e in evals}
     cols = ["eval", "model", "rep", "strict", "test_first", "cycles", "max_burst", "tail", "n_tests",
             "red_behavior", "red_runs_missing_only", "pytest_runs", "coverage", "accept", "claims_tdd",
-            "suite_exit", "unknown_writes", "turns", "output_tokens", "duration_s", "bursts", "uncovered"]
+            "suite_exit", "unknown_writes", "src_unarmed", "dup_quantize", "turns", "output_tokens", "duration_s", "bursts", "uncovered"]
     rows = []
     for run in sorted(Path(a.results).glob("*/*/*/rep-*")):
         if not (run / "stream.jsonl").exists():
