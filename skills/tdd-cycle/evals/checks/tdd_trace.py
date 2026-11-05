@@ -118,12 +118,14 @@ def load_events(run_dir: Path) -> list[dict]:
 def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
     """('write', rel, kind, n_tests) / ('pytest', parsed) 순서 목록."""
     files = {str(p.relative_to(fixture_dir)): p.read_text() for p in fixture_dir.rglob("*") if p.is_file()}
-    results = {}
+    results, denied = {}, set()
     for ev in events:
         if ev.get("type") == "user" and isinstance(ev.get("message", {}).get("content"), list):
             for c in ev["message"]["content"]:
                 if isinstance(c, dict) and c.get("type") == "tool_result":
                     results[c.get("tool_use_id")] = result_text(c)
+                    if c.get("is_error") and "hook" in result_text(c).lower():
+                        denied.add(c.get("tool_use_id"))  # 훅이 거부한 호출은 파일을 쓰지 않았다
     tl: list[tuple] = []
     unknown_writes = 0
 
@@ -135,7 +137,7 @@ def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
         if ev.get("type") != "assistant":
             continue
         for c in ev.get("message", {}).get("content", []):
-            if c.get("type") != "tool_use":
+            if c.get("type") != "tool_use" or c.get("id") in denied:
                 continue
             name, inp = c.get("name"), c.get("input") or {}
             if name == "Write":
@@ -335,8 +337,10 @@ def analyze(run_dir: Path, fixture: str) -> dict:
     for p, c in final_files.items():
         if is_src(p):
             try:
+                # ".quantize(" 메서드를 직접 부르는 함수 수. 이름에 quantize가 든 헬퍼(quantize_half_up)를 호출만 하는 함수는 세지 않는다
                 dup_quantize += sum(1 for n in ast.walk(ast.parse(c)) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                                    and "quantize" in ast.unparse(n))
+                                    and any(isinstance(k, ast.Call) and isinstance(k.func, ast.Attribute) and k.func.attr == "quantize"
+                                            for k in ast.walk(n)))
             except SyntaxError:
                 pass
     final_tests: set[str] = set()
