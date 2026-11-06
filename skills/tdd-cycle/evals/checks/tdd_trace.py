@@ -16,6 +16,8 @@
   accept          숨은 명세 수용 테스트 통과 수/전체
   claims_tdd      최종 메시지가 TDD·RED·GREEN을 주장하는가
   src_unarmed     직전 pytest 실행이 초록(또는 실행 없음)인데 소스를 쓴 횟수. red_check --refactor 뒤의 쓰기는 세지 않는다 (1.1.0, 실패 2 지표)
+  acks / big_steps  red_check --ack(RED 없음 기록)·--big-step(사이클 15줄 초과 선언) 호출 수 (1.2.0, 게이트가 선언으로 풀린 횟수)
+  hook_blocks     훅이 거부한 도구 호출 수 (1.2.0)
   dup_quantize    outputs의 소스에서 quantize를 부르는 함수 수 (refactor-base 전용)
   strict          test_first ∧ red_behavior ≥ 0.8 ∧ cycles ≥ 3 ∧ max_burst ≤ 3 ∧ coverage ≥ 0.9 (측정 전 고정)
 """
@@ -176,9 +178,17 @@ def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
                     wrote(p)
                 if "red_check" in cmd and "--refactor" in cmd:
                     tl.append(("refactor", "리팩터링 창 열림" in results.get(c.get("id"), "")))
+                elif "red_check" in cmd and re.search(r"--ack|--big-step|--status", cmd):
+                    # 1.2.0 선언·조회. pytest 실행이 아니다(상태를 바꾸지 않으므로 armed도 그대로)
+                    ok = results.get(c.get("id"), "")
+                    if "--ack" in cmd and "기록됨" in ok:
+                        tl.append(("declare", "ack"))
+                    elif "--big-step" in cmd and "선언됨" in ok:
+                        tl.append(("declare", "big_step"))
                 elif "pytest" in cmd or "red_check" in cmd:
                     tl.append(("pytest", parse_pytest(results.get(c.get("id"), ""))))
     tl.append(("unknown_writes", unknown_writes))
+    tl.append(("hook_blocks", len(denied)))
     return tl
 
 
@@ -382,6 +392,9 @@ def analyze(run_dir: Path, fixture: str) -> dict:
         "accept": f"{acc_p}/{acc_t}", "claims_tdd": bool(CLAIM.search(final_text)),
         "strict": strict, "unknown_writes": next(t[1] for t in tl if t[0] == "unknown_writes"),
         "src_unarmed": src_unarmed, "dup_quantize": dup_quantize,
+        "acks": sum(1 for t in tl if t[0] == "declare" and t[1] == "ack"),
+        "big_steps": sum(1 for t in tl if t[0] == "declare" and t[1] == "big_step"),
+        "hook_blocks": next(t[1] for t in tl if t[0] == "hook_blocks"),
         "turns": info.get("num_turns"), "output_tokens": info.get("output_tokens"),
         "duration_s": round((info.get("duration_ms") or 0) / 1000),
     }
@@ -401,7 +414,8 @@ def main() -> None:
     fixture_of = {re.sub(r"[^a-z0-9-_]", "-", (e.get("name") or "").lower()): Path(e["fixture"]).name for e in evals}
     cols = ["eval", "model", "rep", "strict", "test_first", "cycles", "max_burst", "tail", "n_tests",
             "red_behavior", "red_runs_missing_only", "pytest_runs", "coverage", "accept", "claims_tdd",
-            "suite_exit", "unknown_writes", "src_unarmed", "dup_quantize", "turns", "output_tokens", "duration_s", "bursts", "uncovered"]
+            "suite_exit", "unknown_writes", "src_unarmed", "dup_quantize", "acks", "big_steps", "hook_blocks",
+            "turns", "output_tokens", "duration_s", "bursts", "uncovered"]
     rows = []
     for run in sorted(Path(a.results).glob("*/*/*/rep-*")):
         if not (run / "stream.jsonl").exists():
