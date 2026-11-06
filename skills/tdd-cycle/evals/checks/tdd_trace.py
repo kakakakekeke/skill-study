@@ -37,8 +37,19 @@ HERE = Path(__file__).resolve().parent
 ACCEPT = {"feed-base": "feed_accept.py", "duration-base": "duration_accept.py", "store-base": "store_accept.py",
           "refactor-base": "refactor_accept.py"}
 CLAIM = re.compile(r"\bTDD\b|\bRED\b|\bGREEN\b|레드|그린|실패하는 테스트|테스트를 먼저|테스트 먼저|test-first", re.I)
-MISSING = re.compile(r"ModuleNotFoundError|ImportError|cannot import name|NameError|has no attribute|"
-                     r"not callable|unexpected keyword argument|positional argument|takes no arguments")
+MISSING_RE = re.compile(r"ModuleNotFoundError|ImportError|cannot import name|NameError|has no attribute|"
+                        r"not callable|unexpected keyword argument|positional argument|takes no arguments")
+BUILTIN_ATTR = re.compile(r"'(?:NoneType|str|int|float|bool|bytes|list|dict|tuple|set|frozenset|complex)' object has no attribute")
+
+
+class _Missing:
+    """1.1.1: 내장 타입 값의 속성 오류는 동작 실패다(훅의 tdd_state.is_missing과 같은 규칙). `.search(msg)` 인터페이스 유지."""
+    @staticmethod
+    def search(msg: str):
+        return MISSING_RE.search(msg) if not BUILTIN_ATTR.search(msg or "") else None
+
+
+MISSING = _Missing()
 HEREDOC = re.compile(r"cat\s*(>>?)\s*(\S+)\s*<<-?\s*['\"]?(\w+)['\"]?\n(.*?)\n\3", re.S)  # 1.2.0: `cat >>`(추가)도 따라간다
 BASH_WRITE = re.compile(r"(?:>>?\s*|tee\s+(?:-a\s+)?|sed\s+-i\S*\s.*?|cp\s+\S+\s+|mv\s+\S+\s+)(\S+\.py)\b")
 

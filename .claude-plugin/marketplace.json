@@ -31,8 +31,8 @@
     },
     {
       "name": "tdd-cycle",
-      "description": "TDD 요청에서 동작 하나씩 사이클을 돈다: 테스트 하나 → 동작 이유로 실패하는 RED 확인(import 오류는 RED가 아님) → 최소 구현 → 다음 동작. 끝에 사이클 기록을 보고한다. 1.1.0: 행동 검사 훅 — 프로젝트에 .claude/tdd-mode가 있거나(TDD_MODE=1) 요청에 TDD가 있으면, 동작 이유로 실패하는 테스트 없이 소스 .py를 고치는 것을 막는다(TDD_MODE=0으로 끔)",
-      "version": "1.1.0",
+      "description": "TDD 요청에서 동작 하나씩 사이클을 돈다: 테스트 하나 → 동작 이유로 실패하는 RED 확인(import 오류는 RED가 아님) → 최소 구현 → 다음 동작. 끝에 사이클 기록을 보고한다. 1.1.0: 행동 검사 훅 — 프로젝트에 .claude/tdd-mode가 있거나(TDD_MODE=1) 요청에 TDD가 있으면, 동작 이유로 실패하는 테스트 없이 소스 .py를 고치는 것을 막는다(TDD_MODE=0으로 끔). 1.1.1: 결함 수정 2건 — 내장 타입 속성 오류('NoneType' object has no attribute)를 import 누락으로 오분류해 스텁만 허용 상태에 갇히던 것, 출력을 잘라 결과를 못 읽은 pytest 뒤 앞의 RED가 남던 것",
+      "version": "1.1.1",
       "category": "development",
       "source": "./skills",
       "strict": false,

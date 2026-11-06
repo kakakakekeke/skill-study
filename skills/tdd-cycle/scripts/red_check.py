@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from tdd_state import apply_run, fresh, load, marker_on, parse_pytest, project_root, save, summary  # noqa: E402
+from tdd_state import apply_run, fresh, is_missing, load, marker_on, parse_pytest, project_root, save, summary  # noqa: E402
 
 
 def main() -> int:
@@ -58,7 +58,7 @@ def main() -> int:
     failed = [(n, r) for n, r in parsed["failed"].items()]
     if parsed["result"] == "red":
         print(f"RED (동작): {s_line}")
-        for n, r in [(n, r) for n, r in failed if r and not re.search(r"ModuleNotFoundError|ImportError|NameError|has no attribute", r)][:5]:
+        for n, r in [(n, r) for n, r in failed if r and not is_missing(r)][:5]:
             print(f"  FAILED {n} - {r[:160]}")
         for n in notes:
             print(n)
