@@ -4,8 +4,9 @@
 UserPromptSubmit  모드 판정: 새 세션이면 상태 초기화(마커 .claude/tdd-mode 또는 TDD_MODE=1이면 project 모드),
                   요청에 TDD 언급이 있으면 prompt 모드, "TDD 없이" 류면 끔. 켜져 있으면 안내 한 줄을 주입한다.
 PreToolUse        Edit·Write·MultiEdit·Bash가 소스 .py(테스트 제외)를 고치려 할 때:
-                  red(동작 RED)·refactor → 허용 / red_missing → 스텁만 허용(AST) / none·green → 거부.
+                  red(동작 RED)·refactor → 허용 / red_missing → 스텁만 허용(AST) / none·green·unknown → 거부.
 PostToolUse       Bash로 pytest를 직접 돌린 출력을 읽어 상태를 갱신한다(red_check.py는 스스로 기록하므로 건너뜀).
+                  확실한 pytest 실행인데 출력을 읽지 못하면 unknown(1.1.1: 파이프로 잘린 출력 뒤 앞의 RED가 남던 빈틈).
 Stop              이 세션의 사이클 요약을 systemMessage로 보인다. 막지 않는다.
 끄기: TDD_MODE=0. 디버그: TDD_GATE_DEBUG=<파일>에 입력을 덧붙인다.
 """
@@ -20,7 +21,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "scripts"))
 from tdd_state import (OFF_RE, ON_RE, apply_run, fresh, is_src, load, marker_on, mode_on, nonstub_defs,  # noqa: E402
-                       parse_pytest, project_root, rel_to, save, summary)
+                       parse_pytest, project_root, rel_to, runs_pytest, save, summary)
 
 RED_CHECK = HERE.parent / "scripts" / "red_check.py"
 HEREDOC = re.compile(r"cat\s*>>?\s*(\S+)\s*<<-?\s*['\"]?(\w+)['\"]?\n(.*?)\n\2", re.S)
@@ -33,6 +34,9 @@ NEED_RED = ("tdd-cycle: 소스를 고치기 전에 동작 이유로 실패하는
 STUB_ONLY = ("tdd-cycle: 지금은 RED (잘못된 이유) 상태라 없는 이름을 스텁으로만 만든다(시그니처, pass 또는 빈 값 반환). "
              "동작이 들어간 함수: {names}. 본문을 스텁으로 줄여 다시 쓰고, `python3 {rc} <테스트>`로 RED (동작)을 본 뒤 구현한다.")
 SHELL_EDIT = ("tdd-cycle: RED (잘못된 이유) 상태에서는 셸로 소스를 고치지 않는다(내용을 검사할 수 없다). Write·Edit 도구로 스텁만 만든다.")
+UNKNOWN_RUN = ("tdd-cycle: 마지막 pytest 실행의 결과를 읽지 못했다(출력이 파이프·리다이렉트로 잘렸거나 요약 줄이 없다). "
+               "지금이 RED인지 GREEN인지 알 수 없어 소스 수정을 막는다. `python3 {rc} <테스트>`로 다시 돌려 확인한다. "
+               "pytest 출력은 tail·grep·head로 자르지 않는다.")
 CONTEXT = ("[tdd-cycle] TDD 모드({why}). 소스 .py(테스트 제외) 수정은 동작 이유로 실패하는 테스트가 먼저 있어야 허용된다(훅이 막는다). "
            "개발 절차는 tdd-cycle 스킬을 Skill 도구로 호출해 따른다. RED 확인: `python3 {rc} <테스트>`.")
 
@@ -102,7 +106,9 @@ def on_pre(data: dict, root: Path, st: dict | None) -> None:
         reason = None
         if state in ("red", "refactor"):
             continue
-        if state == "red_missing":
+        if state == "unknown":
+            reason = UNKNOWN_RUN.format(rc=RED_CHECK)
+        elif state == "red_missing":
             if new is None:
                 reason = SHELL_EDIT
             else:
@@ -128,8 +134,11 @@ def on_post(data: dict, root: Path, st: dict | None) -> None:
         return
     resp = data.get("tool_response")
     text = resp if isinstance(resp, str) else ((resp or {}).get("stdout") or "") + "\n" + ((resp or {}).get("stderr") or "")
+    parsed = parse_pytest(text)
+    if parsed["result"] is None and not runs_pytest(cmd):
+        return  # pytest를 언급만 한 명령(grep·heredoc 등)이고 읽을 결과도 없다 → 1.1.0처럼 무시
     st = st or fresh(data.get("session_id"), "project")
-    notes = apply_run(st, parse_pytest(text), "bash", root)
+    notes = apply_run(st, parsed, "bash", root)
     save(root, st)
     if notes:
         out({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": "tdd-cycle: " + " ".join(notes)}})

@@ -2,7 +2,8 @@
 
 프로젝트 루트(git toplevel, 없으면 cwd)마다 JSON 하나를 ~/.cache/tdd-cycle/<해시>.json에 둔다.
 상태(state): none(아직 실행 없음) · red(동작 이유로 실패) · red_missing(import·이름·시그니처 누락으로만 실패) ·
-green(마지막 실행이 초록) · refactor(초록에서 리팩터링 창을 연 상태, 다음 실행에서 닫힘)
+green(마지막 실행이 초록) · refactor(초록에서 리팩터링 창을 연 상태, 다음 실행에서 닫힘) ·
+unknown(pytest를 확실히 돌렸는데 출력을 읽지 못함 — 파이프로 잘림 등. 다음 실행까지 소스 수정 차단) (1.1.1)
 모드(mode): project(마커 파일·TDD_MODE=1) · prompt(요청에 TDD 언급) · off · off_user(요청으로 끔)
 """
 from __future__ import annotations
@@ -18,6 +19,14 @@ from pathlib import Path
 
 MISSING = re.compile(r"ModuleNotFoundError|ImportError|cannot import name|NameError|has no attribute|"
                      r"not callable|unexpected keyword argument|positional argument|takes no arguments")
+# 1.1.1: 내장 타입 값의 속성 오류('NoneType' object has no attribute 'strip')는 "이름이 없음"이 아니라 동작 실패다
+# (예: link 없는 item에서 findtext가 None을 돌려줌). 모듈·클래스·사용자 객체의 속성 누락만 누락으로 본다.
+BUILTIN_ATTR = re.compile(r"'(?:NoneType|str|int|float|bool|bytes|list|dict|tuple|set|frozenset|complex)' object has no attribute")
+
+
+def is_missing(msg: str | None) -> bool:
+    """실패 메시지가 '아직 이름·모듈·시그니처가 없음'인가. 동작 실패면 False."""
+    return bool(msg) and bool(MISSING.search(msg)) and not BUILTIN_ATTR.search(msg)
 STATE_DIR = Path(os.environ.get("TDD_CYCLE_STATE_DIR") or Path.home() / ".cache" / "tdd-cycle")
 # \b는 한글 앞뒤에서 경계가 아니다("TDD로"). 영문자 경계만 본다.
 ON_RE = re.compile(r"(?<![a-z])tdd(?![a-z])|test[- ]?(first|driven)|red[- ]?green|테스트\s*(먼저|부터|주도)|실패하는 테스트(를|부터)\s*먼저", re.I)
@@ -131,17 +140,34 @@ def parse_pytest(text: str) -> dict:
     e_lines = re.findall(r"^E\s+(.*)$", text, re.M)
     n_failed = counts.get("failed", 0) or len(failed)
     n_error = counts.get("error", 0) or len(errors)
+    no_tests = bool(re.search(r"no tests ran|no tests collected|collected 0 items", text))
     if n_failed == 0 and n_error == 0:
         result = "green" if counts.get("passed", 0) > 0 or passed else None
     else:
-        behavior = [n for n, r in failed.items() if r and not MISSING.search(r)]
+        behavior = [n for n, r in failed.items() if r and not is_missing(r)]
         unknown = [n for n, r in failed.items() if not r]
-        missing_e = any(MISSING.search(e) for e in e_lines)
+        missing_e = any(is_missing(e) for e in e_lines) and not any(BUILTIN_ATTR.search(e) for e in e_lines)
         if behavior or ((unknown or (n_failed and not failed)) and not missing_e):
             result = "red"
         else:
             result = "red_missing"
-    return {"result": result, "failed": failed, "passed": passed, "errors": errors, "counts": counts}
+    return {"result": result, "failed": failed, "passed": passed, "errors": errors, "counts": counts,
+            "no_tests": no_tests and result is None}
+
+
+# 1.1.1: 명령 위치(줄 처음, ; && || | ( 뒤, 환경변수 접두 뒤, python -m / uv run / poetry run 뒤)의 pytest만 "확실한 실행"으로 본다.
+# `echo pytest`·`grep pytest pyproject.toml`처럼 인자 자리의 pytest는 실행이 아니다.
+PYTEST_RUN = re.compile(r"(?:^|[;&|(`\n])\s*(?:\w+=\S*\s+)*(?:timeout\s+\S+\s+)?"
+                        r"(?:python3?\s+-m\s+|uv\s+run\s+(?:-m\s+)?|poetry\s+run\s+|pipenv\s+run\s+)?pytest(?=\s|$|[;&|)])")
+PYTEST_NOT_RUN = re.compile(r"--version|--help|--collect-only|(?<!\S)--co(?!\S)|--fixtures|--markers")
+HEREDOC_BODY = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?\n.*?\n\1", re.S)
+
+
+def runs_pytest(cmd: str) -> bool:
+    """명령이 pytest를 확실히 실행하는가. heredoc 본문('import pytest')·인자 자리의 pytest·--version 류는 아니다.
+    확실한 실행인데 출력을 읽지 못하면 상태가 unknown이 된다. 확실하지 않은 언급은 읽히면 반영하고 아니면 무시한다."""
+    stripped = HEREDOC_BODY.sub("", cmd)
+    return bool(PYTEST_RUN.search(stripped)) and not PYTEST_NOT_RUN.search(stripped)
 
 
 SRC_GROWTH_LIMIT = 15  # 한 사이클에 늘어난 소스 줄 수가 이보다 크면 "테스트 하나가 요구한 것보다 많이 썼다"는 신호 [잠정]
@@ -165,6 +191,14 @@ def apply_run(st: dict, parsed: dict, via: str, root: Path | None = None) -> lis
     """pytest 실행 결과를 상태에 반영하고 모델에게 보일 메모를 돌려준다."""
     res = parsed["result"]
     if res is None:
+        # 1.1.1: pytest를 확실히 돌렸는데 결과를 읽지 못했다(파이프·리다이렉트로 잘림 등). 앞 상태를 믿을 수 없으니 unknown으로 둔다.
+        # "no tests ran"은 읽은 것이다(테스트가 없음) — 상태를 바꾸지 않는다. red_check.py는 자기 출력을 직접 읽으므로 여기 오지 않는다.
+        if via == "bash" and not parsed.get("no_tests"):
+            st["state"] = "unknown"
+            st["unknown_runs"] = st.get("unknown_runs", 0) + 1
+            st["log"].append({"t": round(time.time()), "via": via, "result": "unknown"})
+            return ["pytest 출력을 읽지 못했다(파이프·리다이렉트로 잘렸거나 요약 줄이 없다). 결과를 확인할 때까지 소스 수정이 막힌다. "
+                    "`red_check.py <테스트>`로 다시 돌린다. 출력을 tail·grep으로 자르지 않는다."]
         return []
     prev = st["state"]
     first_run = st["runs"] == 0
@@ -194,7 +228,7 @@ def apply_run(st: dict, parsed: dict, via: str, root: Path | None = None) -> lis
                            "사이클 표에 'RED 없음'으로 적는다.")
         st["failing"] = {}
     else:
-        new_behavior = [n for n, r in parsed["failed"].items() if r and not MISSING.search(r) and n not in passed_once]
+        new_behavior = [n for n, r in parsed["failed"].items() if r and not is_missing(r) and n not in passed_once]
         seen_red |= set(new_behavior)
         st["failing"] = parsed["failed"]
         if res == "red" and prev != "red":
@@ -211,9 +245,10 @@ def apply_run(st: dict, parsed: dict, via: str, root: Path | None = None) -> lis
 
 
 def summary(st: dict) -> str:
+    extra = f" · 결과 못 읽은 pytest {st['unknown_runs']}" if st.get("unknown_runs") else ""
     return (f"tdd-cycle: 사이클 {st['cycles']} · 동작 RED를 거친 테스트 {len(st['seen_red'])} · RED 없이 통과 {len(st['premature'])}"
             f" · import RED→GREEN 직행 {st['missing_to_green']} · 리팩터링 창 {st['refactors']} · 훅 차단 {st['blocks']}"
-            f" · pytest 실행 {st['runs']}")
+            f" · pytest 실행 {st['runs']}" + extra)
 
 
 # ---- 스텁 검사 (red_missing 상태에서 허용되는 소스 변경) ------------------------------

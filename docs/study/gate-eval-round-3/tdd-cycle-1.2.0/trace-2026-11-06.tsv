@@ -1,0 +1,85 @@
+eval	model	rep	strict	test_first	cycles	max_burst	tail	n_tests	red_behavior	red_runs_missing_only	pytest_runs	coverage	accept	claims_tdd	suite_exit	unknown_writes	src_unarmed	dup_quantize	acks	big_steps	hook_blocks	turns	output_tokens	duration_s	bursts	uncovered
+article-store	haiku	1	False	True	15	1	0	15	0.67	2	31	1.0	14/14	True	0	1	0	0	5	0	1	52	20790	139	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	haiku	2	False	True	16	1	0	16	0.69	1	32	1.0	14/14	True	0	0	0	0	3	0	0	68	23516	145	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	haiku	3	False	True	16	1	0	16	0.69	1	30	1.0	14/14	True	0	1	0	0	1	0	0	36	18699	137	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	haiku	1	False	True	15	1	0	15	0.73	1	33	1.0	14/14	True	0	0	0	0	0	0	0	38	19255	128	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	haiku	2	False	True	15	1	0	15	0.73	1	40	1.0	14/14	True	0	0	0	0	0	0	1	64	20651	131	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	haiku	3	False	True	16	1	0	16	0.69	2	31	1.0	14/14	True	0	0	0	0	0	0	0	69	21699	138	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	sonnet	1	False	True	13	1	0	13	0.77	2	36	1.0	14/14	True	0	1	0	0	2	0	0	36	11997	109	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	sonnet	2	True	True	7	3	0	12	0.92	1	22	1.0	14/14	True	0	0	0	0	1	0	0	34	9027	78	[1, 1, 2, 2, 1, 2, 3]	{}
+article-store	sonnet	3	True	True	8	2	0	9	0.89	1	25	1.0	14/14	True	0	0	0	0	1	0	0	37	8910	82	[1, 1, 1, 1, 2, 1, 1, 1]	{}
+article-store	sonnet	1	True	True	13	2	0	15	0.93	1	41	1.0	14/14	True	0	3	0	0	0	0	0	47	14103	122	[1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1]	{}
+article-store	sonnet	2	True	True	11	1	0	11	1.0	1	33	1.0	14/14	True	0	3	0	0	0	0	0	29	10273	90	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store	sonnet	3	False	True	15	1	0	15	0.73	2	34	1.0	14/14	True	0	4	0	0	0	0	1	30	11264	102	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	haiku	1	False	True	20	2	0	21	0.71	1	41	1.0	14/14	True	0	0	0	0	5	0	0	89	27704	177	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1]	{}
+article-store-mode	haiku	2	False	True	15	1	0	15	0.6	1	29	1.0	14/14	True	0	0	0	0	4	0	0	50	17969	126	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	haiku	3	False	True	16	1	0	16	0.62	1	30	1.0	14/14	True	0	1	0	0	2	0	0	50	20787	146	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	haiku	1	False	True	14	1	0	14	0.71	1	36	1.0	14/14	True	0	0	0	0	0	0	0	59	21271	131	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	haiku	2	False	True	17	1	0	17	0.65	1	34	1.0	14/14	True	0	0	0	0	0	0	1	71	24560	160	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	haiku	3	True	True	15	1	0	15	0.8	1	44	1.0	14/14	True	0	0	0	0	0	0	0	67	22344	145	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	sonnet	1	True	True	13	1	0	13	0.85	2	38	1.0	14/14	True	0	2	0	0	1	0	0	41	11389	102	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	sonnet	2	True	True	12	1	0	12	0.83	1	35	1.0	14/14	True	0	2	0	0	1	0	0	22	9297	84	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	sonnet	3	False	False	13	1	0	13	0.77	1	30	1.0	14/14	True	0	3	0	0	2	0	0	32	10592	93	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	sonnet	1	True	True	10	2	0	12	0.92	1	24	1.0	14/14	True	0	1	0	0	0	0	1	21	8803	78	[1, 1, 1, 2, 1, 1, 1, 1, 1, 2]	{}
+article-store-mode	sonnet	2	True	True	12	1	0	12	0.92	2	35	1.0	14/14	True	0	0	0	0	0	0	1	41	10650	100	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+article-store-mode	sonnet	3	False	True	11	2	0	12	0.75	1	28	1.0	14/14	True	0	2	0	0	0	0	1	29	10562	99	[1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1]	{}
+duration-parse	haiku	1	False	True	21	1	0	21	0.52	3	40	1.0	26/26	True	0	0	0	0	10	0	1	99	33281	211	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	haiku	2	False	True	15	1	0	15	0.47	2	29	1.0	26/26	True	0	2	0	0	8	0	0	39	15813	112	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	haiku	3	False	True	13	1	0	13	0.62	2	24	1.0	26/26	True	0	0	0	0	3	0	0	30	12979	93	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	haiku	1	False	True	14	1	0	14	0.64	2	33	1.0	26/26	True	0	0	0	0	0	0	0	59	19017	128	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	haiku	2	False	True	22	2	0	23	0.7	2	56	1.0	26/26	True	0	18	0	0	0	0	0	67	27943	196	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	haiku	3	False	True	19	1	0	19	0.47	1	36	1.0	26/26	True	0	2	0	0	0	0	1	29	17319	113	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	sonnet	1	True	True	13	1	0	13	0.85	1	35	1.0	26/26	True	0	1	0	0	2	0	0	41	9935	99	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	sonnet	2	False	True	13	1	0	13	0.69	2	37	1.0	26/26	True	0	3	1	0	2	0	0	43	10259	96	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	sonnet	3	False	True	11	1	0	11	0.73	1	28	1.0	26/26	True	0	2	0	0	2	0	0	40	8876	79	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	sonnet	1	False	True	13	1	0	13	0.77	1	36	1.0	26/26	True	0	3	0	0	0	0	1	35	10007	101	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	sonnet	2	True	True	12	1	0	12	0.83	2	35	1.0	26/26	True	0	0	1	0	0	0	2	41	10029	93	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse	sonnet	3	False	True	12	1	0	12	0.75	1	32	1.0	26/26	True	0	1	0	0	0	0	1	29	8428	89	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	haiku	1	False	True	9	3	0	11	0.55	1	25	1.0	26/26	True	0	0	0	0	2	0	0	27	13767	102	[1, 1, 1, 1, 1, 1, 1, 3, 1]	{}
+duration-parse-mode	haiku	2	False	True	15	1	0	15	0.6	3	39	1.0	26/26	True	0	0	0	0	6	0	0	77	23995	168	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	haiku	3	False	True	10	3	0	12	0.5	1	29	1.0	26/26	True	0	2	0	0	4	0	0	51	18700	132	[1, 1, 1, 1, 1, 1, 1, 1, 1, 3]	{}
+duration-parse-mode	haiku	1	False	True	15	1	0	15	0.67	1	28	1.0	26/26	True	0	0	0	0	0	0	0	61	21514	135	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	haiku	2	False	True	18	1	0	18	0.67	2	33	1.0	26/26	True	0	0	0	0	0	0	0	73	28035	172	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	haiku	3	False	True	17	1	0	17	0.53	1	30	1.0	26/26	True	0	0	0	0	0	0	1	58	22271	138	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	sonnet	1	False	False	13	1	0	13	0.77	1	35	1.0	26/26	True	0	3	0	0	2	0	2	33	10541	102	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	sonnet	2	False	False	14	4	0	18	0.61	4	43	1.0	26/26	True	0	3	0	0	2	0	1	56	16067	148	[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 4]	{}
+duration-parse-mode	sonnet	3	False	True	11	2	0	12	0.67	1	25	1.0	26/26	True	0	2	0	0	2	0	0	26	7405	78	[1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	sonnet	1	False	True	12	1	0	12	0.75	1	35	1.0	26/26	True	0	4	0	0	0	0	1	44	12097	121	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	sonnet	2	False	True	15	1	0	15	0.73	1	39	1.0	26/26	True	0	1	0	0	0	0	2	43	12224	126	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+duration-parse-mode	sonnet	3	False	True	20	1	0	20	0.5	1	41	1.0	26/26	True	0	1	0	0	0	0	0	38	11092	112	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	haiku	1	False	True	16	1	0	16	0.69	1	31	1.0	17/17	True	0	2	0	0	2	0	0	38	19321	129	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	haiku	2	True	True	17	1	0	17	0.82	1	37	1.0	17/17	True	0	1	0	0	3	0	0	65	22336	161	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	haiku	3	False	True	19	1	0	19	0.53	3	38	1.0	17/17	True	0	0	0	0	1	0	0	38	23342	146	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	haiku	1	False	True	18	1	0	18	0.56	1	43	1.0	17/17	True	0	0	0	0	0	0	1	71	28049	174	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	haiku	2	True	True	14	1	0	14	0.86	4	32	1.0	17/17	True	0	0	0	0	0	0	1	75	27611	173	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	haiku	3	True	True	15	1	0	15	0.8	1	31	1.0	17/17	True	0	2	0	0	0	0	0	39	19409	138	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	sonnet	1	True	True	17	1	0	17	0.82	5	50	1.0	17/17	True	0	0	0	0	3	0	1	45	14763	150	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	sonnet	2	True	True	14	1	0	14	0.86	4	41	1.0	17/17	True	0	2	0	0	1	0	1	47	13766	135	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	sonnet	3	False	True	17	2	0	18	0.78	3	42	1.0	17/17	True	0	1	0	0	2	0	1	43	14437	153	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1]	{}
+feed-parse	sonnet	1	True	True	17	1	0	17	0.82	5	50	1.0	17/17	True	0	2	0	0	0	0	1	56	18423	174	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	sonnet	2	True	True	16	1	0	16	0.88	6	52	1.0	17/17	True	0	0	0	0	0	0	1	64	18262	179	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse	sonnet	3	True	True	17	1	0	17	0.82	4	49	1.0	17/17	True	0	3	0	0	0	0	3	73	20491	194	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	haiku	1	True	True	17	1	0	17	0.82	4	42	1.0	17/17	True	0	1	1	0	3	0	0	75	29292	205	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	haiku	2	True	True	17	1	0	17	0.82	1	34	1.0	17/17	True	0	0	0	0	2	0	0	81	23499	149	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	haiku	3	True	True	16	1	0	16	0.88	5	38	1.0	17/17	True	0	0	0	0	2	1	2	91	31023	190	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	haiku	1	True	True	15	1	0	15	0.87	4	49	1.0	17/17	True	0	0	0	0	0	0	1	63	25570	164	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	haiku	2	False	True	18	1	0	18	0.78	1	36	1.0	17/17	True	0	0	0	0	0	0	0	84	28731	182	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	haiku	3	False	True	16	1	0	16	0.75	4	36	1.0	17/17	True	0	0	0	0	0	0	2	81	37593	226	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	sonnet	1	True	True	15	1	0	15	0.8	4	43	1.0	17/17	True	0	1	0	0	3	0	1	39	13974	144	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	sonnet	2	True	True	15	1	0	15	0.87	3	46	1.0	17/17	True	0	0	0	0	2	0	2	52	15170	148	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	sonnet	3	False	True	13	1	0	13	0.77	3	29	1.0	17/17	True	0	0	0	0	2	0	1	71	14918	130	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	sonnet	1	True	True	15	1	0	15	0.8	2	43	1.0	17/17	True	0	0	0	0	0	0	0	47	13235	133	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+feed-parse-mode	sonnet	2	False	True	3	1	0	4	0.75	3	12	1.0	5/17	True	1	0	0	0	0	0	2	25	7152	68	[1, 1, 1]	{}
+feed-parse-mode	sonnet	3	True	True	16	1	0	16	0.88	5	51	1.0	17/17	True	0	1	0	0	0	0	1	60	18916	174	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]	{}
+refactor-dedup	haiku	1	False	True	4	11	0	14	0.07	2	10	0.97	20/20	True	0	0	0	1	1	0	1	25	9873	73	[11, 1, 1, 1]	{"money/format.py": [13]}
+refactor-dedup	haiku	2	False	False	1	11	0	11	0.0	0	3	0.97	20/20	True	0	0	0	1	0	0	0	16	7852	53	[11]	{"money/format.py": [13]}
+refactor-dedup	haiku	3	False	False	1	11	0	11	0.0	0	4	0.97	20/20	True	0	0	0	1	0	0	0	15	5908	60	[11]	{"money/format.py": [13]}
+refactor-dedup	haiku	1	False	False	1	11	0	11	0.0	0	4	0.97	20/20	True	0	0	0	1	0	0	0	13	5617	39	[11]	{"money/format.py": [13]}
+refactor-dedup	haiku	2	False	True	3	11	0	13	0.08	1	7	0.97	20/20	True	0	0	0	1	0	0	0	20	8149	49	[11, 1, 1]	{"money/format.py": [13]}
+refactor-dedup	haiku	3	False	True	2	11	0	12	0.08	1	8	0.97	20/20	True	0	0	0	1	0	0	0	20	10890	64	[11, 1]	{"money/format.py": [13]}
+refactor-dedup	sonnet	1	False	False	1	11	0	11	0.0	0	3	0.97	20/20	True	0	0	0	1	0	0	4	16	4047	37	[11]	{"money/format.py": [13]}
+refactor-dedup	sonnet	2	False	False	1	11	0	11	0.0	0	3	0.97	20/20	True	0	0	0	1	0	0	1	12	2890	30	[11]	{"money/format.py": [13]}
+refactor-dedup	sonnet	3	False	False	1	11	0	11	0.0	0	3	0.97	20/20	True	0	0	0	1	0	0	1	16	3475	34	[11]	{"money/format.py": [13]}
+refactor-dedup	sonnet	1	False	False	1	11	0	11	0.0	0	4	0.97	20/20	True	0	0	0	1	0	0	5	17	4850	39	[11]	{"money/format.py": [13]}
+refactor-dedup	sonnet	2	False	False	1	11	0	11	0.0	0	3	0.97	20/20	True	0	0	0	1	0	0	1	11	3064	30	[11]	{"money/format.py": [13]}
+refactor-dedup	sonnet	3	False	False	1	11	0	11	0.0	0	2	0.97	20/20	True	0	0	0	1	0	0	0	17	3858	34	[11]	{"money/format.py": [13]}
