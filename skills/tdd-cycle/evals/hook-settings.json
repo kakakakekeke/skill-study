@@ -4,7 +4,7 @@
       {"hooks": [{"type": "command", "command": "python3 ${SKILL_DIR}/hooks/tdd_gate.py", "timeout": 10}]}
     ],
     "PreToolUse": [
-      {"matcher": "Edit|Write|MultiEdit|Bash|Skill", "hooks": [{"type": "command", "command": "python3 ${SKILL_DIR}/hooks/tdd_gate.py", "timeout": 10}]}
+      {"matcher": "Edit|Write|MultiEdit|Bash", "hooks": [{"type": "command", "command": "python3 ${SKILL_DIR}/hooks/tdd_gate.py", "timeout": 10}]}
     ],
     "PostToolUse": [
       {"matcher": "Bash", "hooks": [{"type": "command", "command": "python3 ${SKILL_DIR}/hooks/tdd_gate.py", "timeout": 10}]}

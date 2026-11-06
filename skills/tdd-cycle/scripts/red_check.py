@@ -4,8 +4,6 @@
 사용: python3 red_check.py <pytest 인자...>   예: python3 red_check.py tests/test_feed.py::test_br_is_space
       python3 red_check.py                   전체 스위트
       python3 red_check.py --refactor        초록 상태에서 리팩터링 창을 연다(동작을 바꾸지 않는 정리만, 다음 실행에서 닫힘)
-      python3 red_check.py --ack <테스트 이름>   실패한 적 없이 통과한 테스트를 'RED 없음'으로 기록한다(훅 차단 해제, 1.2.0)
-      python3 red_check.py --big-step <이유>   이번 사이클의 소스 증가 한도(15줄)를 넘는 걸음을 선언한다(GREEN까지, 1.2.0)
       python3 red_check.py --status          이 세션의 사이클 요약 한 줄
 종료 코드: 0 RED(동작) · 1 GREEN · 2 RED(잘못된 이유: import·이름·속성·시그니처 누락) · 3 테스트 없음/기타
 훅(hooks/tdd_gate.py)이 켜져 있으면 같은 상태 파일을 보고 소스 수정을 허용·차단한다.
@@ -28,37 +26,6 @@ def main() -> int:
     st = load(root) or fresh(None, "project" if marker_on(root) else "off")
     if args == ["--status"]:
         print(summary(st))
-        return 0
-    if args[:1] == ["--ack"]:
-        names = args[1:]
-        pending = st.get("no_red_pending", [])
-        if not names:
-            print("기록할 테스트 이름이 필요하다. 미확인 'RED 없음': " + (", ".join(pending) or "없음"))
-            return 3
-        unknown = [n for n in names if n not in pending]
-        if unknown:
-            print("미확인 목록에 없는 이름: " + ", ".join(unknown) + ". 미확인 'RED 없음': " + (", ".join(pending) or "없음"))
-            return 3
-        st["no_red_pending"] = [n for n in pending if n not in names]
-        st["acks"] += len(names)
-        st["log"].append({"via": "ack", "tests": names})
-        save(root, st)
-        print("기록됨(RED 없음): " + ", ".join(names) + ". 사이클 표의 RED 이유 칸에 'RED 없음'으로 적는다. "
-              "앞 사이클 구현이 이 동작을 미리 넣었다는 뜻이다. 다음 사이클은 더 작게 간다.")
-        return 0
-    if args[:1] == ["--big-step"]:
-        reason = " ".join(args[1:]).strip()
-        if st["state"] != "red":
-            print(f"큰 걸음 선언은 RED (동작) 상태에서만 한다. 지금 상태: {st['state']}.")
-            return 3
-        if not reason:
-            print("이유가 필요하다: red_check.py --big-step <왜 한 테스트에 15줄 넘게 필요한가>")
-            return 3
-        st["big_step"] = reason[:120]
-        st["big_steps"] += 1
-        st["log"].append({"via": "big_step", "reason": reason[:120]})
-        save(root, st)
-        print("큰 걸음 선언됨(이번 사이클 GREEN까지). 그래도 지금 실패하는 테스트가 요구하는 것만 쓴다. 선언은 요약에 기록된다.")
         return 0
     if args == ["--refactor"]:
         if st["state"] != "green":

@@ -1,5 +1,5 @@
 """tdd_gate.py·red_check.py 단위 테스트. 훅을 Claude Code가 주는 stdin JSON 형식으로 구동한다.
-실행: python3 -m pytest skills/tdd-cycle/scripts/tests -q
+실행: python3 -m pytest skills/tdd-cycle/evals/candidates/1.2.0-gates/tests -q
 """
 from __future__ import annotations
 
@@ -11,7 +11,8 @@ from pathlib import Path
 
 import pytest
 
-SKILL = Path(__file__).resolve().parents[2]
+# 후보 1.2.0 디렉터리(evals/candidates/1.2.0-gates) 안의 훅·스크립트를 검사한다
+SKILL = Path(__file__).resolve().parents[1]
 GATE = SKILL / "hooks" / "tdd_gate.py"
 RED_CHECK = SKILL / "scripts" / "red_check.py"
 sys.path.insert(0, str(SKILL / "scripts"))
