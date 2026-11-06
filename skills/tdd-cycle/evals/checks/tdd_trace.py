@@ -179,15 +179,17 @@ def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
                     wrote(p)
                 if "red_check" in cmd and "--refactor" in cmd:
                     tl.append(("refactor", "리팩터링 창 열림" in results.get(c.get("id"), "")))
-                elif "red_check" in cmd and re.search(r"--ack|--big-step|--status", cmd):
-                    # 1.2.0 선언·조회. pytest 실행이 아니다(상태를 바꾸지 않으므로 armed도 그대로)
+                else:
                     ok = results.get(c.get("id"), "")
-                    if "--ack" in cmd and "기록됨" in ok:
-                        tl.append(("declare", "ack"))
-                    elif "--big-step" in cmd and "선언됨" in ok:
-                        tl.append(("declare", "big_step"))
-                elif "pytest" in cmd or "red_check" in cmd:
-                    tl.append(("pytest", parse_pytest(results.get(c.get("id"), ""))))
+                    if "red_check" in cmd and re.search(r"--ack|--big-step", cmd):
+                        # 1.2.0 선언. 상태를 바꾸지 않으므로 armed도 그대로. 같은 명령에 실행이 섞여 있을 수 있어(`--ack X && red_check t.py::y`) 아래도 본다
+                        if "--ack" in cmd and "기록됨" in ok:
+                            tl.append(("declare", "ack"))
+                        if "--big-step" in cmd and "선언됨" in ok:
+                            tl.append(("declare", "big_step"))
+                    runs_here = re.search(r"red_check\.py(?!\s+--(?:ack|big-step|status)\b)", rest) or re.search(r"(?:^|[;&|(`\n])\s*(?:\w+=\S*\s+)*(?:python3?\s+-m\s+)?pytest\b", rest)
+                    if runs_here:
+                        tl.append(("pytest", parse_pytest(ok)))
     tl.append(("unknown_writes", unknown_writes))
     tl.append(("hook_blocks", len(denied)))
     return tl
