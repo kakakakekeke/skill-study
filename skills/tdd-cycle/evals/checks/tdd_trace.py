@@ -39,8 +39,8 @@ ACCEPT = {"feed-base": "feed_accept.py", "duration-base": "duration_accept.py", 
 CLAIM = re.compile(r"\bTDD\b|\bRED\b|\bGREEN\b|레드|그린|실패하는 테스트|테스트를 먼저|테스트 먼저|test-first", re.I)
 MISSING = re.compile(r"ModuleNotFoundError|ImportError|cannot import name|NameError|has no attribute|"
                      r"not callable|unexpected keyword argument|positional argument|takes no arguments")
-HEREDOC = re.compile(r"cat\s*>\s*(\S+)\s*<<-?\s*['\"]?(\w+)['\"]?\n(.*?)\n\2", re.S)
-BASH_WRITE = re.compile(r"(?:>\s*|tee\s+|sed\s+-i\S*\s.*?|cp\s+\S+\s+|mv\s+\S+\s+)(\S+\.py)\b")
+HEREDOC = re.compile(r"cat\s*(>>?)\s*(\S+)\s*<<-?\s*['\"]?(\w+)['\"]?\n(.*?)\n\3", re.S)  # 1.2.0: `cat >>`(추가)도 따라간다
+BASH_WRITE = re.compile(r"(?:>>?\s*|tee\s+(?:-a\s+)?|sed\s+-i\S*\s.*?|cp\s+\S+\s+|mv\s+\S+\s+)(\S+\.py)\b")
 
 
 def rel(path: str) -> str | None:
@@ -163,10 +163,11 @@ def timeline(events: list[dict], fixture_dir: Path) -> list[tuple]:
             elif name == "Bash":
                 cmd = inp.get("command", "")
                 for m in HEREDOC.finditer(cmd):
-                    p = rel(m.group(1))
+                    p = rel(m.group(2))
                     if p is None:
                         continue
-                    files[p] = m.group(3) + "\n"
+                    body = m.group(4) + "\n"
+                    files[p] = (files.get(p, "") + body) if m.group(1) == ">>" else body
                     wrote(p)
                 rest = HEREDOC.sub("", cmd)
                 for m in BASH_WRITE.finditer(rest):
